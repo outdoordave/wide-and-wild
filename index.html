@@ -274,6 +274,81 @@
     .map-stop text { font-size: 17px; }
   }
 
+  /* ============ GEAR / EQUIPMENT ============ */
+  .gear-cat { margin-bottom: 44px; }
+  .gear-cat-head { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+  .gear-cat-head .ic { width: 44px; height: 44px; border-radius: 50%; background: var(--c-accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .gear-cat-head h3 { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--c-ink); }
+  .gear-cat-head .count { font-size: 13px; color: var(--c-ink-soft); margin-left: auto; font-weight: 600; }
+  .gear-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .gear-item {
+    background: var(--c-bg-alt); border: 1px solid var(--c-line); border-radius: var(--radius);
+    padding: 20px 22px; display: flex; align-items: center; gap: 14px; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .gear-item:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -14px rgba(46,36,24,0.4); }
+  .gear-item .gi-ic { width: 40px; height: 40px; border-radius: 8px; background: var(--c-bg); border: 1px solid var(--c-line); display: flex; align-items: center; justify-content: center; font-size: 19px; color: var(--c-accent); flex-shrink: 0; }
+  .gear-item .gi-name { font-weight: 700; font-size: 15px; color: var(--c-ink); line-height: 1.3; }
+  .gear-item .gi-brand { font-size: 12px; color: var(--c-ink-soft); margin-top: 2px; }
+  @media (max-width: 860px) { .gear-grid { grid-template-columns: 1fr; } }
+
+  /* ============ INSTAGRAM-LINKS ============ */
+  .insta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+  .insta-link { display: inline-flex; align-items: center; gap: 10px; background: var(--c-bg-alt); border: 1px solid var(--c-line); border-radius: 30px; padding: 10px 20px; font-weight: 700; font-size: 14px; color: var(--c-ink); transition: all 0.2s; cursor: pointer; }
+  .insta-link:hover { border-color: var(--c-accent); color: var(--c-accent); transform: translateY(-2px); }
+  .insta-link .ig-ic { font-size: 18px; }
+  .insta-row.on-dark .insta-link { background: rgba(240,229,212,0.08); border-color: rgba(240,229,212,0.2); color: #f0e5d4; }
+  .insta-row.on-dark .insta-link:hover { border-color: #f0c9a8; color: #f0c9a8; }
+
+  /* ============ RANDOM-FOTO-BOX ============ */
+  .random-box { position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 16/9; max-width: 920px; margin: 0 auto; box-shadow: 0 20px 50px -24px rgba(46,36,24,0.5); }
+  .random-box .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease; }
+  .random-box .slide.active { opacity: 1; }
+  .random-box .slide .ph { position: absolute; inset: 0; }
+  .random-box .cap { position: absolute; bottom: 0; left: 0; right: 0; z-index: 5; padding: 40px 28px 22px; background: linear-gradient(to top, rgba(28,24,18,0.85), transparent); color: #fff; }
+  .random-box .cap .cat { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #f0c9a8; font-weight: 700; }
+  .random-box .cap .ttl { font-family: var(--font-display); font-size: 24px; font-weight: 500; }
+
+  /* ============ REISE-SLIDESHOW & GALERIE ============ */
+  .trip-detail .slideshow { position: relative; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .trip-detail .slideshow .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease; }
+  .trip-detail .slideshow .slide.active { opacity: 1; }
+  .trip-detail .slideshow .slide .ph { position: absolute; inset: 0; }
+  .trip-detail .slideshow .dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; gap: 6px; }
+  .trip-detail .slideshow .dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.45); transition: background 0.2s; }
+  .trip-detail .slideshow .dots span.active { background: #fff; }
+  .view-all-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; color: var(--c-accent); font-weight: 700; font-size: 14px; cursor: pointer; }
+  .view-all-link::after { content: "\u2192"; transition: transform 0.2s; }
+  .view-all-link:hover::after { transform: translateX(4px); }
+
+  /* Galerie-Overlay (alle Fotos einer Reise) */
+  .trip-gallery { position: fixed; inset: 0; z-index: 1100; background: rgba(20,17,12,0.96); display: none; overflow-y: auto; padding: 70px 24px 40px; }
+  .trip-gallery.open { display: block; }
+  .trip-gallery .tg-head { max-width: 1100px; margin: 0 auto 24px; color: var(--c-dark-ink); text-align: center; }
+  .trip-gallery .tg-head h3 { font-family: var(--font-display); font-size: 30px; font-weight: 500; }
+  .trip-gallery .tg-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .trip-gallery .tg-grid .ph { aspect-ratio: 4/3; border-radius: 8px; }
+  .trip-gallery .tg-grid .ph .cap2 { position: absolute; bottom: 0; left: 0; right: 0; z-index: 3; padding: 20px 14px 10px; background: linear-gradient(to top, rgba(28,24,18,0.85), transparent); color: #fff; font-size: 13px; font-weight: 600; }
+  .tg-close { position: fixed; top: 18px; right: 22px; z-index: 1110; width: 46px; height: 46px; border-radius: 50%; background: rgba(240,229,212,0.18); color: #fff; border: none; font-size: 22px; cursor: pointer; }
+  @media (max-width: 860px) { .trip-gallery .tg-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .trip-gallery .tg-grid { grid-template-columns: 1fr; } }
+
+  /* ============ REISEPLANUNG ============ */
+  .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+  .plan-card { background: var(--c-bg-alt); border: 1px solid var(--c-line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+  .plan-card .ph { aspect-ratio: 21/9; }
+  .plan-card .pc-body { padding: 24px; }
+  .plan-card .pc-when { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--c-accent); font-weight: 700; margin-bottom: 8px; }
+  .plan-card h3 { font-family: var(--font-display); font-size: 24px; font-weight: 500; margin-bottom: 10px; }
+  .plan-card .pc-note { font-size: 15px; color: var(--c-ink-soft); margin-bottom: 16px; }
+  .countdown { display: inline-flex; align-items: baseline; gap: 8px; background: var(--c-accent); color: #fff; padding: 8px 18px; border-radius: 24px; font-weight: 700; }
+  .countdown .num { font-size: 22px; font-family: var(--font-display); }
+  .countdown .lbl { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  .plan-wishlist { margin-top: 50px; }
+  .plan-wishlist h3 { font-family: var(--font-display); font-size: 24px; font-weight: 500; margin-bottom: 18px; text-align: center; }
+  .wish-tags { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .wish-tags span { background: var(--c-bg-alt); border: 1px solid var(--c-line); border-radius: 24px; padding: 8px 18px; font-size: 14px; font-weight: 600; color: var(--c-ink-soft); }
+  @media (max-width: 860px) { .plan-grid { grid-template-columns: 1fr; } }
+
   /* ============ FOOTER ============ */
   footer { background: var(--c-dark); color: #9a8c76; padding: 60px 0 36px; text-align: center; }
   .footer-logo { width: 200px; margin: 0 auto 22px; opacity: 0.95; }
@@ -321,6 +396,7 @@
       <a data-nav="portfolio" data-de="Portfolio" data-en="Portfolio">Portfolio</a>
       <a data-nav="stories" data-de="Stories" data-en="Stories">Stories</a>
       <a data-nav="trips" data-de="Reisen" data-en="Trips">Reisen</a>
+      <a data-nav="gear" data-de="Equipment" data-en="Gear">Equipment</a>
       <a data-nav="about" data-de="Über uns" data-en="About">Über uns</a>
       <a data-nav="contact" data-de="Kontakt" data-en="Contact">Kontakt</a>
       <div class="lang-toggle">
@@ -352,7 +428,21 @@
           <h2 data-de="Zwei Blickwinkel, ein endloser Horizont." data-en="Two perspectives, one endless horizon.">Zwei Blickwinkel, ein endloser Horizont.</h2>
           <div class="divider-orn">✦</div>
           <p data-de="Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen." data-en="Alexandra captures animals and light with her camera, David sends the drone into the sky. Together we tell the story of the American landscape — one frame at a time.">Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen.</p>
+          <div class="insta-row">
+            <a class="insta-link" href="https://instagram.com/a3.flow" target="_blank" rel="noopener"><span class="ig-ic">◎</span> @a3.flow</a>
+            <a class="insta-link" href="https://instagram.com/davidbastisch" target="_blank" rel="noopener"><span class="ig-ic">◎</span> @davidbastisch</a>
+          </div>
         </div>
+      </div>
+    </section>
+
+    <section style="padding-top:0;">
+      <div class="wrap">
+        <div class="section-head" style="text-align:center; margin-left:auto; margin-right:auto;">
+          <div class="kicker" data-de="Galerie" data-en="Gallery">Galerie</div>
+          <h2 data-de="Momentaufnahmen" data-en="Moments">Momentaufnahmen</h2>
+        </div>
+        <div class="random-box" id="randomBox"></div>
       </div>
     </section>
 
@@ -438,6 +528,20 @@
       <div class="trip-stoplist" id="tripStoplist" style="justify-content:center;"></div>
     </div>
     <section></section>
+  </div>
+
+  <!-- ============ GEAR ============ -->
+  <div class="page" id="page-gear">
+    <div class="wrap">
+      <div class="page-title">
+        <div class="kicker" data-de="Equipment" data-en="Gear">Equipment</div>
+        <h1 data-de="Womit wir fotografieren" data-en="What we shoot with">Womit wir fotografieren</h1>
+        <p data-de="Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben." data-en="Our gear at a glance — sorted by category. What we actually carry out there.">Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben.</p>
+      </div>
+    </div>
+    <section>
+      <div class="wrap" id="gearWrap"></div>
+    </section>
   </div>
 
   <!-- ============ ABOUT ============ -->
@@ -534,6 +638,7 @@
     <a data-nav="portfolio" data-de="Portfolio" data-en="Portfolio">Portfolio</a>
     <a data-nav="stories" data-de="Stories" data-en="Stories">Stories</a>
     <a data-nav="trips" data-de="Reisen" data-en="Trips">Reisen</a>
+    <a data-nav="gear" data-de="Equipment" data-en="Gear">Equipment</a>
     <a data-nav="about" data-de="Über uns" data-en="About">Über uns</a>
     <a data-nav="contact" data-de="Kontakt" data-en="Contact">Kontakt</a>
   </div>
@@ -702,6 +807,24 @@ var trips = {
 };
 var currentTrip = 'florida';
 var currentStop = 0;
+var gear = [
+  { cat:'cameras', icon:'\uD83D\uDCF7', de:{name:'Kameras'}, en:{name:'Cameras'}, items:[
+    { name:'Sony A7 IV', brand:'Sony' }
+  ]},
+  { cat:'lenses', icon:'\uD83D\uDD0D', de:{name:'Objektive'}, en:{name:'Lenses'}, items:[
+    { name:'Tamron 28-75mm f/2.8', brand:'Tamron' },
+    { name:'Tamron 150-500mm f/5-6.7', brand:'Tamron' }
+  ]},
+  { cat:'drones', icon:'\u2708\uFE0F', de:{name:'Drohnen & Action'}, en:{name:'Drones & Action'}, items:[
+    { name:'DJI Air 2S', brand:'DJI' },
+    { name:'DJI Osmo Action 4', brand:'DJI' }
+  ]},
+  { cat:'accessories', icon:'\uD83C\uDF92', de:{name:'Zubehör'}, en:{name:'Accessories'}, items:[
+    { name:'Peak Design Stativ', brand:'Peak Design' },
+    { name:'iPhone', brand:'Apple' }
+  ]}
+];
+
 var currentLang = 'de';
 var currentFilter = 'all';
 var currentStory = 0;
@@ -719,6 +842,7 @@ function applyLang() {
   }
   renderGallery();
   renderStories();
+  renderGear();
   var tp = document.getElementById('page-trips');
   if (tp && tp.classList.contains('active')) renderTrip();
   var sp = document.getElementById('page-story');
@@ -816,6 +940,32 @@ function renderStories() {
         '<div class="excerpt">' + d.excerpt + '</div><div class="read">' + readLabel + '</div></div>';
       grid.appendChild(card);
     })(i);
+  }
+}
+
+/* ---------- Gear / Equipment ---------- */
+function renderGear() {
+  var wrap = document.getElementById('gearWrap');
+  wrap.innerHTML = '';
+  for (var i = 0; i < gear.length; i++) {
+    var c = gear[i];
+    var d = c[currentLang];
+    var itemsHtml = '';
+    for (var j = 0; j < c.items.length; j++) {
+      itemsHtml +=
+        '<div class="gear-item">' +
+          '<div class="gi-ic">' + c.icon + '</div>' +
+          '<div><div class="gi-name">' + c.items[j].name + '</div>' +
+          '<div class="gi-brand">' + c.items[j].brand + '</div></div>' +
+        '</div>';
+    }
+    var countLabel = c.items.length + (currentLang === 'de' ? (c.items.length === 1 ? ' Teil' : ' Teile') : (c.items.length === 1 ? ' item' : ' items'));
+    wrap.innerHTML +=
+      '<div class="gear-cat">' +
+        '<div class="gear-cat-head"><div class="ic">' + c.icon + '</div>' +
+        '<h3>' + d.name + '</h3><div class="count">' + countLabel + '</div></div>' +
+        '<div class="gear-grid">' + itemsHtml + '</div>' +
+      '</div>';
   }
 }
 
