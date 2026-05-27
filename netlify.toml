@@ -1,0 +1,5 @@
+[[redirects]]
+from = "/admin/*"
+to = "/admin/:splat"
+status = 200
+force = true
