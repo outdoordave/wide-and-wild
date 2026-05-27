@@ -7,9 +7,316 @@
   <title>Wide &amp; Wild — Verwaltung</title>
   <!-- Netlify Identity Widget: muss VOR Decap CMS geladen werden -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    /* Zurück-zur-Website-Knopf oben rechts */
+    .ww-back-btn {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 999999;
+      background: #a7672f;
+      color: #fff;
+      text-decoration: none;
+      font-family: -apple-system, system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+      transition: background .15s;
+    }
+    .ww-back-btn:hover { background: #b97a3f; }
+
+    /* Upload-/Speicher-Indikator (Banner unten) */
+    #ww-progress {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999998;
+      background: #1c1812;
+      color: #f4ede1;
+      font-family: -apple-system, system-ui, sans-serif;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.25);
+      min-width: 260px;
+    }
+    #ww-progress .ww-progress-label { margin-bottom: 6px; }
+    #ww-progress .ww-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,.15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    #ww-progress .ww-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a7672f, #b08a4f);
+      width: 0%;
+      transition: width .3s;
+      border-radius: 3px;
+    }
+
+    /* Ortssuche-Dropdown */
+    .ww-place-results {
+      position: absolute;
+      z-index: 99999;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
+      max-height: 240px;
+      overflow-y: auto;
+      font-family: -apple-system, system-ui, sans-serif;
+      font-size: 13px;
+      min-width: 280px;
+    }
+    .ww-place-results .ww-place-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    .ww-place-results .ww-place-item:last-child { border-bottom: none; }
+    .ww-place-results .ww-place-item:hover { background: #f4ede1; }
+    .ww-place-results .ww-place-empty { padding: 8px 12px; color: #888; }
+  </style>
 </head>
 <body>
-  <!-- Decap CMS lädt hier die Verwaltungsoberfläche -->
+  <!-- Zurück zur Website -->
+  <a href="/" class="ww-back-btn" title="Zurück zur Website">← Zurück zur Website</a>
+
+  <!-- Fortschritts-Banner -->
+  <div id="ww-progress" role="status" aria-live="polite">
+    <div class="ww-progress-label">Speichern …</div>
+    <div class="ww-progress-bar"><div class="ww-progress-fill"></div></div>
+  </div>
+
+  <!-- Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.8.4/dist/decap-cms.js"></script>
+
+  <!-- Erweiterungen (Ortssuche, Fortschrittsanzeige, Login-Redirect) -->
+  <script>
+  (function(){
+    'use strict';
+
+    // ----------- 1) Netlify-Identity Login-Redirect -----------
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", function (user) {
+        if (!user) {
+          window.netlifyIdentity.on("login", function () { document.location.href = "/admin/"; });
+        }
+      });
+    }
+
+    // ----------- 2) Upload-/Speicher-Fortschrittsanzeige -----------
+    var progressEl   = document.getElementById('ww-progress');
+    var progressLbl  = progressEl.querySelector('.ww-progress-label');
+    var progressFill = progressEl.querySelector('.ww-progress-fill');
+    var progressTimer = null;
+    var progressFakePct = 0;
+
+    function startProgress(label){
+      try {
+        if (progressTimer) clearInterval(progressTimer);
+        progressLbl.textContent = label || 'Bitte warten …';
+        progressEl.style.display = 'block';
+        progressFakePct = 5;
+        progressFill.style.width = progressFakePct + '%';
+        // sanfter Fake-Fortschritt – echte Bytes kennt das CMS leider nicht
+        progressTimer = setInterval(function(){
+          if (progressFakePct < 90) {
+            progressFakePct += Math.random() * 5;
+            progressFill.style.width = progressFakePct + '%';
+          }
+        }, 400);
+      } catch(e){ /* still */ }
+    }
+    function endProgress(success){
+      try {
+        if (progressTimer) clearInterval(progressTimer);
+        progressFill.style.width = '100%';
+        progressLbl.textContent = success === false ? 'Fehlgeschlagen ✕' : 'Fertig ✓';
+        setTimeout(function(){ progressEl.style.display = 'none'; progressFill.style.width = '0%'; }, 900);
+      } catch(e){ /* still */ }
+    }
+
+    // CMS-Events abfangen
+    function hookCMSEvents(){
+      try {
+        if (!window.CMS) return false;
+        // Pre-Save → Anzeige starten
+        window.CMS.registerEventListener({
+          name: 'prePublish',
+          handler: function(){ startProgress('Speichern & Veröffentlichen …'); }
+        });
+        window.CMS.registerEventListener({
+          name: 'postPublish',
+          handler: function(){ endProgress(true); }
+        });
+        window.CMS.registerEventListener({
+          name: 'preSave',
+          handler: function(){ startProgress('Speichern …'); }
+        });
+        window.CMS.registerEventListener({
+          name: 'postSave',
+          handler: function(){ endProgress(true); }
+        });
+        return true;
+      } catch(e){ console.warn('CMS-Hooks nicht möglich:', e); return false; }
+    }
+
+    // Auch Datei-Upload (XHR) abfangen – das CMS lädt Bilder per fetch hoch
+    (function(){
+      var origFetch = window.fetch;
+      window.fetch = function(url, opts){
+        try {
+          var isUpload = opts && opts.method && /POST|PUT/i.test(opts.method)
+                         && opts.body && (opts.body instanceof FormData
+                                          || (typeof opts.body === 'string' && opts.body.length > 50000));
+          if (isUpload) startProgress('Hochladen …');
+          var p = origFetch.apply(this, arguments);
+          if (isUpload) {
+            p.then(function(r){ endProgress(r && r.ok !== false); })
+             .catch(function(){ endProgress(false); });
+          }
+          return p;
+        } catch(e){ return origFetch.apply(this, arguments); }
+      };
+    })();
+
+    // ----------- 3) Ortssuche via OpenStreetMap Nominatim -----------
+    // Sucht in jedem `place_search`-Feld und schreibt Ergebnis in name/lat/lon
+    var placeDebounce = null;
+
+    function findSiblingInput(searchInput, fieldName){
+      // Gehe vom place_search-Input hoch bis zum gemeinsamen Container (List-Item)
+      // und finde dort das Input mit data-fieldName="name" bzw. "lat"/"lon".
+      var container = searchInput.closest('[class*="ListItem"], [class*="list-item"], fieldset, .nc-collapsibleContent');
+      if (!container) container = searchInput.parentNode.parentNode.parentNode;
+      // Versuche per Label-Text zu finden
+      var labels = container.querySelectorAll('label, [class*="FieldLabel"]');
+      for (var i = 0; i < labels.length; i++){
+        var t = (labels[i].textContent || '').toLowerCase();
+        var input = labels[i].parentNode.querySelector('input, textarea');
+        if (!input) continue;
+        if (fieldName === 'name' && t.indexOf('ort (anzeigename)') !== -1) return input;
+        if (fieldName === 'lat'  && t.indexOf('breitengrad') !== -1) return input;
+        if (fieldName === 'lon'  && t.indexOf('längengrad') !== -1)  return input;
+      }
+      return null;
+    }
+
+    function setReactInputValue(input, value){
+      // React-kontrollierte Inputs brauchen native Setter + input-Event
+      try {
+        var proto = Object.getPrototypeOf(input);
+        var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+        setter.call(input, value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      } catch(e){
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+
+    function attachPlaceSearch(searchInput){
+      if (searchInput.dataset.wwPlaceAttached) return;
+      searchInput.dataset.wwPlaceAttached = '1';
+
+      var dropdown;
+      function closeDropdown(){ if (dropdown && dropdown.parentNode) dropdown.parentNode.removeChild(dropdown); dropdown = null; }
+      function openDropdown(items){
+        closeDropdown();
+        dropdown = document.createElement('div');
+        dropdown.className = 'ww-place-results';
+        var rect = searchInput.getBoundingClientRect();
+        dropdown.style.top  = (window.scrollY + rect.bottom + 4) + 'px';
+        dropdown.style.left = (window.scrollX + rect.left) + 'px';
+        dropdown.style.width = rect.width + 'px';
+        if (!items || !items.length) {
+          var empty = document.createElement('div');
+          empty.className = 'ww-place-empty';
+          empty.textContent = 'Keine Treffer.';
+          dropdown.appendChild(empty);
+        } else {
+          items.slice(0, 8).forEach(function(it){
+            var d = document.createElement('div');
+            d.className = 'ww-place-item';
+            d.textContent = it.display_name;
+            d.addEventListener('mousedown', function(ev){
+              ev.preventDefault();
+              // Felder befüllen
+              var nameInput = findSiblingInput(searchInput, 'name');
+              var latInput  = findSiblingInput(searchInput, 'lat');
+              var lonInput  = findSiblingInput(searchInput, 'lon');
+              // Kurzer Name: erstes Komma-Segment
+              var shortName = (it.display_name || '').split(',')[0].trim();
+              if (nameInput) setReactInputValue(nameInput, shortName);
+              if (latInput)  setReactInputValue(latInput,  String(it.lat));
+              if (lonInput)  setReactInputValue(lonInput,  String(it.lon));
+              // Suchfeld zeigt jetzt den Volltreffer (zur Bestätigung)
+              setReactInputValue(searchInput, it.display_name);
+              closeDropdown();
+            });
+            dropdown.appendChild(d);
+          });
+        }
+        document.body.appendChild(dropdown);
+      }
+
+      searchInput.addEventListener('input', function(){
+        if (placeDebounce) clearTimeout(placeDebounce);
+        var q = searchInput.value.trim();
+        if (q.length < 3) { closeDropdown(); return; }
+        placeDebounce = setTimeout(function(){
+          var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=0&q=' + encodeURIComponent(q);
+          fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function(r){ return r.ok ? r.json() : []; })
+            .then(function(items){ openDropdown(items); })
+            .catch(function(){ openDropdown([]); });
+        }, 350);
+      });
+      searchInput.addEventListener('blur', function(){ setTimeout(closeDropdown, 200); });
+    }
+
+    // Beobachte das CMS-DOM: sobald ein Eingabefeld mit Label "Ort suchen" auftaucht, anhängen
+    function scanForPlaceFields(){
+      var labels = document.querySelectorAll('label, [class*="FieldLabel"]');
+      for (var i = 0; i < labels.length; i++){
+        var t = (labels[i].textContent || '').toLowerCase();
+        if (t.indexOf('ort suchen') !== -1 || t.indexOf('🔍') !== -1) {
+          var input = labels[i].parentNode.querySelector('input[type="text"], input:not([type])');
+          if (input) attachPlaceSearch(input);
+        }
+      }
+    }
+
+    var domObserver = new MutationObserver(function(){ scanForPlaceFields(); });
+
+    // ----------- 4) Initialisierung -----------
+    function init(){
+      var attempts = 0;
+      var iv = setInterval(function(){
+        attempts++;
+        if (hookCMSEvents()) {
+          clearInterval(iv);
+          domObserver.observe(document.body, { childList: true, subtree: true });
+          scanForPlaceFields();
+          console.log('[Wide & Wild] Admin-Erweiterungen aktiv.');
+        } else if (attempts > 50) {
+          clearInterval(iv);
+          // Trotzdem Ortssuche aktivieren, auch ohne CMS-Hooks
+          domObserver.observe(document.body, { childList: true, subtree: true });
+          scanForPlaceFields();
+        }
+      }, 200);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+  </script>
 </body>
 </html>
