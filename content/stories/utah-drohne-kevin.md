@@ -2,7 +2,7 @@
 title_de: Red Rock
 category_de: Utah · Aus der Luft
 date: 2024-09-25
-cover: ""
+cover: /uploads/img_5916-3.jpg
 excerpt_de: Manche Orte sieht man erst, wenn man sie nach oben verlässt. Über
   Utahs Schluchten, eine eigensinnige Drohne und das Bild, das heute im Flur
   hängt.
