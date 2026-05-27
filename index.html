@@ -444,7 +444,7 @@
           <div class="divider-orn">✦</div>
           <p data-de="Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen." data-en="Alexandra captures animals and light with her camera, David sends the drone into the sky. Together we tell the story of the American landscape — one frame at a time.">Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen.</p>
           <div class="insta-row">
-            <a class="insta-link" href="https://instagram.com/a3_flow" target="_blank" rel="noopener"><span class="ig-ic">◎</span> @a3_flow</a>
+            <a class="insta-link" href="https://instagram.com/a3.flow" target="_blank" rel="noopener"><span class="ig-ic">◎</span> @a3.flow</a>
             <a class="insta-link" href="https://instagram.com/davidbastisch" target="_blank" rel="noopener"><span class="ig-ic">◎</span> @davidbastisch</a>
           </div>
         </div>
@@ -533,9 +533,9 @@
       </div>
       <div class="trip-tabs" id="tripTabs">
         <button class="active" data-trip="birthday" data-de="Geburtstag 2023 · West-Runde" data-en="Birthday 2023 · West loop">Geburtstag 2023 · West-Runde</button>
+        <button data-trip="west" data-de="Westen 2024 · SF-Runde" data-en="West 2024 · SF loop">Westen 2024 · SF-Runde</button>
         <button data-trip="florida" data-de="Süden 2025 · Atlanta → Austin" data-en="South 2025 · Atlanta → Austin">Süden 2025 · Atlanta → Austin</button>
         <button data-trip="robin" data-de="Robin 2025 · Tennessee" data-en="Robin 2025 · Tennessee">Robin 2025 · Tennessee</button>
-        <button data-trip="west" data-de="Westen · San Francisco-Runde" data-en="West · San Francisco loop">Westen · San Francisco-Runde</button>
         <button data-trip="alaska2026" data-de="Alaska 2026 · bald ✦" data-en="Alaska 2026 · soon ✦">Alaska 2026 · bald ✦</button>
       </div>
       <div class="trip-summary" id="tripSummary"></div>
@@ -810,8 +810,8 @@ var trips = {
     ]
   },
   west: {
-    de: { meta:'Westen · ~5.500 km · die große Runde', summary:'Die ultimative Westküsten-Schleife: von San Francisco über LA und Las Vegas zu den großen Nationalparks — Zion, Yellowstone, Yosemite — und zurück.' },
-    en: { meta:'West · ~3,400 mi · the grand loop', summary:'The ultimate West Coast loop: from San Francisco via LA and Las Vegas to the great national parks — Zion, Yellowstone, Yosemite — and back.' },
+    de: { meta:'2024 · ~5.500 km · die große Westküsten-Runde', summary:'Die ultimative Westküsten-Schleife: von San Francisco über LA und Las Vegas zu den großen Nationalparks — Zion, Yellowstone, Yosemite — und zurück.' },
+    en: { meta:'2024 · ~3,400 mi · the grand West Coast loop', summary:'The ultimate West Coast loop: from San Francisco via LA and Las Vegas to the great national parks — Zion, Yellowstone, Yosemite — and back.' },
     stops: [
       { x:45,  y:279, c1:'#7e98a0', c2:'#3a5058', name:'San Francisco', de:{date:'Start & Ziel', t:'San Francisco', txt:'Mietwagen holen, Lombard Street, Golden Gate Park, Baker Beach und Point Bonita. Sausalito, der Muir Beach Overlook und natürlich Alcatraz. Start und Ende der großen Runde.'}, en:{date:'Start & finish', t:'San Francisco', txt:'Pick up the rental car, Lombard Street, Golden Gate Park, Baker Beach and Point Bonita. Sausalito, the Muir Beach Overlook and of course Alcatraz. Start and end of the grand loop.'} },
       { x:72,  y:338, c1:'#8a9a7e', c2:'#3a4a38', name:'Morro Bay', de:{date:'Highway 1', t:'Morro Bay', txt:'Über den legendären Highway 1 die Küste hinunter. In Morro Bay den Ottern beim Spielen zugesehen — und unterwegs am Apple Park vorbeigeschaut.'}, en:{date:'Highway 1', t:'Morro Bay', txt:'Down the coast on the legendary Highway 1. Watched the otters play in Morro Bay — and stopped by Apple Park along the way.'} },
@@ -934,14 +934,55 @@ function navigate(page) {
 
 /* ---------- Portfolio ---------- */
 /* Baut style+class fuer einen Platzhalter; nutzt Illustration falls vorhanden */
-function phAttrs(c1, c2, imgKey) {
+function phAttrs(c1, c2, imgKey, photo) {
   var cls = 'ph';
   var style = '--ph-c1:' + c1 + '; --ph-c2:' + c2 + ';';
+  if (photo) {
+    // echtes hochgeladenes Foto hat Vorrang
+    cls += ' has-photo';
+    style += " background-image:url('" + photo + "'); background-size:cover; background-position:center;";
+    return 'class="' + cls + '" style="' + style + '"';
+  }
   if (imgKey && ILLUS[imgKey]) {
     cls += ' has-illus';
     style += " background-image:url('" + ILLUS[imgKey] + "');";
   }
   return 'class="' + cls + '" data-ph="PLATZHALTER" style="' + style + '"';
+}
+
+/* Standard-Illustration + Farben je Kategorie, falls noch kein echtes Foto da ist */
+var PORTFOLIO_CAT = {
+  landscape: { img:'mountains', c1:'#8a9a7e', c2:'#3a4a38', de:'Landschaft', en:'Landscape' },
+  wildlife:  { img:'desert',    c1:'#b08a5e', c2:'#5e3f20', de:'Wildlife',   en:'Wildlife' },
+  aerial:    { img:'coast',     c1:'#7e98a0', c2:'#3a5058', de:'Aus der Luft', en:'Aerial' }
+};
+
+/* Wandelt die flache portfolio.json in das Anzeigeformat */
+function buildPortfolioFromItems(items) {
+  return items.map(function(it){
+    var cat = PORTFOLIO_CAT[it.category] || PORTFOLIO_CAT.landscape;
+    return {
+      cat: it.category,
+      wide: !!it.wide,
+      img: cat.img,
+      c1: cat.c1, c2: cat.c2,
+      photo: it.image || '',
+      de: { t: it.title_de || '', k: cat.de },
+      en: { t: it.title_en || it.title_de || '', k: cat.en }
+    };
+  });
+}
+
+function loadPortfolio() {
+  fetch('content/portfolio.json', { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('not ok'); return r.json(); })
+    .then(function(data){
+      if (data && data.items && data.items.length) {
+        portfolio = buildPortfolioFromItems(data.items);
+      }
+      renderGallery();
+    })
+    .catch(function(){ renderGallery(); });
 }
 
 function renderGallery() {
@@ -954,7 +995,7 @@ function renderGallery() {
       var item = document.createElement('div');
       item.className = 'item' + (p.wide ? ' wide' : '');
       item.innerHTML =
-        '<div ' + phAttrs(p.c1, p.c2, p.img) + '></div>' +
+        '<div ' + phAttrs(p.c1, p.c2, p.img, p.photo) + '></div>' +
         '<div class="label"><div class="cat">' + d.k + '</div><div class="ttl">' + d.t + '</div></div>';
       item.addEventListener('click', function() { openLightbox(p); });
       grid.appendChild(item);
@@ -972,11 +1013,19 @@ function openLightbox(p) {
   var img = document.getElementById('lbImg');
   img.style.setProperty('--ph-c1', p.c1);
   img.style.setProperty('--ph-c2', p.c2);
-  if (p.img && ILLUS[p.img]) {
+  if (p.photo) {
+    img.classList.remove('has-illus');
+    img.classList.add('has-photo');
+    img.style.backgroundImage = "url('" + p.photo + "')";
+    img.style.backgroundSize = 'cover';
+    img.style.backgroundPosition = 'center';
+  } else if (p.img && ILLUS[p.img]) {
+    img.classList.remove('has-photo');
     img.classList.add('has-illus');
     img.style.backgroundImage = "url('" + ILLUS[p.img] + "')";
   } else {
     img.classList.remove('has-illus');
+    img.classList.remove('has-photo');
     img.style.backgroundImage = '';
   }
   document.getElementById('lbCap').textContent = d.t;
@@ -989,6 +1038,102 @@ function closeLightbox() {
 }
 
 /* ---------- Stories Liste ---------- */
+/* ---------- Stories aus CMS-Dateien laden ---------- */
+/* Mini-Parser fuer YAML-Frontmatter (nur die einfachen Faelle, die das CMS erzeugt) */
+function parseFrontmatter(raw) {
+  var fm = {}, body = raw;
+  var m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!m) return { data: fm, body: body };
+  var lines = m[1].split('\n');
+  body = m[2];
+  var i = 0;
+  while (i < lines.length) {
+    var line = lines[i];
+    var kv = line.match(/^([a-zA-Z_]+):\s*(.*)$/);
+    if (kv) {
+      var key = kv[1], val = kv[2];
+      if (val === '|' || val === '|-' || val === '>') {
+        // Block-Skalar: folgende eingerueckte Zeilen sammeln
+        var block = [];
+        i++;
+        while (i < lines.length && (lines[i].match(/^\s{2,}/) || lines[i] === '')) {
+          block.push(lines[i].replace(/^\s{2}/, ''));
+          i++;
+        }
+        fm[key] = block.join('\n').replace(/\s+$/, '');
+        continue;
+      } else {
+        // einfacher Wert, evtl. in Anfuehrungszeichen
+        val = val.replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"');
+        fm[key] = val;
+      }
+    }
+    i++;
+  }
+  return { data: fm, body: body };
+}
+
+/* Sehr einfacher Markdown -> HTML Wandler (Absaetze, Zitate, Zwischenueberschriften) */
+function mdToHtml(md) {
+  if (!md) return '';
+  var blocks = md.split(/\n\s*\n/);
+  var html = '';
+  for (var i = 0; i < blocks.length; i++) {
+    var b = blocks[i].trim();
+    if (!b) continue;
+    if (b.indexOf('> ') === 0 || b.indexOf('>') === 0) {
+      html += '<div class="pullquote">' + b.replace(/^>\s?/gm, '').trim() + '</div>';
+    } else if (b.indexOf('## ') === 0) {
+      html += '<h2>' + b.substring(3).trim() + '</h2>';
+    } else if (b.indexOf('### ') === 0) {
+      html += '<h3>' + b.substring(4).trim() + '</h3>';
+    } else {
+      // einfache Inline-Formatierung: **fett** und *kursiv*
+      var t = b.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      html += '<p>' + t.replace(/\n/g, '<br>') + '</p>';
+    }
+  }
+  return html;
+}
+
+/* Wandelt eine geparste Story-Datei ins Anzeigeformat der Seite */
+function buildStory(data, bodyDe) {
+  var coverPhoto = data.cover || '';
+  return {
+    phC1: '#8a9a7e', phC2: '#3a4a38', img: 'mountains',
+    photo: coverPhoto,
+    de: {
+      cat: data.category_de || '', title: data.title_de || '',
+      excerpt: data.excerpt_de || '', bodyHtml: mdToHtml(bodyDe)
+    },
+    en: {
+      cat: data.category_en || data.category_de || '', title: data.title_en || data.title_de || '',
+      excerpt: data.excerpt_en || data.excerpt_de || '', bodyHtml: mdToHtml(data.body_en || bodyDe)
+    }
+  };
+}
+
+function loadStories() {
+  fetch('content/stories-index.json', { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('no index'); return r.json(); })
+    .then(function(idx){
+      var items = (idx && idx.items) ? idx.items : [];
+      if (!items.length) { renderStories(); return; }
+      // alle Story-Dateien parallel laden
+      return Promise.all(items.map(function(it){
+        return fetch('content/stories/' + it.slug + '.md', { cache: 'no-store' })
+          .then(function(r){ if (!r.ok) throw new Error('miss'); return r.text(); })
+          .then(function(raw){ var p = parseFrontmatter(raw); return buildStory(p.data, p.body); })
+          .catch(function(){ return null; });
+      })).then(function(loaded){
+        var ok = loaded.filter(function(s){ return s; });
+        if (ok.length) stories = ok;
+        renderStories();
+      });
+    })
+    .catch(function(){ renderStories(); });
+}
+
 function renderStories() {
   var grid = document.getElementById('storiesGrid');
   grid.innerHTML = '';
@@ -1001,7 +1146,7 @@ function renderStories() {
       card.className = 'story-card';
       card.addEventListener('click', function() { openStory(idx); });
       card.innerHTML =
-        '<div ' + phAttrs(s.phC1, s.phC2, s.img) + '></div>' +
+        '<div ' + phAttrs(s.phC1, s.phC2, s.img, s.photo) + '></div>' +
         '<div class="body"><div class="meta">' + d.cat + '</div><h3>' + d.title + '</h3>' +
         '<div class="excerpt">' + d.excerpt + '</div><div class="read">' + readLabel + '</div></div>';
       grid.appendChild(card);
@@ -1010,8 +1155,45 @@ function renderStories() {
 }
 
 /* ---------- Gear / Equipment (schmaler Listenstil) ---------- */
+/* Kategorie-Namen (Reihenfolge bestimmt die Anzeige) */
+var GEAR_CATS = [
+  { cat:'cameras', de:'Kameras',         en:'Cameras' },
+  { cat:'lenses',  de:'Objektive',       en:'Lenses' },
+  { cat:'drones',  de:'Drohne & Action', en:'Drone & Action' },
+  { cat:'phone',   de:'Smartphone',      en:'Phone' },
+  { cat:'support', de:'Stativ & Träger', en:'Support & Carry' },
+  { cat:'cooking', de:'Kochen & Camp',   en:'Cooking & Camp' }
+];
+
+/* Wandelt eine flache Item-Liste (aus gear.json) in das gruppierte Anzeigeformat */
+function buildGearFromItems(items) {
+  var grouped = [];
+  for (var c = 0; c < GEAR_CATS.length; c++) {
+    var cat = GEAR_CATS[c];
+    var inCat = items.filter(function(it){ return it.category === cat.cat; });
+    if (inCat.length) {
+      grouped.push({ cat: cat.cat, de:{name:cat.de}, en:{name:cat.en}, items: inCat });
+    }
+  }
+  return grouped;
+}
+
+/* Laedt gear.json vom Server; bei Misserfolg (z.B. reines Offline-Oeffnen) Fallback auf eingebaute Daten */
+function loadGear() {
+  fetch('content/gear.json', { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('not ok'); return r.json(); })
+    .then(function(data){
+      if (data && data.items && data.items.length) {
+        gear = buildGearFromItems(data.items);
+      }
+      renderGear();
+    })
+    .catch(function(){ renderGear(); });
+}
+
 function renderGear() {
   var wrap = document.getElementById('gearWrap');
+  if (!wrap) return;
   wrap.innerHTML = '';
   var html = '<div class="gear-list">';
   for (var i = 0; i < gear.length; i++) {
@@ -1040,15 +1222,10 @@ function renderStory(i) {
   var s = stories[i];
   var d = s[currentLang];
   var html =
-    '<div class="reader-hero"><div ' + phAttrs(s.phC1, s.phC2, s.img) + '></div>' +
+    '<div class="reader-hero"><div ' + phAttrs(s.phC1, s.phC2, s.img, s.photo) + '></div>' +
     '<div class="reader-hero-inner"><div class="meta">' + d.cat + '</div><h1>' + d.title + '</h1></div></div>' +
     '<div class="reader-body">';
-  for (var b = 0; b < d.body.length; b++) {
-    var bl = d.body[b];
-    if (bl.type === 'p') html += '<p>' + bl.text + '</p>';
-    if (bl.type === 'quote') html += '<div class="pullquote">' + bl.text + '</div>';
-    if (bl.type === 'fig') html += '<div class="figure"><div class="ph" data-ph="PLATZHALTER" style="--ph-c1:' + bl.c1 + '; --ph-c2:' + bl.c2 + ';"></div><div class="cap">' + bl.cap + '</div></div>';
-  }
+  html += d.bodyHtml || '';
   html += '</div>';
   var prevL = currentLang === 'de' ? 'Vorherige' : 'Previous';
   var nextL = currentLang === 'de' ? 'Nächste' : 'Next';
@@ -1066,7 +1243,104 @@ function renderStory(i) {
   }
 }
 
+/* ---------- Reisen aus CMS-Dateien laden ---------- */
+/* Wandelt eine Reise-Datei (echte Koordinaten, DE/EN-Felder) ins Anzeigeformat */
+function buildTrip(data) {
+  var stops = (data.stops || []).map(function(s){
+    return {
+      name: s.name, lat: s.lat, lon: s.lon,
+      photo: s.photo || '',
+      de: { date: s.date_de || '', t: s.title_de || s.name, txt: s.text_de || '' },
+      en: { date: s.date_en || s.date_de || '', t: s.title_en || s.title_de || s.name, txt: s.text_en || s.text_de || '' }
+    };
+  });
+  return {
+    de: { meta: data.meta_de || '', summary: data.summary_de || '' },
+    en: { meta: data.meta_en || data.meta_de || '', summary: data.summary_en || data.summary_de || '' },
+    upcoming: !!data.upcoming,
+    title: { de: data.title_de || '', en: data.title_en || data.title_de || '' },
+    stops: stops
+  };
+}
+
+/* Baut die Reiter-Buttons dynamisch aus den geladenen Reisen */
+function buildTripTabs(order) {
+  var tabs = document.getElementById('tripTabs');
+  if (!tabs) return;
+  tabs.innerHTML = '';
+  for (var i = 0; i < order.length; i++) {
+    (function(slug, idx){
+      var t = trips[slug];
+      if (!t) return;
+      var btn = document.createElement('button');
+      if (idx === 0) btn.className = 'active';
+      btn.setAttribute('data-trip', slug);
+      btn.setAttribute('data-de', t.title.de);
+      btn.setAttribute('data-en', t.title.en);
+      btn.textContent = t.title[currentLang] || t.title.de;
+      btn.addEventListener('click', function(){ setTrip(slug); });
+      tabs.appendChild(btn);
+    })(order[i], i);
+  }
+}
+
+function loadTrips() {
+  fetch('content/trips-index.json', { cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('no index'); return r.json(); })
+    .then(function(idx){
+      var items = (idx && idx.items) ? idx.items : [];
+      if (!items.length) { renderTrip(); return; }
+      return Promise.all(items.map(function(it){
+        return fetch('content/trips/' + it.slug + '.json', { cache: 'no-store' })
+          .then(function(r){ if (!r.ok) throw new Error('miss'); return r.json(); })
+          .then(function(data){ return { slug: it.slug, trip: buildTrip(data) }; })
+          .catch(function(){ return null; });
+      })).then(function(loaded){
+        var ok = loaded.filter(function(x){ return x; });
+        if (ok.length) {
+          var newTrips = {};
+          var order = [];
+          ok.forEach(function(x){ newTrips[x.slug] = x.trip; order.push(x.slug); });
+          trips = newTrips;
+          currentTrip = order[0];
+          currentStop = 0;
+          buildTripTabs(order);
+        }
+        renderTrip();
+      });
+    })
+    .catch(function(){ renderTrip(); });
+}
+
 /* ---------- Reisen / interaktive Karte ---------- */
+/* Rechnet echte Geo-Koordinaten (lat/lon) in Kartenposition (x/y) um.
+   Zwei Projektionen: kontinentale USA und Alaska. */
+function projectUSA(lat, lon) {
+  return {
+    x: (lon - (-125.0)) / ((-66.5) - (-125.0)) * 1000,
+    y: (49.5 - lat) / (49.5 - 24.0) * 600
+  };
+}
+function projectAlaska(lat, lon) {
+  return {
+    x: (lon - (-170.0)) / ((-130.0) - (-170.0)) * 1000,
+    y: (71.5 - lat) / (71.5 - 51.0) * 600
+  };
+}
+/* Ergaenzt eine Station um x/y aus ihren echten Koordinaten, falls noch nicht gesetzt.
+   ak:true -> Alaska-Projektion. Ein Punkt gilt als Alaska, wenn lat > 50. */
+function ensureXY(stop) {
+  if (typeof stop.x === 'number' && typeof stop.y === 'number') return stop;
+  if (typeof stop.lat === 'number' && typeof stop.lon === 'number') {
+    var isAk = stop.ak || stop.lat > 50;
+    var p = isAk ? projectAlaska(stop.lat, stop.lon) : projectUSA(stop.lat, stop.lon);
+    stop.x = Math.round(p.x * 10) / 10;
+    stop.y = Math.round(p.y * 10) / 10;
+    if (isAk) stop.ak = true;
+  }
+  return stop;
+}
+
 function renderTrip() {
   var trip = trips[currentTrip];
   var td = trip[currentLang];
@@ -1075,6 +1349,7 @@ function renderTrip() {
     '<div class="meta">' + td.meta + '</div><p>' + td.summary + '</p>';
 
   var stops = trip.stops;
+  for (var e = 0; e < stops.length; e++) { ensureXY(stops[e]); }
   var hasAlaska = false;
   for (var a = 0; a < stops.length; a++) { if (stops[a].ak) hasAlaska = true; }
 
@@ -1265,6 +1540,10 @@ function initSite() {
   renderGallery();
   renderStories();
   applyLang();
+  loadGear();
+  loadPortfolio();
+  loadStories();
+  loadTrips();
 }
 
 /* Robust starten: wenn das Dokument schon bereit ist (z.B. in der

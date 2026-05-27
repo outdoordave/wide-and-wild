@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "slug": "birthday",
+      "order": 1
+    },
+    {
+      "slug": "west",
+      "order": 2
+    },
+    {
+      "slug": "florida",
+      "order": 3
+    },
+    {
+      "slug": "robin",
+      "order": 4
+    },
+    {
+      "slug": "alaska2026",
+      "order": 5
+    }
+  ]
+}

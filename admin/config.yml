@@ -1,0 +1,117 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "uploads"
+public_folder: "/uploads"
+
+locale: "de"
+
+collections:
+  - name: "equipment"
+    label: "Equipment"
+    files:
+      - name: "gear"
+        label: "Gear-Liste"
+        file: "content/gear.json"
+        description: "Eure gesamte Ausrüstung. Neue Teile mit + hinzufügen."
+        fields:
+          - name: "items"
+            label: "Ausrüstung"
+            label_singular: "Ausrüstungsteil"
+            widget: "list"
+            summary: "{{fields.name}} — {{fields.brand}}"
+            fields:
+              - { name: "name", label: "Name", widget: "string", hint: "z.B. Sony A7 IV" }
+              - { name: "brand", label: "Marke", widget: "string", hint: "z.B. Sony" }
+              - name: "category"
+                label: "Kategorie"
+                widget: "select"
+                options:
+                  - { label: "Kameras", value: "cameras" }
+                  - { label: "Objektive", value: "lenses" }
+                  - { label: "Drohne & Action", value: "drones" }
+                  - { label: "Smartphone", value: "phone" }
+                  - { label: "Stativ & Träger", value: "support" }
+                  - { label: "Kochen & Camp", value: "cooking" }
+              - { name: "link", label: "Link (optional)", widget: "string", required: false, hint: "Zur Produktseite, falls gewünscht" }
+
+  - name: "portfolio"
+    label: "Portfolio"
+    files:
+      - name: "photos"
+        label: "Portfolio-Fotos"
+        file: "content/portfolio.json"
+        description: "Eure Portfolio-Bilder. Mit + ein neues Foto hinzufügen."
+        fields:
+          - name: "items"
+            label: "Fotos"
+            label_singular: "Foto"
+            widget: "list"
+            summary: "{{fields.title_de}}"
+            fields:
+              - { name: "image", label: "Foto", widget: "image", hint: "Bild hochladen (Drag & Drop)" }
+              - { name: "title_de", label: "Titel (Deutsch)", widget: "string" }
+              - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
+              - name: "category"
+                label: "Kategorie"
+                widget: "select"
+                options:
+                  - { label: "Landschaft", value: "landscape" }
+                  - { label: "Wildlife", value: "wildlife" }
+                  - { label: "Aus der Luft", value: "aerial" }
+              - { name: "wide", label: "Breites Bild (über 2 Spalten)", widget: "boolean", default: false, required: false }
+
+  - name: "stories"
+    label: "Stories / Beiträge"
+    label_singular: "Beitrag"
+    folder: "content/stories"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title_de}}"
+    sortable_fields: ["date", "title_de"]
+    fields:
+      - { name: "title_de", label: "Titel (Deutsch)", widget: "string" }
+      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
+      - { name: "category_de", label: "Kategorie/Ort (Deutsch)", widget: "string", hint: "z.B. Kalifornien · 3 Tage" }
+      - { name: "category_en", label: "Kategorie/Ort (Englisch)", widget: "string", required: false }
+      - { name: "date", label: "Datum", widget: "datetime", default: "", required: false }
+      - { name: "cover", label: "Titelbild", widget: "image", required: false, hint: "Großes Bild oben (optional)" }
+      - { name: "excerpt_de", label: "Anriss (Deutsch)", widget: "text", hint: "1-2 Sätze, erscheinen in der Übersicht" }
+      - { name: "excerpt_en", label: "Anriss (Englisch)", widget: "text", required: false }
+      - { name: "body_de", label: "Text (Deutsch)", widget: "markdown", hint: "Der eigentliche Beitrag. Absätze, Überschriften, Zitate möglich." }
+      - { name: "body_en", label: "Text (Englisch)", widget: "markdown", required: false }
+
+  - name: "trips"
+    label: "Reisen"
+    label_singular: "Reise"
+    folder: "content/trips"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title_de}}"
+    sortable_fields: ["order", "title_de"]
+    fields:
+      - { name: "title_de", label: "Titel (Deutsch)", widget: "string", hint: "z.B. Geburtstag 2023 · West-Runde" }
+      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
+      - { name: "meta_de", label: "Untertitel/Zeitraum (Deutsch)", widget: "string", hint: "z.B. September 2023 · 18 Tage" }
+      - { name: "meta_en", label: "Untertitel/Zeitraum (Englisch)", widget: "string", required: false }
+      - { name: "summary_de", label: "Zusammenfassung (Deutsch)", widget: "text" }
+      - { name: "summary_en", label: "Zusammenfassung (Englisch)", widget: "text", required: false }
+      - { name: "upcoming", label: "Kommende Reise (Teaser)", widget: "boolean", default: false, required: false }
+      - { name: "order", label: "Reihenfolge", widget: "number", default: 1, hint: "Kleinere Zahl = weiter vorne (chronologisch)" }
+      - name: "stops"
+        label: "Stationen"
+        label_singular: "Station"
+        widget: "list"
+        summary: "{{fields.name}}"
+        fields:
+          - { name: "name", label: "Ort", widget: "string", hint: "z.B. San Francisco" }
+          - { name: "lat", label: "Breitengrad", widget: "number", value_type: "float", hint: "aus Google Maps, z.B. 37.77" }
+          - { name: "lon", label: "Längengrad", widget: "number", value_type: "float", hint: "aus Google Maps, z.B. -122.42" }
+          - { name: "date_de", label: "Datum (Deutsch)", widget: "string", required: false, hint: "z.B. 28. Sept – 01. Okt" }
+          - { name: "date_en", label: "Datum (Englisch)", widget: "string", required: false }
+          - { name: "title_de", label: "Überschrift (Deutsch)", widget: "string", required: false }
+          - { name: "title_en", label: "Überschrift (Englisch)", widget: "string", required: false }
+          - { name: "text_de", label: "Beschreibung (Deutsch)", widget: "text", required: false }
+          - { name: "text_en", label: "Beschreibung (Englisch)", widget: "text", required: false }
+          - { name: "photo", label: "Foto (optional)", widget: "image", required: false }
