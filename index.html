@@ -223,6 +223,13 @@
   .reader-body .figure .ph { border-radius: var(--radius); aspect-ratio: 16/10; }
   .reader-body .figure .cap { font-size: 13px; color: var(--c-ink-soft); margin-top: 10px; font-style: italic; text-align: center; }
   .reader-body .pullquote { font-family: var(--font-display); font-size: 27px; font-weight: 400; font-style: italic; line-height: 1.35; color: var(--c-accent); border-left: 3px solid var(--c-gold); padding-left: 24px; margin: 40px 0; }
+  .reader-body h2 { font-family: var(--font-display); font-size: 30px; font-weight: 600; line-height: 1.2; margin: 44px 0 16px; color: var(--c-ink); }
+  .reader-body h3 { font-family: var(--font-display); font-size: 23px; font-weight: 600; line-height: 1.25; margin: 36px 0 12px; color: var(--c-ink); }
+  .reader-body ul, .reader-body ol { font-size: 18px; line-height: 1.85; margin: 0 0 24px 26px; color: #4a3d2c; }
+  .reader-body li { margin-bottom: 8px; }
+  .reader-body a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+  .reader-body img { max-width: 100%; border-radius: var(--radius); margin: 38px 0; display: block; }
+  .reader-body u { text-decoration: underline; text-underline-offset: 2px; }
   .reader-nav { max-width: 720px; margin: 0 auto; padding: 24px; display: flex; justify-content: space-between; gap: 16px; }
   .reader-nav button { background: var(--c-bg-alt); border: 1px solid var(--c-line); color: var(--c-ink); padding: 14px 20px; border-radius: var(--radius); cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; flex: 1; text-align: left; }
   .reader-nav button:hover:not(:disabled) { background: var(--c-line); }
@@ -1096,21 +1103,51 @@ function parseFrontmatter(raw) {
 /* Sehr einfacher Markdown -> HTML Wandler (Absaetze, Zitate, Zwischenueberschriften) */
 function mdToHtml(md) {
   if (!md) return '';
+  // Inline-Formatierung: **fett**, *kursiv*, ~~durchgestrichen~~, [Link](url), ![Bild](url)
+  // HTML-Tags wie <u> oder <span style="..."> bleiben unangetastet und werden durchgelassen.
+  function inline(t) {
+    t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+    t = t.replace(/~~([^~]+)~~/g, '<s>$1</s>');
+    return t;
+  }
   var blocks = md.split(/\n\s*\n/);
   var html = '';
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i].trim();
     if (!b) continue;
+    var lines = b.split('\n');
     if (b.indexOf('> ') === 0 || b.indexOf('>') === 0) {
-      html += '<div class="pullquote">' + b.replace(/^>\s?/gm, '').trim() + '</div>';
-    } else if (b.indexOf('## ') === 0) {
-      html += '<h2>' + b.substring(3).trim() + '</h2>';
+      html += '<div class="pullquote">' + inline(b.replace(/^>\s?/gm, '').trim()) + '</div>';
     } else if (b.indexOf('### ') === 0) {
-      html += '<h3>' + b.substring(4).trim() + '</h3>';
+      html += '<h3>' + inline(b.substring(4).trim()) + '</h3>';
+    } else if (b.indexOf('## ') === 0) {
+      html += '<h2>' + inline(b.substring(3).trim()) + '</h2>';
+    } else if (b.indexOf('# ') === 0) {
+      html += '<h2>' + inline(b.substring(2).trim()) + '</h2>';
+    } else if (/^[-*]\s/.test(lines[0])) {
+      // Aufzählungsliste
+      html += '<ul>';
+      for (var u = 0; u < lines.length; u++) {
+        var li = lines[u].replace(/^[-*]\s+/, '').trim();
+        if (li) html += '<li>' + inline(li) + '</li>';
+      }
+      html += '</ul>';
+    } else if (/^\d+\.\s/.test(lines[0])) {
+      // Nummerierte Liste
+      html += '<ol>';
+      for (var o = 0; o < lines.length; o++) {
+        var ol = lines[o].replace(/^\d+\.\s+/, '').trim();
+        if (ol) html += '<li>' + inline(ol) + '</li>';
+      }
+      html += '</ol>';
+    } else if (/^<(p|div|ul|ol|h[1-6]|img|figure|blockquote|section)\b/i.test(b)) {
+      // Ganzer Block ist bereits HTML (Raw-Modus) -> unverändert übernehmen
+      html += b;
     } else {
-      // einfache Inline-Formatierung: **fett** und *kursiv*
-      var t = b.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      html += '<p>' + t.replace(/\n/g, '<br>') + '</p>';
+      html += '<p>' + inline(b).replace(/\n/g, '<br>') + '</p>';
     }
   }
   return html;
@@ -1597,6 +1634,16 @@ function initSite() {
   document.getElementById('btn-de').addEventListener('click', function() { setLang('de'); });
   document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
   document.getElementById('burger').addEventListener('click', toggleMenu);
+
+  // Menue schliessen, wenn neben das geoeffnete Menue geklickt/getippt wird
+  document.addEventListener('click', function(e) {
+    var navLinks = document.getElementById('navLinks');
+    var burger = document.getElementById('burger');
+    if (!navLinks.classList.contains('open')) return;     // Menue ist zu -> nichts tun
+    if (navLinks.contains(e.target)) return;               // Klick INNERHALB des Menues -> offen lassen
+    if (burger.contains(e.target)) return;                 // Klick aufs Burger -> macht toggleMenu selbst
+    closeMenu();                                           // sonst: ausserhalb geklickt -> schliessen
+  });
 
   // alle data-nav Elemente (Navi, Footer, Buttons, Teaser, Logo, Back-Link)
   var navEls = document.querySelectorAll('[data-nav]');

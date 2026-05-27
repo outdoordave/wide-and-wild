@@ -2,14 +2,127 @@ backend:
   name: git-gateway
   branch: main
 
+# Editorial Workflow: Inhalte erst als Entwurf speichern, dann manuell veröffentlichen
+publish_mode: editorial_workflow
+
 media_folder: "uploads"
 public_folder: "/uploads"
 
 locale: "de"
 
 collections:
+  # ============================================================
+  #  STORIES / BEITRÄGE
+  # ============================================================
+  - name: "stories"
+    label: "Stories / Beiträge"
+    label_singular: "Beitrag"
+    description: "Hier schreibst du Reise-Geschichten. Oben rechts auf 'New Beitrag' für einen neuen. Bestehende anklicken zum Bearbeiten. Erst als Entwurf speichern, dann veröffentlichen."
+    folder: "content/stories"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title_de}}  ·  {{date}}"
+    sortable_fields: ["date", "title_de"]
+    fields:
+      # ---- Pflicht / wichtigste Felder zuerst ----
+      - { name: "title_de", label: "① Titel (Deutsch)", widget: "string", hint: "Die Überschrift des Beitrags." }
+      - { name: "category_de", label: "② Ort / Kategorie (Deutsch)", widget: "string", hint: "z.B. Kalifornien · 3 Tage" }
+      - { name: "date", label: "③ Datum", widget: "datetime", required: false, hint: "Wann war das? Bestimmt die Reihenfolge." }
+      - { name: "cover", label: "④ Titelbild", widget: "image", required: false, hint: "Großes Bild ganz oben. Drag & Drop." }
+      - { name: "excerpt_de", label: "⑤ Anriss / Vorschautext (Deutsch)", widget: "text", hint: "1–2 Sätze. Erscheinen in der Übersicht als Teaser." }
+      - name: "body_de"
+        label: "⑥ Haupttext (Deutsch)"
+        widget: "markdown"
+        hint: "Der eigentliche Beitrag. Knöpfe für fett/kursiv/Überschriften. Oben rechts auf 'Markdown' umschalten für eigenes HTML (z.B. <u>unterstrichen</u>)."
+        modes: ["rich_text", "raw"]
+        buttons: ["bold", "italic", "strikethrough", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
+        editor_components: ["image"]
+      # ---- Englisch: alles optional, klar als Übersetzung markiert ----
+      - { name: "title_en", label: "🇬🇧 Titel (Englisch)", widget: "string", required: false, hint: "Übersetzung. Leer lassen = Deutsch wird verwendet." }
+      - { name: "category_en", label: "🇬🇧 Ort / Kategorie (Englisch)", widget: "string", required: false }
+      - { name: "excerpt_en", label: "🇬🇧 Anriss (Englisch)", widget: "text", required: false }
+      - name: "body_en"
+        label: "🇬🇧 Haupttext (Englisch)"
+        widget: "markdown"
+        required: false
+        modes: ["rich_text", "raw"]
+        buttons: ["bold", "italic", "strikethrough", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
+        editor_components: ["image"]
+
+  # ============================================================
+  #  REISEN
+  # ============================================================
+  - name: "trips"
+    label: "Reisen"
+    label_singular: "Reise"
+    description: "Eure Reisen mit Stationen auf der Karte. 'New Reise' für eine neue. Reihenfolge über das Feld 'Reihenfolge' steuern."
+    folder: "content/trips"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{order}}  ·  {{title_de}}"
+    sortable_fields: ["order", "title_de"]
+    fields:
+      - { name: "title_de", label: "① Titel (Deutsch)", widget: "string", hint: "z.B. West-Runde 2024" }
+      - { name: "meta_de", label: "② Zeitraum (Deutsch)", widget: "string", hint: "z.B. September 2023 · 18 Tage" }
+      - { name: "summary_de", label: "③ Zusammenfassung (Deutsch)", widget: "text" }
+      - { name: "order", label: "④ Reihenfolge", widget: "number", default: 1, hint: "Kleinere Zahl = weiter vorne." }
+      - { name: "upcoming", label: "⑤ Kommende Reise? (Teaser-Stil)", widget: "boolean", default: false, required: false }
+      - name: "stops"
+        label: "⑥ Stationen"
+        label_singular: "Station"
+        widget: "list"
+        summary: "{{fields.name}}"
+        hint: "Die Orte der Reise. Koordinaten aus Google Maps (Rechtsklick auf den Ort → Zahlen kopieren)."
+        fields:
+          - { name: "name", label: "Ort", widget: "string", hint: "z.B. San Francisco" }
+          - { name: "lat", label: "Breitengrad (lat)", widget: "number", value_type: "float", hint: "z.B. 37.77" }
+          - { name: "lon", label: "Längengrad (lon)", widget: "number", value_type: "float", hint: "z.B. -122.42" }
+          - { name: "title_de", label: "Überschrift (Deutsch)", widget: "string", required: false }
+          - { name: "text_de", label: "Beschreibung (Deutsch)", widget: "text", required: false }
+          - { name: "date_de", label: "Datum (Deutsch)", widget: "string", required: false, hint: "z.B. 28. Sept – 01. Okt" }
+          - { name: "photo", label: "Foto (optional)", widget: "image", required: false }
+          - { name: "title_en", label: "🇬🇧 Überschrift (Englisch)", widget: "string", required: false }
+          - { name: "text_en", label: "🇬🇧 Beschreibung (Englisch)", widget: "text", required: false }
+          - { name: "date_en", label: "🇬🇧 Datum (Englisch)", widget: "string", required: false }
+      # ---- Englisch der Reise selbst ----
+      - { name: "title_en", label: "🇬🇧 Titel (Englisch)", widget: "string", required: false }
+      - { name: "meta_en", label: "🇬🇧 Zeitraum (Englisch)", widget: "string", required: false }
+      - { name: "summary_en", label: "🇬🇧 Zusammenfassung (Englisch)", widget: "text", required: false }
+
+  # ============================================================
+  #  PORTFOLIO
+  # ============================================================
+  - name: "portfolio"
+    label: "Portfolio (Fotos)"
+    files:
+      - name: "photos"
+        label: "Portfolio-Fotos"
+        file: "content/portfolio.json"
+        description: "Eure Galerie-Bilder. Mit + ein neues Foto hinzufügen, hochladen, Kategorie wählen."
+        fields:
+          - name: "items"
+            label: "Fotos"
+            label_singular: "Foto"
+            widget: "list"
+            summary: "{{fields.title_de}}"
+            fields:
+              - { name: "image", label: "Foto", widget: "image", hint: "Bild hochladen (Drag & Drop)" }
+              - { name: "title_de", label: "Titel (Deutsch)", widget: "string" }
+              - name: "category"
+                label: "Kategorie"
+                widget: "select"
+                options:
+                  - { label: "Landschaft", value: "landscape" }
+                  - { label: "Wildlife", value: "wildlife" }
+                  - { label: "Aus der Luft", value: "aerial" }
+              - { name: "wide", label: "Breites Bild (über 2 Spalten)", widget: "boolean", default: false, required: false }
+              - { name: "title_en", label: "🇬🇧 Titel (Englisch)", widget: "string", required: false }
+
+  # ============================================================
+  #  EQUIPMENT
+  # ============================================================
   - name: "equipment"
-    label: "Equipment"
+    label: "Equipment (Ausrüstung)"
     files:
       - name: "gear"
         label: "Gear-Liste"
@@ -36,96 +149,19 @@ collections:
                   - { label: "Kochen & Camp", value: "cooking" }
               - { name: "link", label: "Link (optional)", widget: "string", required: false, hint: "Zur Produktseite, falls gewünscht" }
 
-  - name: "portfolio"
-    label: "Portfolio"
-    files:
-      - name: "photos"
-        label: "Portfolio-Fotos"
-        file: "content/portfolio.json"
-        description: "Eure Portfolio-Bilder. Mit + ein neues Foto hinzufügen."
-        fields:
-          - name: "items"
-            label: "Fotos"
-            label_singular: "Foto"
-            widget: "list"
-            summary: "{{fields.title_de}}"
-            fields:
-              - { name: "image", label: "Foto", widget: "image", hint: "Bild hochladen (Drag & Drop)" }
-              - { name: "title_de", label: "Titel (Deutsch)", widget: "string" }
-              - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
-              - name: "category"
-                label: "Kategorie"
-                widget: "select"
-                options:
-                  - { label: "Landschaft", value: "landscape" }
-                  - { label: "Wildlife", value: "wildlife" }
-                  - { label: "Aus der Luft", value: "aerial" }
-              - { name: "wide", label: "Breites Bild (über 2 Spalten)", widget: "boolean", default: false, required: false }
-
-  - name: "stories"
-    label: "Stories / Beiträge"
-    label_singular: "Beitrag"
-    folder: "content/stories"
-    create: true
-    slug: "{{slug}}"
-    summary: "{{title_de}}"
-    sortable_fields: ["date", "title_de"]
-    fields:
-      - { name: "title_de", label: "Titel (Deutsch)", widget: "string" }
-      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
-      - { name: "category_de", label: "Kategorie/Ort (Deutsch)", widget: "string", hint: "z.B. Kalifornien · 3 Tage" }
-      - { name: "category_en", label: "Kategorie/Ort (Englisch)", widget: "string", required: false }
-      - { name: "date", label: "Datum", widget: "datetime", default: "", required: false }
-      - { name: "cover", label: "Titelbild", widget: "image", required: false, hint: "Großes Bild oben (optional)" }
-      - { name: "excerpt_de", label: "Anriss (Deutsch)", widget: "text", hint: "1-2 Sätze, erscheinen in der Übersicht" }
-      - { name: "excerpt_en", label: "Anriss (Englisch)", widget: "text", required: false }
-      - { name: "body_de", label: "Text (Deutsch)", widget: "markdown", hint: "Der eigentliche Beitrag. Absätze, Überschriften, Zitate möglich." }
-      - { name: "body_en", label: "Text (Englisch)", widget: "markdown", required: false }
-
-  - name: "trips"
-    label: "Reisen"
-    label_singular: "Reise"
-    folder: "content/trips"
-    create: true
-    slug: "{{slug}}"
-    summary: "{{title_de}}"
-    sortable_fields: ["order", "title_de"]
-    fields:
-      - { name: "title_de", label: "Titel (Deutsch)", widget: "string", hint: "z.B. Geburtstag 2023 · West-Runde" }
-      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
-      - { name: "meta_de", label: "Untertitel/Zeitraum (Deutsch)", widget: "string", hint: "z.B. September 2023 · 18 Tage" }
-      - { name: "meta_en", label: "Untertitel/Zeitraum (Englisch)", widget: "string", required: false }
-      - { name: "summary_de", label: "Zusammenfassung (Deutsch)", widget: "text" }
-      - { name: "summary_en", label: "Zusammenfassung (Englisch)", widget: "text", required: false }
-      - { name: "upcoming", label: "Kommende Reise (Teaser)", widget: "boolean", default: false, required: false }
-      - { name: "order", label: "Reihenfolge", widget: "number", default: 1, hint: "Kleinere Zahl = weiter vorne (chronologisch)" }
-      - name: "stops"
-        label: "Stationen"
-        label_singular: "Station"
-        widget: "list"
-        summary: "{{fields.name}}"
-        fields:
-          - { name: "name", label: "Ort", widget: "string", hint: "z.B. San Francisco" }
-          - { name: "lat", label: "Breitengrad", widget: "number", value_type: "float", hint: "aus Google Maps, z.B. 37.77" }
-          - { name: "lon", label: "Längengrad", widget: "number", value_type: "float", hint: "aus Google Maps, z.B. -122.42" }
-          - { name: "date_de", label: "Datum (Deutsch)", widget: "string", required: false, hint: "z.B. 28. Sept – 01. Okt" }
-          - { name: "date_en", label: "Datum (Englisch)", widget: "string", required: false }
-          - { name: "title_de", label: "Überschrift (Deutsch)", widget: "string", required: false }
-          - { name: "title_en", label: "Überschrift (Englisch)", widget: "string", required: false }
-          - { name: "text_de", label: "Beschreibung (Deutsch)", widget: "text", required: false }
-          - { name: "text_en", label: "Beschreibung (Englisch)", widget: "text", required: false }
-          - { name: "photo", label: "Foto (optional)", widget: "image", required: false }
-
+  # ============================================================
+  #  STARTSEITE
+  # ============================================================
   - name: "homepage"
-    label: "Startseite"
+    label: "Startseite (großes Bild oben)"
     files:
       - name: "hero"
         label: "Großes Bild / Video oben"
         file: "content/home.json"
-        description: "Was oben auf der Startseite im großen Bereich gezeigt wird."
+        description: "Was oben auf der Startseite im großen Bereich gezeigt wird. Umschalten zwischen Bild, Diashow und Video."
         fields:
           - name: "mode"
-            label: "Was anzeigen?"
+            label: "① Was anzeigen?"
             widget: "select"
             default: "image"
             options:
