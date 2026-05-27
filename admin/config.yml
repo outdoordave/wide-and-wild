@@ -17,7 +17,7 @@ collections:
   - name: "stories"
     label: "Stories / Beiträge"
     label_singular: "Beitrag"
-    description: "Hier schreibst du Reise-Geschichten. Oben rechts auf 'New Beitrag' für einen neuen. Bestehende anklicken zum Bearbeiten. Erst als Entwurf speichern, dann veröffentlichen."
+    description: "Hier schreibst du Reise-Geschichten. Oben rechts auf 'New Beitrag' für einen neuen. Bestehende anklicken zum Bearbeiten. Erst als Entwurf speichern, dann veröffentlichen. Bilder bis ca. 10 MB."
     folder: "content/stories"
     create: true
     slug: "{{slug}}"
@@ -28,7 +28,13 @@ collections:
       - { name: "title_de", label: "① Titel (Deutsch)", widget: "string", hint: "Die Überschrift des Beitrags." }
       - { name: "category_de", label: "② Ort / Kategorie (Deutsch)", widget: "string", hint: "z.B. Kalifornien · 3 Tage" }
       - { name: "date", label: "③ Datum", widget: "datetime", required: false, hint: "Wann war das? Bestimmt die Reihenfolge." }
-      - { name: "cover", label: "④ Titelbild", widget: "image", required: false, hint: "Großes Bild ganz oben. Drag & Drop." }
+      - name: "cover"
+        label: "④ Titelbild"
+        widget: "image"
+        required: false
+        hint: "Großes Bild ganz oben. Drag & Drop. Empfohlen: JPG/PNG bis ca. 10 MB."
+        media_library:
+          config: { max_file_size: 10485760 }
       - { name: "excerpt_de", label: "⑤ Anriss / Vorschautext (Deutsch)", widget: "text", hint: "1–2 Sätze. Erscheinen in der Übersicht als Teaser." }
       - name: "body_de"
         label: "⑥ Haupttext (Deutsch)"
@@ -80,7 +86,13 @@ collections:
           - { name: "title_de", label: "Überschrift (Deutsch)", widget: "string", required: false }
           - { name: "text_de", label: "Beschreibung (Deutsch)", widget: "text", required: false }
           - { name: "date_de", label: "Datum (Deutsch)", widget: "string", required: false, hint: "z.B. 28. Sept – 01. Okt" }
-          - { name: "photo", label: "Foto (optional)", widget: "image", required: false }
+          - name: "photo"
+            label: "Foto (optional)"
+            widget: "image"
+            required: false
+            hint: "Empfohlen: JPG/PNG bis ca. 10 MB."
+            media_library:
+              config: { max_file_size: 10485760 }
           - { name: "title_en", label: "🇬🇧 Überschrift (Englisch)", widget: "string", required: false }
           - { name: "text_en", label: "🇬🇧 Beschreibung (Englisch)", widget: "text", required: false }
           - { name: "date_en", label: "🇬🇧 Datum (Englisch)", widget: "string", required: false }
@@ -106,7 +118,12 @@ collections:
             widget: "list"
             summary: "{{fields.title_de}}"
             fields:
-              - { name: "image", label: "Foto", widget: "image", hint: "Bild hochladen (Drag & Drop)" }
+              - name: "image"
+                label: "Foto"
+                widget: "image"
+                hint: "Bild hochladen (Drag & Drop). Empfohlen: JPG/PNG bis ca. 10 MB."
+                media_library:
+                  config: { max_file_size: 10485760 }
               - { name: "title_de", label: "Titel (Deutsch)", widget: "string" }
               - name: "category"
                 label: "Kategorie"
@@ -169,13 +186,36 @@ collections:
               - { label: "Zufällige Bilder (Diashow)", value: "random" }
               - { label: "Video", value: "video" }
             hint: "Hier umschalten zwischen Bild, Diashow und Video."
-          - { name: "image", label: "Einzelbild", widget: "image", required: false, hint: "Wird bei 'Einzelbild' gezeigt." }
+          - name: "image"
+            label: "Einzelbild"
+            widget: "image"
+            required: false
+            hint: "Wird bei 'Einzelbild' gezeigt. Empfohlen: JPG/PNG bis ca. 10 MB."
+            media_library:
+              config: { max_file_size: 10485760 }
           - name: "slideshow"
             label: "Bilder für Diashow"
             widget: "list"
             required: false
             summary: "{{fields.img}}"
-            field: { name: "img", label: "Bild", widget: "image" }
-            hint: "Mehrere Bilder; werden bei 'Zufällige Bilder' nacheinander gezeigt."
-          - { name: "video", label: "Video (MP4)", widget: "file", required: false, hint: "MP4, stumm, kurz. Wird bei 'Video' gezeigt." }
-          - { name: "video_poster", label: "Standbild fürs Video", widget: "image", required: false, hint: "Erscheint sofort, während das Video lädt." }
+            field:
+              name: "img"
+              label: "Bild"
+              widget: "image"
+              media_library:
+                config: { max_file_size: 10485760 }
+            hint: "Mehrere Bilder; werden bei 'Zufällige Bilder' nacheinander gezeigt. Pro Bild bis ca. 10 MB."
+          - name: "video"
+            label: "Video (MP4)"
+            widget: "file"
+            required: false
+            hint: "MP4, stumm, kurz halten! Max. ca. 30 MB — größere Videos schlagen beim Speichern fehl. Für lange Videos besser bei YouTube/Vimeo hochladen und verlinken."
+            media_library:
+              config: { max_file_size: 31457280 }
+          - name: "video_poster"
+            label: "Standbild fürs Video"
+            widget: "image"
+            required: false
+            hint: "Erscheint sofort, während das Video lädt. JPG/PNG bis ca. 10 MB."
+            media_library:
+              config: { max_file_size: 10485760 }
