@@ -115,3 +115,31 @@ collections:
           - { name: "text_de", label: "Beschreibung (Deutsch)", widget: "text", required: false }
           - { name: "text_en", label: "Beschreibung (Englisch)", widget: "text", required: false }
           - { name: "photo", label: "Foto (optional)", widget: "image", required: false }
+
+  - name: "homepage"
+    label: "Startseite"
+    files:
+      - name: "hero"
+        label: "Großes Bild / Video oben"
+        file: "content/home.json"
+        description: "Was oben auf der Startseite im großen Bereich gezeigt wird."
+        fields:
+          - name: "mode"
+            label: "Was anzeigen?"
+            widget: "select"
+            default: "image"
+            options:
+              - { label: "Einzelbild", value: "image" }
+              - { label: "Zufällige Bilder (Diashow)", value: "random" }
+              - { label: "Video", value: "video" }
+            hint: "Hier umschalten zwischen Bild, Diashow und Video."
+          - { name: "image", label: "Einzelbild", widget: "image", required: false, hint: "Wird bei 'Einzelbild' gezeigt." }
+          - name: "slideshow"
+            label: "Bilder für Diashow"
+            widget: "list"
+            required: false
+            summary: "{{fields.img}}"
+            field: { name: "img", label: "Bild", widget: "image" }
+            hint: "Mehrere Bilder; werden bei 'Zufällige Bilder' nacheinander gezeigt."
+          - { name: "video", label: "Video (MP4)", widget: "file", required: false, hint: "MP4, stumm, kurz. Wird bei 'Video' gezeigt." }
+          - { name: "video_poster", label: "Standbild fürs Video", widget: "image", required: false, hint: "Erscheint sofort, während das Video lädt." }
