@@ -4,6 +4,7 @@ title_en: "Yosemite, or: How we slept through sunrise"
 category_de: "Kalifornien · 3 Tage"
 category_en: "California · 3 days"
 date: "2024-09-15"
+has_english: true
 cover: ""
 excerpt_de: "Der Plan war perfekt. Der Wecker war es nicht. Eine Geschichte über Granitwände, kalten Kaffee und das beste zweite Licht des Tages."
 excerpt_en: "The plan was perfect. The alarm was not. A story about granite walls, cold coffee, and the best second light of the day."

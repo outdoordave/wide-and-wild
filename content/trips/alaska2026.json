@@ -1,12 +1,9 @@
 {
   "title_de": "Alaska 2026 · bald ✦",
-  "title_en": "Alaska 2026 · soon ✦",
+  "date": "2026-10-01",
   "meta_de": "Oktober–November 2026 · kommende Reise · Kalifornien & Alaska",
-  "meta_en": "October–November 2026 · upcoming trip · California & Alaska",
   "summary_de": "Unsere kommende große Reise: zuerst die liebgewonnenen Orte Kaliforniens wieder besuchen, dann hoch in den hohen Norden — Anchorage, Denali, Fairbanks bis hinauf nach Coldfoot am Polarkreis. Die Vorfreude ist riesig.",
-  "summary_en": "Our upcoming big trip: first revisiting our favorite places in California, then up to the far north — Anchorage, Denali, Fairbanks all the way up to Coldfoot near the Arctic Circle. We can hardly wait.",
   "upcoming": true,
-  "order": 5,
   "stops": [
     {
       "name": "San Francisco",
@@ -128,5 +125,9 @@
       "text_en": "Last stop inland on the way back to Anchorage.",
       "photo": ""
     }
-  ]
+  ],
+  "has_english": true,
+  "title_en": "Alaska 2026 · soon ✦",
+  "meta_en": "October–November 2026 · upcoming trip · California & Alaska",
+  "summary_en": "Our upcoming big trip: first revisiting our favorite places in California, then up to the far north — Anchorage, Denali, Fairbanks all the way up to Coldfoot near the Arctic Circle. We can hardly wait."
 }

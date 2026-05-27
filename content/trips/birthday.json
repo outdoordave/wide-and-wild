@@ -1,12 +1,9 @@
 {
   "title_de": "Geburtstag 2023 · West-Runde",
-  "title_en": "Birthday 2023 · West loop",
+  "date": "2023-09-01",
   "meta_de": "September–Oktober 2023 · 18 Tage · der große Westen",
-  "meta_en": "September–October 2023 · 18 days · the great West",
   "summary_de": "Davids 30. Geburtstagsreise: von San Francisco über die Nationalparks Yosemite und Sequoia nach LA, weiter durch Vegas und den Grand Canyon bis nach Albuquerque. Eine Rundreise voller Filmkulissen, Wüsten und Naturwunder.",
-  "summary_en": "David's 30th birthday trip: from San Francisco via the Yosemite and Sequoia national parks to LA, on through Vegas and the Grand Canyon to Albuquerque. A road trip full of movie locations, deserts and natural wonders.",
   "upcoming": false,
-  "order": 1,
   "stops": [
     {
       "name": "San Francisco",
@@ -92,5 +89,9 @@
       "text_en": "Via Monument Valley to Albuquerque. A self-guided Breaking Bad film location tour and exploring the city before heading home on October 15.",
       "photo": ""
     }
-  ]
+  ],
+  "has_english": true,
+  "title_en": "Birthday 2023 · West loop",
+  "meta_en": "September–October 2023 · 18 days · the great West",
+  "summary_en": "David's 30th birthday trip: from San Francisco via the Yosemite and Sequoia national parks to LA, on through Vegas and the Grand Canyon to Albuquerque. A road trip full of movie locations, deserts and natural wonders."
 }

@@ -1,12 +1,9 @@
 {
   "title_de": "Süden 2025 · Atlanta → Austin",
-  "title_en": "South 2025 · Atlanta → Austin",
+  "date": "2025-09-01",
   "meta_de": "September 2025 · der amerikanische Süden",
-  "meta_en": "September 2025 · the American South",
   "summary_de": "Eine Reise durch den Süden: von Atlanta über Savannah und die Strände Floridas bis hinüber nach New Orleans und Austin.",
-  "summary_en": "A journey through the South: from Atlanta via Savannah and Florida's beaches over to New Orleans and Austin.",
   "upcoming": false,
-  "order": 3,
   "stops": [
     {
       "name": "Atlanta",
@@ -116,5 +113,9 @@
       "text_en": "Final stop Texas with live music and the YETI flagship store.",
       "photo": ""
     }
-  ]
+  ],
+  "has_english": true,
+  "title_en": "South 2025 · Atlanta → Austin",
+  "meta_en": "September 2025 · the American South",
+  "summary_en": "A journey through the South: from Atlanta via Savannah and Florida's beaches over to New Orleans and Austin."
 }

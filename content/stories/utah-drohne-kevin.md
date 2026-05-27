@@ -4,6 +4,7 @@ title_en: "Kevin and the red rocks"
 category_de: "Utah · Aus der Luft"
 category_en: "Utah · Aerial"
 date: "2024-09-25"
+has_english: true
 cover: ""
 excerpt_de: "Manche Orte sieht man erst, wenn man sie nach oben verlässt. Über Utahs Schluchten, eine eigensinnige Drohne und das Bild, das heute im Flur hängt."
 excerpt_en: "Some places you only see when you leave them upward. About Utah's canyons, a stubborn drone, and the photo that now hangs in our hallway."

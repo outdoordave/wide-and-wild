@@ -4,6 +4,7 @@ title_en: "The bison of Lamar Valley"
 category_de: "Yellowstone · Wildlife"
 category_en: "Yellowstone · Wildlife"
 date: "2024-09-20"
+has_english: true
 cover: ""
 excerpt_de: "25 Meter Abstand, sagt die Regel. Eine Herde Bisons sieht das anders. Über eine Begegnung, die uns sehr klein gemacht hat."
 excerpt_en: "25 meters distance, says the rule. A herd of bison sees it differently. About an encounter that made us feel very small."
