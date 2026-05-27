@@ -2,41 +2,31 @@ backend:
   name: git-gateway
   branch: main
 
-# WICHTIG: Editorial Workflow wieder ausgeschaltet!
-# Grund: Verursacht "API_ERROR: Not Found" beim Speichern, weil GitHub-PR-Branches
-# nicht synchron sind. Ohne Editorial Workflow: Speichern = direkt in main.
-# Falls du Entwurf-vor-Veröffentlichung willst, nimm "test_repo_branch" Workaround.
+# Editorial Workflow DEAKTIVIERT - verursacht "API_ERROR: Not Found"
 # publish_mode: editorial_workflow
 
-# Lokales Testen ohne Netlify-Credits:
-# 1. In Terminal:  cd <projekt-ordner>  &&  npx decap-server
-# 2. Hier 'local_backend: true' aktivieren (vor 'git push' wieder auskommentieren!)
+# Lokales Testen: 'local_backend: true' einkommentieren + 'npx decap-server' starten
 # local_backend: true
 
-# Medien-Ordnersystem: Jede Sammlung hat ihren eigenen Unterordner
 media_folder: "uploads"
 public_folder: "/uploads"
 
 locale: "de"
 
-# ============================================================
-#  Reihenfolge entspricht der Website-Navigation:
-#  Portfolio → Stories → Reisen → Equipment → Startseite
-# ============================================================
+# Reihenfolge = Website-Navigation: Portfolio -> Stories -> Reisen -> Equipment -> Startseite
+
 collections:
 
   # ============================================================
-  #  PORTFOLIO (Fotos)
+  #  PORTFOLIO
   # ============================================================
   - name: "portfolio"
     label: "Portfolio (Fotos)"
-    media_folder: "/uploads/portfolio"
-    public_folder: "/uploads/portfolio"
     files:
       - name: "photos"
         label: "Portfolio-Fotos"
         file: "content/portfolio.json"
-        description: "Eure Galerie-Bilder. Mit + ein neues Foto hinzufügen, hochladen, Kategorie wählen."
+        description: "Eure Galerie-Bilder. Mit + ein neues Foto hinzufuegen, Kategorie waehlen."
         fields:
           - name: "items"
             label: "Fotos"
@@ -47,7 +37,7 @@ collections:
               - name: "image"
                 label: "Foto"
                 widget: "image"
-                hint: "Bild hochladen (Drag & Drop). Empfohlen: JPG/PNG bis ca. 10 MB."
+                hint: "Bild hochladen. Empfohlen: JPG/PNG bis ca. 10 MB."
               - { name: "title_de", label: "Titel", widget: "string" }
               - name: "category"
                 label: "Kategorie"
@@ -56,58 +46,52 @@ collections:
                   - { label: "Landschaft", value: "landscape" }
                   - { label: "Wildlife", value: "wildlife" }
                   - { label: "Aus der Luft", value: "aerial" }
-              - { name: "wide", label: "Breites Bild (über 2 Spalten)", widget: "boolean", default: false, required: false }
-              - { name: "has_english", label: "🇬🇧 Englischen Titel hinzufügen?", widget: "boolean", default: false, required: false, hint: "Anklicken, falls ein englischer Titel hinterlegt werden soll." }
-              - { name: "title_en", label: "🇬🇧 Titel (Englisch)", widget: "string", required: false }
+              - { name: "wide", label: "Breites Bild (2 Spalten)", widget: "boolean", default: false, required: false }
+              - { name: "has_english", label: "Englischen Titel?", widget: "boolean", default: false, required: false }
+              - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
 
   # ============================================================
-  #  STORIES / BEITRÄGE
+  #  STORIES
   # ============================================================
   - name: "stories"
-    label: "Stories / Beiträge"
+    label: "Stories / Beitraege"
     label_singular: "Beitrag"
-    description: "Reise-Geschichten. 'New Beitrag' für einen neuen. Bestehende anklicken zum Bearbeiten. Werden automatisch nach Datum sortiert (neueste zuerst)."
+    description: "Reise-Geschichten. Werden automatisch nach Datum sortiert (neueste zuerst)."
     folder: "content/stories"
-    media_folder: "/uploads/stories"
-    public_folder: "/uploads/stories"
     create: true
     slug: "{{year}}-{{month}}-{{slug}}"
-    summary: "{{title_de}}  ·  {{date}}"
+    summary: "{{title_de}}  -  {{date}}"
     sortable_fields: ["date", "title_de"]
-    # Standard-Sortierung: neueste oben
-    view_filters:
-      - { label: "Alle", field: "title_de", pattern: "" }
     fields:
-      - { name: "title_de", label: "① Titel", widget: "string", hint: "Die Überschrift des Beitrags." }
-      - { name: "category_de", label: "② Ort / Kategorie", widget: "string", hint: "z.B. Kalifornien · USA" }
+      - { name: "title_de", label: "Titel", widget: "string" }
+      - { name: "category_de", label: "Ort / Kategorie", widget: "string", hint: "z.B. Kalifornien, USA" }
       - name: "date"
-        label: "③ Wann (Monat + Jahr)"
+        label: "Wann (Monat + Jahr)"
         widget: "datetime"
         date_format: "YYYY-MM"
         time_format: false
         format: "YYYY-MM-DD"
-        default: ""
         picker_utc: false
-        hint: "Nur Monat + Jahr wählen. Bestimmt die Reihenfolge auf der Website (neueste zuerst)."
+        hint: "Nur Monat + Jahr. Bestimmt die Reihenfolge (neueste zuerst)."
       - name: "cover"
-        label: "④ Titelbild"
+        label: "Titelbild"
         widget: "image"
         required: false
-        hint: "Großes Bild ganz oben. Drag & Drop. Empfohlen: JPG/PNG bis ca. 10 MB."
-      - { name: "excerpt_de", label: "⑤ Anriss / Vorschautext", widget: "text", hint: "1–2 Sätze. Erscheinen in der Übersicht als Teaser." }
+        hint: "Grosses Bild oben. JPG/PNG bis ca. 10 MB."
+      - { name: "excerpt_de", label: "Anriss / Vorschautext", widget: "text", hint: "1-2 Saetze fuer die Uebersicht." }
       - name: "body_de"
-        label: "⑥ Haupttext"
+        label: "Haupttext"
         widget: "markdown"
-        hint: "Der eigentliche Beitrag. Knöpfe für fett/kursiv/Überschriften. Oben rechts auf 'Markdown' umschalten für eigenes HTML."
+        hint: "Der eigentliche Beitrag."
         modes: ["rich_text", "raw"]
         buttons: ["bold", "italic", "strikethrough", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
         editor_components: ["image"]
-      - { name: "has_english", label: "🇬🇧 Englische Version hinzufügen?", widget: "boolean", default: false, required: false, hint: "Anklicken, wenn ihr eine englische Übersetzung erstellen wollt. Sonst wird im englischen Modus der deutsche Text angezeigt." }
-      - { name: "title_en", label: "🇬🇧 Titel (Englisch)", widget: "string", required: false }
-      - { name: "category_en", label: "🇬🇧 Ort / Kategorie (Englisch)", widget: "string", required: false }
-      - { name: "excerpt_en", label: "🇬🇧 Anriss (Englisch)", widget: "text", required: false }
+      - { name: "has_english", label: "Englische Version?", widget: "boolean", default: false, required: false, hint: "Ein = englische Felder werden auf der Website gezeigt." }
+      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
+      - { name: "category_en", label: "Ort / Kategorie (Englisch)", widget: "string", required: false }
+      - { name: "excerpt_en", label: "Anriss (Englisch)", widget: "text", required: false }
       - name: "body_en"
-        label: "🇬🇧 Haupttext (Englisch)"
+        label: "Haupttext (Englisch)"
         widget: "markdown"
         required: false
         modes: ["rich_text", "raw"]
@@ -120,77 +104,70 @@ collections:
   - name: "trips"
     label: "Reisen"
     label_singular: "Reise"
-    description: "Eure Reisen mit Stationen auf der Karte. Werden automatisch nach Datum sortiert (neueste/zukünftige zuerst)."
+    description: "Reisen mit Stationen auf der Karte. Automatisch nach Datum sortiert."
     folder: "content/trips"
-    media_folder: "/uploads/trips"
-    public_folder: "/uploads/trips"
     create: true
     slug: "{{year}}-{{month}}-{{slug}}"
-    summary: "{{title_de}}  ·  {{date}}"
+    summary: "{{title_de}}  -  {{date}}"
     sortable_fields: ["date", "title_de"]
     fields:
-      - { name: "title_de", label: "① Titel", widget: "string", hint: "z.B. West-Runde 2024" }
+      - { name: "title_de", label: "Titel", widget: "string", hint: "z.B. West-Runde 2024" }
       - name: "date"
-        label: "② Wann (Monat + Jahr)"
+        label: "Wann (Monat + Jahr)"
         widget: "datetime"
         date_format: "YYYY-MM"
         time_format: false
         format: "YYYY-MM-DD"
         picker_utc: false
-        hint: "Nur Monat + Jahr. Bestimmt die Reihenfolge (zukünftige/neueste zuerst)."
-      - { name: "meta_de", label: "③ Zeitraum-Beschreibung", widget: "string", required: false, hint: "Optional: z.B. 'September 2023 · 18 Tage'. Nur für die Anzeige, nicht für Sortierung." }
-      - { name: "summary_de", label: "④ Zusammenfassung", widget: "text" }
-      - { name: "upcoming", label: "⑤ Kommende Reise? (Teaser-Stil)", widget: "boolean", default: false, required: false, hint: "Wenn angehakt, erscheint die Reise als 'Geplant'-Teaser." }
+        hint: "Nur Monat + Jahr. Zukunftige Reisen erscheinen ganz oben."
+      - { name: "meta_de", label: "Zeitraum-Text (optional)", widget: "string", required: false, hint: "z.B. September 2023, 18 Tage" }
+      - { name: "summary_de", label: "Zusammenfassung", widget: "text" }
+      - { name: "upcoming", label: "Kommende Reise?", widget: "boolean", default: false, required: false }
       - name: "stops"
-        label: "⑥ Stationen"
+        label: "Stationen"
         label_singular: "Station"
         widget: "list"
         summary: "{{fields.name}}"
-        hint: "Die Orte der Reise. TIPP: Orts-Suche unten — gib Ort ein und wähle aus, Koordinaten werden automatisch gesetzt."
+        hint: "Ort suchen eingeben, aus Dropdown waehlen, Koordinaten werden automatisch gefuellt."
         fields:
-          - name: "place_search"
-            label: "🔍 Ort suchen (automatisch)"
-            widget: "string"
-            required: false
-            hint: "Tippe einen Ort wie 'Austin, Texas' — eine Liste erscheint. Wählen → Name, Breite und Länge werden automatisch gefüllt. (Wird durch JavaScript erweitert)"
-          - { name: "name", label: "Ort (Anzeigename)", widget: "string", hint: "Wird automatisch gefüllt oder manuell." }
-          - { name: "lat", label: "Breitengrad (lat)", widget: "number", value_type: "float", hint: "Wird automatisch gefüllt." }
-          - { name: "lon", label: "Längengrad (lon)", widget: "number", value_type: "float", hint: "Wird automatisch gefüllt." }
-          - { name: "title_de", label: "Überschrift", widget: "string", required: false }
+          - { name: "place_search", label: "Ort suchen (Autocomplete)", widget: "string", required: false, hint: "z.B. Austin, Texas eingeben und aus Liste waehlen." }
+          - { name: "name", label: "Ort (Anzeigename)", widget: "string" }
+          - { name: "lat", label: "Breitengrad (lat)", widget: "number", value_type: "float" }
+          - { name: "lon", label: "Laengengrad (lon)", widget: "number", value_type: "float" }
+          - { name: "title_de", label: "Ueberschrift", widget: "string", required: false }
           - { name: "text_de", label: "Beschreibung", widget: "text", required: false }
-          - { name: "date_de", label: "Datum-Notiz (optional)", widget: "string", required: false, hint: "z.B. '28. Sept – 01. Okt'. Nur Anzeige." }
+          - { name: "date_de", label: "Datum-Notiz", widget: "string", required: false, hint: "z.B. 28. Sept - 01. Okt" }
           - name: "photo"
             label: "Foto (optional)"
             widget: "image"
             required: false
-            hint: "Empfohlen: JPG/PNG bis ca. 10 MB."
-          - { name: "title_en", label: "🇬🇧 Überschrift (Englisch)", widget: "string", required: false }
-          - { name: "text_en", label: "🇬🇧 Beschreibung (Englisch)", widget: "text", required: false }
-          - { name: "date_en", label: "🇬🇧 Datum-Notiz (Englisch)", widget: "string", required: false }
-      - { name: "has_english", label: "🇬🇧 Englische Version hinzufügen?", widget: "boolean", default: false, required: false }
-      - { name: "title_en", label: "🇬🇧 Titel (Englisch)", widget: "string", required: false }
-      - { name: "meta_en", label: "🇬🇧 Zeitraum (Englisch)", widget: "string", required: false }
-      - { name: "summary_en", label: "🇬🇧 Zusammenfassung (Englisch)", widget: "text", required: false }
+          - { name: "title_en", label: "Ueberschrift (Englisch)", widget: "string", required: false }
+          - { name: "text_en", label: "Beschreibung (Englisch)", widget: "text", required: false }
+          - { name: "date_en", label: "Datum-Notiz (Englisch)", widget: "string", required: false }
+      - { name: "has_english", label: "Englische Version?", widget: "boolean", default: false, required: false }
+      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
+      - { name: "meta_en", label: "Zeitraum (Englisch)", widget: "string", required: false }
+      - { name: "summary_en", label: "Zusammenfassung (Englisch)", widget: "text", required: false }
 
   # ============================================================
   #  EQUIPMENT
   # ============================================================
   - name: "equipment"
-    label: "Equipment (Ausrüstung)"
+    label: "Equipment (Ausruestung)"
     files:
       - name: "gear"
         label: "Gear-Liste"
         file: "content/gear.json"
-        description: "Eure gesamte Ausrüstung. Neue Teile mit + hinzufügen."
+        description: "Eure gesamte Ausruestung."
         fields:
           - name: "items"
-            label: "Ausrüstung"
-            label_singular: "Ausrüstungsteil"
+            label: "Ausruestung"
+            label_singular: "Ausruestungsteil"
             widget: "list"
-            summary: "{{fields.name}} — {{fields.brand}}"
+            summary: "{{fields.name}} - {{fields.brand}}"
             fields:
               - { name: "name", label: "Name", widget: "string", hint: "z.B. Sony A7 IV" }
-              - { name: "brand", label: "Marke", widget: "string", hint: "z.B. Sony" }
+              - { name: "brand", label: "Marke", widget: "string" }
               - name: "category"
                 label: "Kategorie"
                 widget: "select"
@@ -199,39 +176,36 @@ collections:
                   - { label: "Objektive", value: "lenses" }
                   - { label: "Drohne & Action", value: "drones" }
                   - { label: "Smartphone", value: "phone" }
-                  - { label: "Stativ & Träger", value: "support" }
-                  - { label: "Kochen & Camp", value: "cooking" }
-              - { name: "link", label: "Link (optional)", widget: "string", required: false, hint: "Zur Produktseite, falls gewünscht" }
+                  - { label: "Stativ und Traeger", value: "support" }
+                  - { label: "Kochen und Camp", value: "cooking" }
+              - { name: "link", label: "Link (optional)", widget: "string", required: false }
 
   # ============================================================
   #  STARTSEITE
   # ============================================================
   - name: "homepage"
-    label: "Startseite (großes Bild oben)"
-    media_folder: "/uploads/homepage"
-    public_folder: "/uploads/homepage"
+    label: "Startseite (Hero)"
     files:
       - name: "hero"
-        label: "Großes Bild / Video oben"
+        label: "Grosses Bild / Video oben"
         file: "content/home.json"
-        description: "Was oben auf der Startseite im großen Bereich gezeigt wird. Umschalten zwischen Bild, Diashow und Video."
+        description: "Was ganz oben auf der Startseite gezeigt wird."
         fields:
           - name: "mode"
-            label: "① Was anzeigen?"
+            label: "Was anzeigen?"
             widget: "select"
             default: "image"
             options:
               - { label: "Einzelbild", value: "image" }
-              - { label: "Zufällige Bilder (Diashow)", value: "random" }
+              - { label: "Diashow (zufallige Bilder)", value: "random" }
               - { label: "Video", value: "video" }
-            hint: "Hier umschalten zwischen Bild, Diashow und Video."
           - name: "image"
             label: "Einzelbild"
             widget: "image"
             required: false
-            hint: "Wird bei 'Einzelbild' gezeigt. Empfohlen: JPG/PNG bis ca. 10 MB."
+            hint: "JPG/PNG bis ca. 10 MB."
           - name: "slideshow"
-            label: "Bilder für Diashow"
+            label: "Diashow-Bilder"
             widget: "list"
             required: false
             summary: "{{fields.img}}"
@@ -239,14 +213,12 @@ collections:
               name: "img"
               label: "Bild"
               widget: "image"
-            hint: "Mehrere Bilder; werden bei 'Zufällige Bilder' nacheinander gezeigt. Pro Bild bis ca. 10 MB."
           - name: "video"
             label: "Video (MP4)"
             widget: "file"
             required: false
-            hint: "MP4, stumm, kurz halten! Max. ca. 30 MB — größere Videos schlagen beim Speichern fehl. Für lange Videos besser bei YouTube/Vimeo hochladen und verlinken."
+            hint: "MP4, stumm. Max ca. 30 MB."
           - name: "video_poster"
-            label: "Standbild fürs Video"
+            label: "Video-Vorschaubild"
             widget: "image"
             required: false
-            hint: "Erscheint sofort, während das Video lädt. JPG/PNG bis ca. 10 MB."
