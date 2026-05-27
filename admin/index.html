@@ -190,22 +190,46 @@
     // Sucht in jedem `place_search`-Feld und schreibt Ergebnis in name/lat/lon
     var placeDebounce = null;
 
-    function findSiblingInput(searchInput, fieldName){
-      // Gehe vom place_search-Input hoch bis zum gemeinsamen Container (List-Item)
-      // und finde dort das Input mit data-fieldName="name" bzw. "lat"/"lon".
-      var container = searchInput.closest('[class*="ListItem"], [class*="list-item"], fieldset, .nc-collapsibleContent');
-      if (!container) container = searchInput.parentNode.parentNode.parentNode;
-      // Versuche per Label-Text zu finden
+    function findStopFields(searchInput){
+      // Strategie: Vom place_search-Input ausgehend nach den naechsten 3 Inputs
+      // im DOM suchen. In der Stop-Liste folgen direkt: name (string), lat (number), lon (number).
+      var container = searchInput.closest('[class*="ListItem"], [class*="list-item"], fieldset');
+      if (!container) {
+        // Fallback: 5 Ebenen hoch um sicher das List-Item zu erwischen
+        container = searchInput.parentNode;
+        for (var k = 0; k < 5 && container && container.parentNode; k++) container = container.parentNode;
+      }
+      if (!container) return { name: null, lat: null, lon: null };
+
+      var allInputs = container.querySelectorAll('input, textarea');
+      var result = { name: null, lat: null, lon: null };
+
+      // PRIMAER: nimm die 3 sichtbaren Inputs/Textareas direkt NACH dem searchInput
+      var seenSearch = false;
+      var picked = [];
+      for (var j = 0; j < allInputs.length; j++) {
+        if (allInputs[j] === searchInput) { seenSearch = true; continue; }
+        if (!seenSearch) continue;
+        if (allInputs[j].type === 'hidden') continue;
+        picked.push(allInputs[j]);
+        if (picked.length === 3) break;
+      }
+      if (picked[0]) result.name = picked[0];
+      if (picked[1]) result.lat  = picked[1];
+      if (picked[2]) result.lon  = picked[2];
+
+      // SEKUNDAER: Label-Match als Korrektur (falls Reihenfolge mal anders ist)
       var labels = container.querySelectorAll('label, [class*="FieldLabel"]');
       for (var i = 0; i < labels.length; i++){
         var t = (labels[i].textContent || '').toLowerCase();
         var input = labels[i].parentNode.querySelector('input, textarea');
-        if (!input) continue;
-        if (fieldName === 'name' && t.indexOf('ort (anzeigename)') !== -1) return input;
-        if (fieldName === 'lat'  && t.indexOf('breitengrad') !== -1) return input;
-        if (fieldName === 'lon'  && t.indexOf('längengrad') !== -1)  return input;
+        if (!input || input === searchInput) continue;
+        if (t.indexOf('anzeigename') !== -1 || t.indexOf('ort (') !== -1) result.name = input;
+        else if (t.indexOf('breitengrad') !== -1 || t.indexOf('(lat)') !== -1) result.lat = input;
+        else if (t.indexOf('aengengrad') !== -1 || t.indexOf('ngengrad') !== -1 || t.indexOf('(lon)') !== -1) result.lon = input;
       }
-      return null;
+
+      return result;
     }
 
     function setReactInputValue(input, value){
@@ -248,16 +272,14 @@
             d.textContent = it.display_name;
             d.addEventListener('mousedown', function(ev){
               ev.preventDefault();
-              // Felder befüllen
-              var nameInput = findSiblingInput(searchInput, 'name');
-              var latInput  = findSiblingInput(searchInput, 'lat');
-              var lonInput  = findSiblingInput(searchInput, 'lon');
+              // Felder befuellen
+              var fields = findStopFields(searchInput);
               // Kurzer Name: erstes Komma-Segment
               var shortName = (it.display_name || '').split(',')[0].trim();
-              if (nameInput) setReactInputValue(nameInput, shortName);
-              if (latInput)  setReactInputValue(latInput,  String(it.lat));
-              if (lonInput)  setReactInputValue(lonInput,  String(it.lon));
-              // Suchfeld zeigt jetzt den Volltreffer (zur Bestätigung)
+              if (fields.name) setReactInputValue(fields.name, shortName);
+              if (fields.lat)  setReactInputValue(fields.lat,  String(it.lat));
+              if (fields.lon)  setReactInputValue(fields.lon,  String(it.lon));
+              // Suchfeld zeigt jetzt den Volltreffer (zur Bestaetigung)
               setReactInputValue(searchInput, it.display_name);
               closeDropdown();
             });

@@ -120,7 +120,7 @@ collections:
         format: "YYYY-MM-DD"
         picker_utc: false
         hint: "Nur Monat + Jahr. Zukunftige Reisen erscheinen ganz oben."
-      - { name: "meta_de", label: "Zeitraum-Text (optional)", widget: "string", required: false, hint: "z.B. September 2023, 18 Tage" }
+      - { name: "meta_de", label: "Zusatz-Info zum Zeitraum (optional)", widget: "string", required: false, hint: "Optional: ergaenzt das Datum, z.B. '18 Tage, der grosse Westen'. Leer = nur Monat/Jahr wird gezeigt." }
       - { name: "summary_de", label: "Zusammenfassung", widget: "text" }
       - { name: "upcoming", label: "Kommende Reise?", widget: "boolean", default: false, required: false }
       - name: "stops"
@@ -146,7 +146,7 @@ collections:
           - { name: "date_en", label: "Datum-Notiz (Englisch)", widget: "string", required: false }
       - { name: "has_english", label: "Englische Version?", widget: "boolean", default: false, required: false }
       - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
-      - { name: "meta_en", label: "Zeitraum (Englisch)", widget: "string", required: false }
+      - { name: "meta_en", label: "Zusatz-Info (Englisch, optional)", widget: "string", required: false }
       - { name: "summary_en", label: "Zusammenfassung (Englisch)", widget: "text", required: false }
 
   # ============================================================
