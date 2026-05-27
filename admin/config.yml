@@ -84,7 +84,7 @@ collections:
         widget: "markdown"
         hint: "Der eigentliche Beitrag."
         modes: ["rich_text", "raw"]
-        buttons: ["bold", "italic", "strikethrough", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
+        buttons: ["bold", "italic", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
         editor_components: ["image"]
       - { name: "has_english", label: "Englische Version?", widget: "boolean", default: false, required: false, hint: "Ein = englische Felder werden auf der Website gezeigt." }
       - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
@@ -95,7 +95,7 @@ collections:
         widget: "markdown"
         required: false
         modes: ["rich_text", "raw"]
-        buttons: ["bold", "italic", "strikethrough", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
+        buttons: ["bold", "italic", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
         editor_components: ["image"]
 
   # ============================================================
