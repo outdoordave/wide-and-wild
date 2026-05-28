@@ -6,10 +6,10 @@ cover: /uploads/img_5666.jpg
 excerpt_de: Ein Wilder Waco wurde gesichtet!
 body_de: >-
   ### Ich habe an der roten Ampel im Nirgendwo einen Traumhaften Toyota Tacoma
-  gesehen! 
+  gesehen!
 
 
-  ![](/uploads/img_5666.jpg)
+  ![]()
 has_english: false
 title_en: Kevin and the red rocks
 category_en: Utah · Aerial
