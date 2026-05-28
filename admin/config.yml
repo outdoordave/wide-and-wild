@@ -81,9 +81,9 @@ collections:
         options:
         - label: Landschaft
           value: landscape
-        - label: Tiere
+        - label: Wildlife
           value: wildlife
-        - label: Luftaufnahmen
+        - label: Aerials
           value: aerial
         - label: Lifestyle
           value: lifestyle
