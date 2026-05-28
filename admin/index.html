@@ -425,6 +425,64 @@
       };
     })();
 
+    // ----------- 2b) Upload-Schutz: Größe + Dateityp prüfen -----------
+    // Cloudflare Pages lehnt Dateien über 25 MB ab -> dann scheitert der ganze
+    // Deploy. Wir warnen daher SOFORT bei der Dateiauswahl, bevor etwas hochgeht.
+    (function(){
+      var MAX_MB = 24; // knapp unter Cloudflares 25-MB-Limit
+      // Erlaubte Endungen pro Sinn-Kategorie
+      var ALLOWED = {
+        Bild: ['jpg','jpeg','png','webp','gif','svg','avif'],
+        Video: ['mp4','webm','mov'],
+        Dokument: ['pdf']
+      };
+      var allExt = [];
+      for (var key in ALLOWED) allExt = allExt.concat(ALLOWED[key]);
+
+      function fmtMB(bytes){ return (bytes / (1024*1024)).toFixed(1); }
+
+      function checkFiles(input){
+        if (!input.files || !input.files.length) return;
+        for (var i = 0; i < input.files.length; i++) {
+          var f = input.files[i];
+          var ext = (f.name.split('.').pop() || '').toLowerCase();
+          // Typ prüfen
+          if (allExt.indexOf(ext) === -1) {
+            alert(
+              'Dieser Dateityp (.' + ext + ') wird nicht unterstützt.\n\n' +
+              'Erlaubt sind:\n' +
+              '• Bilder: ' + ALLOWED.Bild.join(', ') + '\n' +
+              '• Videos: ' + ALLOWED.Video.join(', ') + '\n' +
+              '• Dokumente: ' + ALLOWED.Dokument.join(', ')
+            );
+            input.value = '';
+            return;
+          }
+          // Größe prüfen
+          if (f.size > MAX_MB * 1024 * 1024) {
+            var tipp = (ALLOWED.Video.indexOf(ext) !== -1)
+              ? '\n\nTipp für Videos: vor dem Hochladen verkleinern (z.B. mit HandBrake), ' +
+                'auf Full HD (1920px) und 10–15 Sekunden kürzen. Ziel: unter 10 MB.'
+              : '\n\nTipp für Bilder: vor dem Hochladen auf ca. 2000px Breite verkleinern.';
+            alert(
+              'Diese Datei ist zu groß: ' + f.name + '\n' +
+              'Größe: ' + fmtMB(f.size) + ' MB — erlaubt sind maximal ' + MAX_MB + ' MB.\n\n' +
+              'WICHTIG: Größere Dateien blockieren die Veröffentlichung der ganzen ' +
+              'Website (Cloudflare-Limit). Bitte verkleinern und erneut hochladen.' + tipp
+            );
+            input.value = '';
+            return;
+          }
+        }
+      }
+
+      // Alle Datei-Auswahlen im CMS abfangen (auch dynamisch nachgeladene)
+      document.addEventListener('change', function(e){
+        var t = e.target;
+        if (t && t.tagName === 'INPUT' && t.type === 'file') checkFiles(t);
+      }, true);
+    })();
+
     // ----------- 3) Ortssuche via OpenStreetMap Nominatim -----------
     // Sucht in jedem `place_search`-Feld und schreibt Ergebnis in name/lat/lon
     var placeDebounce = null;
