@@ -8,11 +8,13 @@ media_folder: uploads
 public_folder: /uploads
 locale: de
 collections:
+
+# === 🏞️ Startseite (Hero-Bild/Video) ===
 - name: homepage
-  label: Startseite (Hero)
+  label: 🏞️ Startseite
   files:
   - name: hero
-    label: Grosses Bild / Video oben
+    label: Großes Bild / Video oben
     file: content/home.json
     description: Was ganz oben auf der Startseite gezeigt wird.
     fields:
@@ -23,7 +25,7 @@ collections:
       options:
       - label: Einzelbild
         value: image
-      - label: Diashow (zufallige Bilder)
+      - label: Diashow (zufällige Bilder)
         value: random
       - label: Video
         value: video
@@ -50,13 +52,15 @@ collections:
       label: Video-Vorschaubild
       widget: image
       required: false
+
+# === 🖼️ Portfolio ===
 - name: portfolio
-  label: Portfolio (Fotos)
+  label: 🖼️ Portfolio
   files:
   - name: photos
     label: Portfolio-Fotos
     file: content/portfolio.json
-    description: Eure Galerie-Bilder. Mit + ein neues Foto hinzufuegen, Kategorie waehlen.
+    description: Eure Galerie-Bilder. Mit + ein neues Foto hinzufügen, Kategorie wählen.
     fields:
     - name: items
       label: Fotos
@@ -86,17 +90,25 @@ collections:
         widget: boolean
         default: false
         required: false
-      - name: has_english
-        label: Englischen Titel?
-        widget: boolean
-        default: false
+      - name: english
+        label: 🌐 Englische Version
+        widget: object
+        collapsed: true
         required: false
-      - name: title_en
-        label: Titel (Englisch)
-        widget: string
-        required: false
+        fields:
+        - name: enabled
+          label: Englischen Titel anzeigen?
+          widget: boolean
+          default: false
+          required: false
+        - name: title_en
+          label: Titel (Englisch)
+          widget: string
+          required: false
+
+# === 📖 Stories / Beiträge ===
 - name: stories
-  label: Stories / Beitraege
+  label: 📖 Stories
   label_singular: Beitrag
   description: Reise-Geschichten. Werden automatisch nach Datum sortiert (neueste zuerst).
   folder: content/stories
@@ -106,6 +118,8 @@ collections:
   identifier_field: title_de
   slug: '{{year}}-{{month}}-{{slug}}'
   summary: '{{title_de}}  -  {{date}}'
+  # Karten-Ansicht mit Titelbild als Vorschau:
+  view_style: grid
   sortable_fields:
   - date
   - title_de
@@ -129,11 +143,11 @@ collections:
     label: Titelbild
     widget: image
     required: false
-    hint: Grosses Bild oben. JPG/PNG bis ca. 10 MB.
+    hint: Großes Bild oben. JPG/PNG bis ca. 10 MB.
   - name: excerpt_de
     label: Anriss / Vorschautext
     widget: text
-    hint: 1-2 Saetze fuer die Uebersicht.
+    hint: 1-2 Sätze für die Übersicht.
   - name: body_de
     label: Haupttext
     widget: markdown
@@ -153,45 +167,53 @@ collections:
     - link
     editor_components:
     - image
-  - name: has_english
-    label: Englische Version?
-    widget: boolean
-    default: false
+  - name: english
+    label: 🌐 Englische Version
+    widget: object
+    collapsed: true
     required: false
-    hint: Ein = englische Felder werden auf der Website gezeigt.
-  - name: title_en
-    label: Titel (Englisch)
-    widget: string
-    required: false
-  - name: category_en
-    label: Ort / Kategorie (Englisch)
-    widget: string
-    required: false
-  - name: excerpt_en
-    label: Anriss (Englisch)
-    widget: text
-    required: false
-  - name: body_en
-    label: Haupttext (Englisch)
-    widget: markdown
-    required: false
-    modes:
-    - rich_text
-    - raw
-    buttons:
-    - bold
-    - italic
-    - heading-one
-    - heading-two
-    - heading-three
-    - quote
-    - bulleted-list
-    - numbered-list
-    - link
-    editor_components:
-    - image
+    fields:
+    - name: enabled
+      label: Englische Version anzeigen?
+      widget: boolean
+      default: false
+      required: false
+      hint: Ein = englische Felder werden auf der Website gezeigt.
+    - name: title_en
+      label: Titel (Englisch)
+      widget: string
+      required: false
+    - name: category_en
+      label: Ort / Kategorie (Englisch)
+      widget: string
+      required: false
+    - name: excerpt_en
+      label: Anriss (Englisch)
+      widget: text
+      required: false
+    - name: body_en
+      label: Haupttext (Englisch)
+      widget: markdown
+      required: false
+      modes:
+      - rich_text
+      - raw
+      buttons:
+      - bold
+      - italic
+      - heading-one
+      - heading-two
+      - heading-three
+      - quote
+      - bulleted-list
+      - numbered-list
+      - link
+      editor_components:
+      - image
+
+# === 🗺️ Reisen ===
 - name: trips
-  label: Reisen
+  label: 🗺️ Reisen
   label_singular: Reise
   description: Reisen mit Stationen auf der Karte. Angepinnte zuerst, sonst nach Datum (neueste zuerst).
   folder: content/trips
@@ -201,6 +223,8 @@ collections:
   identifier_field: title_de
   slug: '{{year}}-{{month}}-{{slug}}'
   summary: '{{title_de}}  -  {{date}}'
+  # Karten-Ansicht mit Vorschaubild (erste Station-Foto bzw. erstes Galerie-Bild):
+  view_style: grid
   sortable_fields:
   - date
   - title_de
@@ -216,12 +240,12 @@ collections:
     time_format: false
     format: YYYY-MM-DD
     picker_utc: false
-    hint: Nur Monat + Jahr. Zukunftige Reisen erscheinen ganz oben.
+    hint: Nur Monat + Jahr. Zukünftige Reisen erscheinen ganz oben.
   - name: meta_de
     label: Zusatz-Info zum Zeitraum (optional)
     widget: string
     required: false
-    hint: 'Optional: ergaenzt das Datum, z.B. ''18 Tage, der grosse Westen''. Leer = nur Monat/Jahr wird gezeigt.'
+    hint: 'Optional: ergänzt das Datum, z.B. ''18 Tage, der große Westen''. Leer = nur Monat/Jahr wird gezeigt.'
   - name: summary_de
     label: Zusammenfassung
     widget: text
@@ -230,44 +254,23 @@ collections:
     widget: boolean
     default: false
     required: false
-  - name: highlight
-    label: Anpinnen (Highlight)
-    widget: boolean
-    default: false
-    required: false
-    hint: Ein = diese Reise wird oben angepinnt, unabhaengig vom Datum.
-  - name: highlight_order
-    label: Pin-Reihenfolge
-    widget: number
-    value_type: int
-    default: 1
-    required: false
-    hint: Nur relevant wenn angepinnt. Kleine Zahl = weiter oben. Bei gleicher Zahl entscheidet das Datum.
   - name: stops
     label: Stationen
     label_singular: Station
     widget: list
     summary: '{{fields.name}}'
-    hint: Ort suchen eingeben, aus Dropdown waehlen, Koordinaten werden automatisch gefuellt.
+    hint: Ort suchen eingeben, aus Dropdown wählen, Koordinaten werden automatisch gefüllt.
     fields:
     - name: place_search
       label: Ort suchen (Autocomplete)
       widget: string
       required: false
-      hint: z.B. Austin, Texas eingeben und aus Liste waehlen.
+      hint: z.B. Austin, Texas eingeben und aus Liste wählen.
     - name: name
       label: Ort (Anzeigename)
       widget: string
-    - name: lat
-      label: Breitengrad (lat)
-      widget: number
-      value_type: float
-    - name: lon
-      label: Laengengrad (lon)
-      widget: number
-      value_type: float
     - name: title_de
-      label: Ueberschrift
+      label: Überschrift
       widget: string
       required: false
     - name: text_de
@@ -283,7 +286,7 @@ collections:
       label: Titelbild der Station (optional)
       widget: image
       required: false
-      hint: Dieses Bild wird zugeschnitten als Vorschau gezeigt. Waehle eins, dessen Bildmitte gut aussieht.
+      hint: Dieses Bild wird zugeschnitten als Vorschau gezeigt. Wähle eins, dessen Bildmitte gut aussieht.
     - name: photos
       label: Weitere Bilder dieser Station (optional)
       widget: list
@@ -293,90 +296,118 @@ collections:
         name: image
         label: Bild
         widget: image
+    - name: coords
+      label: 📍 Koordinaten (werden automatisch gefüllt)
+      widget: object
+      collapsed: true
+      required: false
+      fields:
+      - name: lat
+        label: Breitengrad (lat)
+        widget: number
+        value_type: float
+        required: false
+      - name: lon
+        label: Längengrad (lon)
+        widget: number
+        value_type: float
+        required: false
+    - name: english
+      label: 🌐 Englische Version (dieser Station)
+      widget: object
+      collapsed: true
+      required: false
+      fields:
+      - name: title_en
+        label: Überschrift (Englisch)
+        widget: string
+        required: false
+      - name: text_en
+        label: Beschreibung (Englisch)
+        widget: text
+        required: false
+      - name: date_en
+        label: Datum-Notiz (Englisch)
+        widget: string
+        required: false
+  - name: pin
+    label: 📌 Anpinnen & Sortierung
+    widget: object
+    collapsed: true
+    required: false
+    fields:
+    - name: highlight
+      label: Anpinnen (Highlight)
+      widget: boolean
+      default: false
+      required: false
+      hint: Ein = diese Reise wird oben angepinnt, unabhängig vom Datum.
+    - name: highlight_order
+      label: Pin-Reihenfolge
+      widget: number
+      value_type: int
+      default: 1
+      required: false
+      hint: Nur relevant wenn angepinnt. Kleine Zahl = weiter oben. Bei gleicher Zahl entscheidet das Datum.
+  - name: gallery_block
+    label: 🖼️ Reise-Galerie (Reisefazit)
+    widget: object
+    collapsed: true
+    required: false
+    fields:
+    - name: gallery
+      label: Bilder
+      widget: list
+      required: false
+      hint: Deine Lieblingsbilder der ganzen Reise. Werden am Ende der Reise als große Galerie gezeigt, NICHT zugeschnitten.
+      fields:
+      - name: image
+        label: Bild
+        widget: image
+      - name: caption_de
+        label: Bildunterschrift (optional)
+        widget: string
+        required: false
+      - name: caption_en
+        label: Bildunterschrift Englisch (optional)
+        widget: string
+        required: false
+  - name: english
+    label: 🌐 Englische Version (gesamte Reise)
+    widget: object
+    collapsed: true
+    required: false
+    fields:
+    - name: enabled
+      label: Englische Version anzeigen?
+      widget: boolean
+      default: false
+      required: false
     - name: title_en
-      label: Ueberschrift (Englisch)
+      label: Titel (Englisch)
       widget: string
       required: false
-    - name: text_en
-      label: Beschreibung (Englisch)
+    - name: meta_en
+      label: Zusatz-Info (Englisch, optional)
+      widget: string
+      required: false
+    - name: summary_en
+      label: Zusammenfassung (Englisch)
       widget: text
       required: false
-    - name: date_en
-      label: Datum-Notiz (Englisch)
-      widget: string
-      required: false
-  - name: has_english
-    label: Englische Version?
-    widget: boolean
-    default: false
-    required: false
-  - name: gallery
-    label: Reise-Galerie (Reisefazit)
-    widget: list
-    required: false
-    hint: Deine Lieblingsbilder der ganzen Reise. Werden am Ende der Reise als grosse Galerie gezeigt, NICHT zugeschnitten.
-    fields:
-    - name: image
-      label: Bild
-      widget: image
-    - name: caption_de
-      label: Bildunterschrift (optional)
-      widget: string
-      required: false
-    - name: caption_en
-      label: Bildunterschrift Englisch (optional)
-      widget: string
-      required: false
-  - name: title_en
-    label: Titel (Englisch)
-    widget: string
-    required: false
-  - name: meta_en
-    label: Zusatz-Info (Englisch, optional)
-    widget: string
-    required: false
-  - name: summary_en
-    label: Zusammenfassung (Englisch)
-    widget: text
-    required: false
-- name: tripsettings
-  label: Reisen-Einstellungen
-  description: Globale Einstellungen für die Reisen-Karte.
-  files:
-  - name: settings
-    label: 🗺️ Karten-Stil
-    file: content/trips-settings.json
-    description: Bestimmt das Aussehen der Karte auf der Reisen-Seite.
-    fields:
-    - name: map_style
-      label: Karten-Stil
-      widget: select
-      default: liberty
-      hint: Wähle das Aussehen der Reise-Karte. Nach dem Speichern auf der Reisen-Seite sichtbar.
-      options:
-      - label: Liberty (ausgewogen, farbig)
-        value: liberty
-      - label: Positron (hell, minimalistisch)
-        value: positron
-      - label: Bright (hell, farbenfroh)
-        value: bright
-      - label: Fiord (gedämpftes Grau, edel)
-        value: fiord
-      - label: Dark (dunkel)
-        value: dark
-      - label: 3D (mit Gebäuden)
-        value: 3d
+
+# === 🎒 Equipment ===
 - name: equipment
-  label: Equipment (Ausruestung)
+  label: 🎒 Equipment
   files:
   - name: gear
     label: Gear-Liste
     file: content/gear.json
-    description: Eure gesamte Ausruestung.
+    description: Eure gesamte Ausrüstung.
     fields:
     - name: items
-      label: Ausruestung
-      label_singular: Ausruestungsteil
+      label: Ausrüstung
+      label_singular: Ausrüstungsteil
       widget: list
       summary: '{{fields.name}} - {{fields.brand}}'
       fields:
@@ -409,10 +440,13 @@ collections:
         label: Link (optional)
         widget: string
         required: false
+
+# === 📝 Website-Texte (5 Bereiche, jetzt inkl. Karten-Stil) ===
 - name: sitetexts
-  label: Website-Texte
+  label: 📝 Website-Texte
   description: Die festen Texte der Website, übersichtlich nach Seite getrennt.
   files:
+
   - name: home
     label: 🏠 Startseite
     file: content/home-texts.json
@@ -536,10 +570,11 @@ collections:
         - name: en
           label: Englisch
           widget: string
+
   - name: pagetitles
     label: 📐 Seiten-Überschriften
     file: content/page-titles.json
-    description: Die Überschriften von Portfolio, Stories, Reisen und Equipment.
+    description: Die Überschriften der einzelnen Seiten (Portfolio, Stories, Reisen, Equipment, Über uns).
     fields:
     - name: portfolio_kicker
       label: Portfolio Mini-Titel
@@ -661,6 +696,7 @@ collections:
       - name: en
         label: EN
         widget: text
+
   - name: about
     label: 👥 Über uns
     file: content/about.json
@@ -784,6 +820,7 @@ collections:
       - name: en
         label: EN
         widget: string
+
   - name: contact
     label: ✉️ Kontakt
     file: content/contact.json
@@ -948,3 +985,27 @@ collections:
         label: Link
         widget: string
         hint: 'z.B. https://instagram.com/euername oder mailto:hallo@... '
+
+  - name: mapstyle
+    label: 🗺️ Karten-Stil (Reisen-Karte)
+    file: content/trips-settings.json
+    description: Bestimmt das Aussehen der Karte auf der Reisen-Seite.
+    fields:
+    - name: map_style
+      label: Karten-Stil
+      widget: select
+      default: liberty
+      hint: Wähle das Aussehen der Reise-Karte. Nach dem Speichern auf der Reisen-Seite sichtbar.
+      options:
+      - label: Liberty (ausgewogen, farbig)
+        value: liberty
+      - label: Positron (hell, minimalistisch)
+        value: positron
+      - label: Bright (hell, farbenfroh)
+        value: bright
+      - label: Fiord (gedämpftes Grau, edel)
+        value: fiord
+      - label: Dark (dunkel)
+        value: dark
+      - label: 3D (mit Gebäuden)
+        value: 3d
