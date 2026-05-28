@@ -2,49 +2,49 @@
   "items": [
     {
       "image": "/uploads/a7406420.jpg",
-      "title_de": "Goldene Stunde, Sierra Nevada",
+      "title_de": "Kirschblüten in Japan",
       "title_en": "Golden hour, Sierra Nevada",
       "category": "landscape",
       "wide": true
     },
     {
       "image": "/uploads/img_5916-3.jpg",
-      "title_de": "Bison im Morgennebel",
+      "title_de": "Yosemite im Sunset",
       "title_en": "Bison in morning mist",
-      "category": "wildlife",
+      "category": "landscape",
       "wide": false
     },
     {
       "image": "/uploads/img_5666.jpg",
-      "title_de": "Weißkopfseeadler",
+      "title_de": "Toyota Tacoma",
       "title_en": "Bald eagle",
       "category": "wildlife",
       "wide": false
     },
     {
       "image": "/uploads/img_5273.jpg",
-      "title_de": "Mäander von oben",
+      "title_de": "San Francisco Tram",
       "title_en": "Meander from above",
       "category": "aerial",
       "wide": false
     },
     {
-      "image": "/uploads/a7406508.jpg",
-      "title_de": "Sterne über der Wüste",
+      "image": "/uploads/img_0206.jpg",
+      "title_de": "Golden Gate Bridge, SF",
       "title_en": "Stars over the desert",
       "category": "landscape",
       "wide": true
     },
     {
-      "image": "/uploads/img_5916-3.jpg",
-      "title_de": "Küstenlinie aus 120m",
+      "image": "/uploads/img_6039.jpg",
+      "title_de": "Stau in LA",
       "title_en": "Coastline from 120m",
       "category": "aerial",
       "wide": false
     },
     {
       "image": "/uploads/img_4101.jpg",
-      "title_de": "Kojote in der Dämmerung",
+      "title_de": "Miami Party",
       "title_en": "Coyote at dusk",
       "category": "wildlife",
       "wide": false
