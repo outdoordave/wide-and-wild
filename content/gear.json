@@ -1,15 +1,70 @@
 {
   "items": [
-    { "name": "Sony A7 IV", "brand": "Sony", "category": "cameras", "link": "" },
-    { "name": "Tamron 28-75mm f/2.8", "brand": "Tamron", "category": "lenses", "link": "" },
-    { "name": "Tamron 150-500mm f/5-6.7", "brand": "Tamron", "category": "lenses", "link": "" },
-    { "name": "DJI Air 2S", "brand": "DJI", "category": "drones", "link": "" },
-    { "name": "DJI Osmo Action 4", "brand": "DJI", "category": "drones", "link": "" },
-    { "name": "iPhone 15 Pro Max", "brand": "Apple", "category": "phone", "link": "" },
-    { "name": "Travel Tripod Aluminium", "brand": "Peak Design", "category": "support", "link": "" },
-    { "name": "Southwest 2400 (Schwarz)", "brand": "Hyperlite Mountain Gear", "category": "support", "link": "" },
-    { "name": "WhisperLite Universal", "brand": "MSR", "category": "cooking", "link": "" },
-    { "name": "Alpha Pot 2L", "brand": "Sea to Summit", "category": "cooking", "link": "" },
-    { "name": "Frontier Pfanne 8\"", "brand": "Sea to Summit", "category": "cooking", "link": "" }
+    {
+      "name": "Sony A7 IV",
+      "brand": "Sony",
+      "category": "cameras",
+      "link": ""
+    },
+    {
+      "name": "Tamron 28-75mm f/2.8",
+      "brand": "Tamron",
+      "category": "lenses",
+      "link": ""
+    },
+    {
+      "name": "Tamron 150-500mm f/5-6.7",
+      "brand": "Tamron",
+      "category": "lenses",
+      "link": ""
+    },
+    {
+      "name": "DJI Air 2S",
+      "brand": "DJI",
+      "category": "drones",
+      "link": ""
+    },
+    {
+      "name": "DJI Osmo Action 4",
+      "brand": "DJI",
+      "category": "drones",
+      "link": ""
+    },
+    {
+      "name": "iPhone 15 Pro Max",
+      "brand": "Apple",
+      "category": "phone",
+      "link": ""
+    },
+    {
+      "name": "Travel Tripod Aluminium",
+      "brand": "Peak Design",
+      "category": "tripod",
+      "link": ""
+    },
+    {
+      "name": "Southwest 2400 (Schwarz)",
+      "brand": "Hyperlite Mountain Gear",
+      "category": "backpack",
+      "link": ""
+    },
+    {
+      "name": "WhisperLite Universal",
+      "brand": "MSR",
+      "category": "cooking",
+      "link": ""
+    },
+    {
+      "name": "Alpha Pot 2L",
+      "brand": "Sea to Summit",
+      "category": "cooking",
+      "link": ""
+    },
+    {
+      "name": "Frontier Pfanne 8\"",
+      "brand": "Sea to Summit",
+      "category": "cooking",
+      "link": ""
+    }
   ]
 }

@@ -135,7 +135,14 @@
       '.ww-prev-body a{color:var(--c-accent);text-underline-offset:2px;}',
       '.ww-prev-body img{max-width:100%;max-height:540px;width:auto;height:auto;object-fit:cover;',
       '  border-radius:var(--radius);margin:38px auto;display:block;}',
-      '.ww-prev-empty{max-width:720px;margin:0 auto;padding:24px;color:var(--c-ink-soft);font-style:italic;}'
+      '.ww-prev-empty{max-width:720px;margin:0 auto;padding:24px;color:var(--c-ink-soft);font-style:italic;}',
+      '.ww-prev-gear{max-width:720px;margin:0 auto;padding:30px 24px;}',
+      '.ww-prev-gear-h{font-size:28px;font-weight:600;margin:0 0 24px;color:#2e2418;}',
+      '.ww-prev-gear-cat{margin-bottom:24px;}',
+      '.ww-prev-gear-cat-name{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a7672f;font-weight:700;margin-bottom:8px;border-bottom:1px solid #d8cab2;padding-bottom:4px;}',
+      '.ww-prev-gear-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #ebe1d1;}',
+      '.ww-prev-gear-item{font-size:16px;color:#2e2418;}',
+      '.ww-prev-gear-brand{font-size:14px;color:#6e5e49;}'
     ].join('\n');
 
     // Bildpfad normalisieren (analog zur Website-Logik fuer /uploads/)
@@ -188,6 +195,40 @@
           )
         );
         });
+
+        // ----- Equipment-Vorschau wie auf der Website (gruppiert nach Kategorie) -----
+        var GEAR_CATS = [
+          { cat:'cameras', de:'Kameras' }, { cat:'lenses', de:'Objektive' },
+          { cat:'drones', de:'Drohne & Action' }, { cat:'phone', de:'Smartphone' },
+          { cat:'tripod', de:'Stativ' }, { cat:'backpack', de:'Rucksack' },
+          { cat:'cooking', de:'Kochen & Camp' }
+        ];
+        CMSref.registerPreviewTemplate('equipment', function(props){
+          var items = props.entry.getIn(['data','items']);
+          var list = items && items.toJS ? items.toJS() : [];
+          var groups = [];
+          for (var c = 0; c < GEAR_CATS.length; c++) {
+            var inCat = list.filter(function(it){ return it && it.category === GEAR_CATS[c].cat; });
+            if (inCat.length) groups.push({ name: GEAR_CATS[c].de, items: inCat });
+          }
+          return h('div', { className: 'ww-prev-gear' },
+            h('h2', { className: 'ww-prev-gear-h' }, 'Womit wir fotografieren'),
+            groups.length === 0
+              ? h('div', { className: 'ww-prev-empty' }, 'Noch keine Ausrüstung eingetragen.')
+              : groups.map(function(g, gi){
+                  return h('div', { key: gi, className: 'ww-prev-gear-cat' },
+                    h('div', { className: 'ww-prev-gear-cat-name' }, g.name),
+                    g.items.map(function(it, ii){
+                      return h('div', { key: ii, className: 'ww-prev-gear-row' },
+                        h('span', { className: 'ww-prev-gear-item' }, it.name || ''),
+                        h('span', { className: 'ww-prev-gear-brand' }, it.brand || '')
+                      );
+                    })
+                  );
+                })
+          );
+        });
+
         return true;
       } catch(e){
         console.warn('[Wide & Wild] Vorschau-Registrierung fehlgeschlagen:', e);

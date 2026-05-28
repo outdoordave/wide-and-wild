@@ -230,7 +230,8 @@ collections:
                   - { label: "Objektive", value: "lenses" }
                   - { label: "Drohne & Action", value: "drones" }
                   - { label: "Smartphone", value: "phone" }
-                  - { label: "Stativ und Traeger", value: "support" }
+                  - { label: "Stativ", value: "tripod" }
+                  - { label: "Rucksack", value: "backpack" }
                   - { label: "Kochen und Camp", value: "cooking" }
               - { name: "link", label: "Link (optional)", widget: "string", required: false }
 
