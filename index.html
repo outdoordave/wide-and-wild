@@ -601,11 +601,11 @@
           </div>
           <div class="teaser" data-filter="wildlife" data-nav="portfolio">
             <div class="ph" data-ph="PLATZHALTER" data-illus="desert" style="--ph-c1:#b08a5e; --ph-c2:#5e3f20;"></div>
-            <div class="ov"><div class="cat" data-de="Tiere" data-en="Wildlife">Tiere</div><div class="ttl" data-de="Auge in Auge" data-en="Eye to eye">Auge in Auge</div></div>
+            <div class="ov"><div class="cat" data-de="Wildlife" data-en="Wildlife">Wildlife</div><div class="ttl" data-de="Auge in Auge" data-en="Eye to eye">Auge in Auge</div></div>
           </div>
           <div class="teaser" data-filter="aerial" data-nav="portfolio">
             <div class="ph" data-ph="PLATZHALTER" data-illus="coast" style="--ph-c1:#7e98a0; --ph-c2:#3a5058;"></div>
-            <div class="ov"><div class="cat" data-de="Luftaufnahmen" data-en="Aerial">Luftaufnahmen</div><div class="ttl" data-de="Neue Perspektiven" data-en="New perspectives">Neue Perspektiven</div></div>
+            <div class="ov"><div class="cat" data-de="Aerials" data-en="Aerial">Aerials</div><div class="ttl" data-de="Neue Perspektiven" data-en="New perspectives">Neue Perspektiven</div></div>
           </div>
         </div>
       </div>
@@ -623,8 +623,8 @@
       <div class="filter-bar" id="filterBar">
         <button class="active" data-cat="all" data-de="Alle" data-en="All">Alle</button>
         <button data-cat="landscape" data-de="Landschaft" data-en="Landscape">Landschaft</button>
-        <button data-cat="wildlife" data-de="Tiere" data-en="Wildlife">Tiere</button>
-        <button data-cat="aerial" data-de="Luftaufnahmen" data-en="Aerial">Luftaufnahmen</button>
+        <button data-cat="wildlife" data-de="Wildlife" data-en="Wildlife">Wildlife</button>
+        <button data-cat="aerial" data-de="Aerials" data-en="Aerial">Aerials</button>
         <button data-cat="lifestyle" data-de="Lifestyle" data-en="Lifestyle">Lifestyle</button>
         <button data-cat="cars" data-de="Autos" data-en="Cars">Autos</button>
         <button data-cat="architecture" data-de="Architektur" data-en="Architecture">Architektur</button>
@@ -1172,8 +1172,8 @@ function wwMediaBox(c1, c2, imgKey, photo, extraClass) {
 /* Standard-Illustration + Farben je Kategorie, falls noch kein echtes Foto da ist */
 var PORTFOLIO_CAT = {
   landscape:   { img:'mountains', c1:'#8a9a7e', c2:'#3a4a38', de:'Landschaft',    en:'Landscape' },
-  wildlife:    { img:'desert',    c1:'#b08a5e', c2:'#5e3f20', de:'Tiere',         en:'Wildlife' },
-  aerial:      { img:'coast',     c1:'#7e98a0', c2:'#3a5058', de:'Luftaufnahmen', en:'Aerial' },
+  wildlife:    { img:'desert',    c1:'#b08a5e', c2:'#5e3f20', de:'Wildlife',         en:'Wildlife' },
+  aerial:      { img:'coast',     c1:'#7e98a0', c2:'#3a5058', de:'Aerials', en:'Aerial' },
   lifestyle:   { img:'mountains', c1:'#c69b7a', c2:'#6b4a30', de:'Lifestyle',     en:'Lifestyle' },
   cars:        { img:'desert',    c1:'#6e7a8a', c2:'#2e3a4a', de:'Autos',         en:'Cars' },
   architecture:{ img:'coast',     c1:'#9a8a7e', c2:'#4a3e38', de:'Architektur',   en:'Architecture' },
@@ -2049,6 +2049,7 @@ function wwDrawTrip() {
   }
 
   // Auf alle Stops einzoomen
+  var coords = stops.map(function(s){ return [s.lon, s.lat]; });
   var bounds = new maplibregl.LngLatBounds();
   for (var b = 0; b < coords.length; b++) bounds.extend(coords[b]);
   if (coords.length === 1) map.flyTo({ center: coords[0], zoom: 6 });
