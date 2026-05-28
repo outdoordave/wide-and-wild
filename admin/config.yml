@@ -81,10 +81,28 @@ collections:
         options:
         - label: Landschaft
           value: landscape
-        - label: Wildlife
+        - label: Tiere
           value: wildlife
-        - label: Aus der Luft
+        - label: Luftaufnahmen
           value: aerial
+        - label: Lifestyle
+          value: lifestyle
+        - label: Autos
+          value: cars
+        - label: Architektur
+          value: architecture
+        - label: Portrait
+          value: portrait
+        - label: Street
+          value: street
+        - label: Nacht/Sterne
+          value: night
+        - label: Makro
+          value: macro
+        - label: Reise
+          value: travel
+        - label: Schwarz-Weiß
+          value: bw
       - name: wide
         label: Breites Bild (2 Spalten)
         widget: boolean
