@@ -134,6 +134,14 @@
     "why_text": {
       "de": "Weil kein anderes Land so viel Vielfalt auf einer einzigen Reise bietet: Wüsten, Canyons, Küsten, Wälder, Berge — und dazwischen Tiere, die man sonst nur aus Dokus kennt. Jede Tour ist anders, jedes Licht neu. Genau das hält uns draußen.",
       "en": "Because no other country offers so much variety in a single trip: deserts, canyons, coasts, forests, mountains — and animals in between that you usually only see in documentaries. Every trip is different, every light is new. That's exactly what keeps us out there."
+    },
+    "person1_gear": {
+      "de": "Ausrüstung: Sony A7 IV · Tamron 28-75mm · Tamron 150-500mm · Peak Design Stativ",
+      "en": "Gear: Sony A7 IV · Tamron 28-75mm · Tamron 150-500mm · Peak Design tripod"
+    },
+    "person2_gear": {
+      "de": "Ausrüstung: DJI Air 2S · DJI Osmo Action 4 · iPhone",
+      "en": "Gear: DJI Air 2S · DJI Osmo Action 4 · iPhone"
     }
   },
   "contact": {
@@ -172,6 +180,30 @@
         "label": "@davidbastisch",
         "url": "https://instagram.com/davidbastisch"
       }
-    ]
+    ],
+    "form_success": {
+      "de": "Danke! Deine Nachricht ist angekommen — wir melden uns bald.",
+      "en": "Thanks! Your message came through — we'll be in touch soon."
+    },
+    "form_name": {
+      "de": "Dein Name",
+      "en": "Your name"
+    },
+    "form_email": {
+      "de": "Deine E-Mail",
+      "en": "Your email"
+    },
+    "form_message": {
+      "de": "Deine Nachricht",
+      "en": "Your message"
+    },
+    "form_send": {
+      "de": "Nachricht senden",
+      "en": "Send message"
+    },
+    "form_note": {
+      "de": "Hinweis: Dies ist eine Vorschau — das Formular versendet noch nichts. Beim Live-Schalten verbinden wir es mit eurem Postfach.",
+      "en": "Note: This is a preview — the form doesn't send anything yet. When we go live, we'll connect it to your inbox."
+    }
   }
 }
