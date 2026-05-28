@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<!-- Leaflet: echte zoombare Weltkarte fuer die Reisen-Sektion -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<!-- MapLibre GL + OpenFreeMap: edle Vektor-Karte, gratis, kein API-Key, mehrsprachig -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.21.0/dist/maplibre-gl.css"/>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wide &amp; Wild — Travel &amp; Outdoor Photography</title>
@@ -74,12 +74,10 @@
     position: sticky; top: 0; z-index: 1100; background: rgba(244,237,225,0.94);
     backdrop-filter: blur(10px); border-bottom: 1px solid var(--c-line);
   }
-  /* Leaflet-Karte darf nicht ueber den Header scrollen */
-  .map-box .leaflet-container { z-index: 1; }
-  .map-box .leaflet-pane,
-  .map-box .leaflet-top,
-  .map-box .leaflet-bottom { z-index: 2; }
-  .map-box .leaflet-control { z-index: 3; }
+  /* MapLibre-Karte darf nicht ueber den Header scrollen */
+  .map-box .maplibregl-map { z-index: 1; }
+  .map-box .maplibregl-canvas-container { z-index: 1; }
+  .map-box .maplibregl-control-container { z-index: 3; }
   .nav { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; height: 88px; display: flex; align-items: center; justify-content: space-between; }
   .nav-logo { display: flex; align-items: center; cursor: pointer; height: 100%; }
   .nav-logo img { height: 62px; width: auto; }
@@ -290,11 +288,11 @@
   .trip-tabs button.active { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
   .map-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start; }
   .map-box { border-radius: var(--radius); overflow: hidden; position: relative; height: 420px; }
-  .map-box .leaflet-container { height: 100%; border-radius: var(--radius); }
-  /* Leaflet-Popup im Website-Stil */
-  .leaflet-popup-content-wrapper { background: var(--c-dark); color: var(--c-dark-ink); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.4); border: none; }
-  .leaflet-popup-tip { background: var(--c-dark); }
-  .leaflet-popup-content { margin: 10px 14px; font-family: var(--font-body); }
+  .map-box .maplibregl-map { height: 100%; border-radius: var(--radius); }
+  /* MapLibre-Popup im Website-Stil */
+  .maplibregl-popup-content { background: var(--c-dark); color: var(--c-dark-ink); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.4); border: none; padding: 10px 14px; font-family: var(--font-body); }
+  .maplibregl-popup-tip { border-top-color: var(--c-dark) !important; border-bottom-color: var(--c-dark) !important; }
+  .maplibregl-popup-close-button { color: #f0c9a8; font-size: 18px; padding: 2px 6px; }
   .ww-popup-name { font-size: 14px; font-weight: 700; color: #f0c9a8; margin: 0 0 2px; }
   .ww-popup-date { font-size: 12px; color: #9a8c76; margin: 0; }
   @media (max-width: 700px) { .map-box { height: 300px; } }
@@ -1054,6 +1052,8 @@ function applyLang() {
   renderLatest();
   var tp = document.getElementById('page-trips');
   if (tp && tp.classList.contains('active')) renderTrip();
+  // Kartenbeschriftung an die neue Sprache anpassen (falls Karte schon da)
+  if (window._mlReady) wwSetMapLanguage(currentLang);
   var sp = document.getElementById('page-story');
   if (sp.classList.contains('active')) renderStory(currentStory);
 }
@@ -1809,72 +1809,40 @@ function renderTrip() {
 
   var stops = trip.stops;
 
-  // Leaflet-Karte aufbauen (oder aktualisieren)
+  // MapLibre-Karte mit OpenFreeMap (Vektor, edel, gratis, mehrsprachig)
   var mapBox = document.getElementById('mapBox');
-  if (!window._leafletMap) {
-    // Erste Initialisierung
+  if (!window._mlMap) {
     mapBox.innerHTML = '';
     var mapDiv = document.createElement('div');
-    mapDiv.id = 'leafletMap';
+    mapDiv.id = 'mlMap';
     mapDiv.style.cssText = 'width:100%;height:100%';
     mapBox.appendChild(mapDiv);
-    window._leafletMap = L.map('leafletMap', { zoomControl: true, scrollWheelZoom: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 18
-    }).addTo(window._leafletMap);
-  }
-
-  var lmap = window._leafletMap;
-
-  // Alte Marker + Linie entfernen
-  if (window._leafletLayers) {
-    for (var r = 0; r < window._leafletLayers.length; r++) lmap.removeLayer(window._leafletLayers[r]);
-  }
-  window._leafletLayers = [];
-  window._leafletMarkers = [];
-
-  if (!stops || stops.length === 0) return;
-
-  // Marker-Icon im Website-Stil
-  function makeIcon(selected) {
-    var col = selected ? '#f0c9a8' : '#a7672f';
-    var border = selected ? '#a7672f' : '#f4ede1';
-    var size = selected ? 18 : 14;
-    return L.divIcon({
-      className: '',
-      html: '<div style="width:' + size + 'px;height:' + size + 'px;background:' + col + ';border:2.5px solid ' + border + ';border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.45);transition:all .2s"></div>',
-      iconSize: [size, size],
-      iconAnchor: [size/2, size/2]
+    window._mlMap = new maplibregl.Map({
+      container: 'mlMap',
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [-110, 40], zoom: 3,
+      attributionControl: { compact: true }
+    });
+    window._mlMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    window._mlMap.scrollZoom.disable(); // Scrollen scrollt die Seite, nicht die Karte
+    window._mlMarkers = [];
+    window._mlReady = false;
+    window._mlMap.on('load', function(){
+      window._mlReady = true;
+      wwSetMapLanguage(currentLang);
+      wwDrawTrip();
     });
   }
 
-  // Route-Linie
-  var latlngs = stops.map(function(s){ return [s.lat, s.lon]; });
-  var line = L.polyline(latlngs, { color: '#a7672f', weight: 2.5, dashArray: '7,6', opacity: 0.85 });
-  line.addTo(lmap);
-  window._leafletLayers.push(line);
+  if (!stops || stops.length === 0) return;
 
-  // Marker
-  for (var m = 0; m < stops.length; m++) {
-    (function(idx){
-      var s = stops[idx];
-      var marker = L.marker([s.lat, s.lon], { icon: makeIcon(idx === currentStop) });
-      var d = s[currentLang];
-      marker.bindPopup(
-        '<p class="ww-popup-name">' + (d ? d.t : s.name) + '</p>' +
-        (d && d.date ? '<p class="ww-popup-date">' + d.date + '</p>' : '')
-      );
-      marker.on('click', function(){ selectStop(idx); });
-      marker.addTo(lmap);
-      window._leafletLayers.push(marker);
-      window._leafletMarkers.push(marker);
-    })(m);
+  // Wenn die Karte schon bereit ist, sofort zeichnen; sonst macht es das load-Event
+  if (window._mlReady) {
+    wwSetMapLanguage(currentLang);
+    wwDrawTrip();
+    // Container war evtl. unsichtbar -> Groesse neu berechnen
+    setTimeout(function(){ if (window._mlMap) window._mlMap.resize(); }, 100);
   }
-
-  // Karte auf alle Stops einzoomen
-  lmap.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
-  setTimeout(function(){ lmap.invalidateSize(); }, 150);
 
   // Stop-Liste als Buttons
   var list = document.getElementById('tripStoplist');
@@ -1891,6 +1859,80 @@ function renderTrip() {
 
   renderStopDetail();
   renderTripGallery();
+}
+
+/* Setzt die Beschriftungssprache der Karte: 'de' -> name:de, 'en' -> name:en,
+   mit Rueckfall auf den lokalen Namen. */
+function wwSetMapLanguage(lang) {
+  var map = window._mlMap;
+  if (!map || !map.isStyleLoaded()) return;
+  var field = (lang === 'de') ? 'name:de' : 'name:en';
+  var expr = ['coalesce', ['get', field], ['get', 'name:latin'], ['get', 'name']];
+  try {
+    var layers = map.getStyle().layers || [];
+    for (var i = 0; i < layers.length; i++) {
+      var ly = layers[i];
+      if (ly.type === 'symbol' && ly.layout && ly.layout['text-field'] !== undefined) {
+        map.setLayoutProperty(ly.id, 'text-field', expr);
+      }
+    }
+  } catch(e) { /* Stil noch nicht ganz bereit – nicht schlimm */ }
+}
+
+/* Zeichnet Route-Linie + Marker fuer die aktuelle Reise auf die MapLibre-Karte */
+function wwDrawTrip() {
+  var map = window._mlMap;
+  if (!map || !window._mlReady) return;
+  var stops = trips[currentTrip].stops;
+  if (!stops || !stops.length) return;
+
+  // Alte Marker entfernen
+  if (window._mlMarkers) {
+    for (var r = 0; r < window._mlMarkers.length; r++) window._mlMarkers[r].remove();
+  }
+  window._mlMarkers = [];
+
+  // Route-Linie als GeoJSON-Source (entfernen falls vorhanden)
+  var coords = stops.map(function(s){ return [s.lon, s.lat]; });
+  var geo = { type: 'Feature', geometry: { type: 'LineString', coordinates: coords } };
+  if (map.getLayer('ww-route')) map.removeLayer('ww-route');
+  if (map.getSource('ww-route')) map.removeSource('ww-route');
+  map.addSource('ww-route', { type: 'geojson', data: geo });
+  map.addLayer({
+    id: 'ww-route', type: 'line', source: 'ww-route',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': '#a7672f', 'line-width': 2.5, 'line-dasharray': [2, 2], 'line-opacity': 0.85 }
+  });
+
+  // Marker setzen
+  for (var m = 0; m < stops.length; m++) {
+    (function(idx){
+      var s = stops[idx];
+      var sel = (idx === currentStop);
+      var size = sel ? 18 : 14;
+      var col = sel ? '#f0c9a8' : '#a7672f';
+      var border = sel ? '#a7672f' : '#f4ede1';
+      var el = document.createElement('div');
+      el.style.cssText = 'width:' + size + 'px;height:' + size + 'px;background:' + col + ';border:2.5px solid ' + border + ';border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.45);cursor:pointer;transition:all .2s';
+      var d = s[currentLang];
+      var popup = new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(
+        '<p class="ww-popup-name">' + (d ? d.t : s.name) + '</p>' +
+        (d && d.date ? '<p class="ww-popup-date">' + d.date + '</p>' : '')
+      );
+      var marker = new maplibregl.Marker({ element: el })
+        .setLngLat([s.lon, s.lat])
+        .setPopup(popup)
+        .addTo(map);
+      el.addEventListener('click', function(){ selectStop(idx); });
+      window._mlMarkers.push(marker);
+    })(m);
+  }
+
+  // Auf alle Stops einzoomen
+  var bounds = new maplibregl.LngLatBounds();
+  for (var b = 0; b < coords.length; b++) bounds.extend(coords[b]);
+  if (coords.length === 1) map.flyTo({ center: coords[0], zoom: 6 });
+  else map.fitBounds(bounds, { padding: 50, duration: 600 });
 }
 
 /* Reise-Gesamtgalerie (Reisefazit) als Masonry rendern */
@@ -1915,23 +1957,12 @@ function renderTripGallery() {
 
 function selectStop(i) {
   currentStop = i;
-  // Marker-Icons aktualisieren
-  if (window._leafletMarkers) {
+  // Marker neu zeichnen (markiert den aktiven Stop) + auf ihn zentrieren
+  if (window._mlReady) {
+    wwDrawTrip();
     var stops = trips[currentTrip].stops;
-    for (var m = 0; m < window._leafletMarkers.length; m++) {
-      var col = (m === i) ? '#f0c9a8' : '#a7672f';
-      var border = (m === i) ? '#a7672f' : '#f4ede1';
-      var size = (m === i) ? 18 : 14;
-      window._leafletMarkers[m].setIcon(L.divIcon({
-        className: '',
-        html: '<div style="width:' + size + 'px;height:' + size + 'px;background:' + col + ';border:2.5px solid ' + border + ';border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.45);transition:all .2s"></div>',
-        iconSize: [size, size],
-        iconAnchor: [size/2, size/2]
-      }));
-    }
-    // Auf selektierten Stop zentrieren
     if (stops && stops[i]) {
-      window._leafletMap.panTo([stops[i].lat, stops[i].lon], { animate: true });
+      window._mlMap.flyTo({ center: [stops[i].lon, stops[i].lat], zoom: Math.max(window._mlMap.getZoom(), 5), duration: 600 });
     }
   }
   var btns = document.querySelectorAll('#tripStoplist button');
@@ -2327,6 +2358,6 @@ if (document.readyState === 'loading') {
   initSite();
 }
 </script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.21.0/dist/maplibre-gl.js"></script>
 </body>
 </html>
