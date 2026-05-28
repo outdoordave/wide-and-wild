@@ -192,13 +192,29 @@ collections:
           - { name: "text_de", label: "Beschreibung", widget: "text", required: false }
           - { name: "date_de", label: "Datum-Notiz", widget: "string", required: false, hint: "z.B. 28. Sept - 01. Okt" }
           - name: "photo"
-            label: "Foto (optional)"
+            label: "Titelbild der Station (optional)"
             widget: "image"
             required: false
+            hint: "Dieses Bild wird zugeschnitten als Vorschau gezeigt. Waehle eins, dessen Bildmitte gut aussieht."
+          - name: "photos"
+            label: "Weitere Bilder dieser Station (optional)"
+            widget: "list"
+            required: false
+            hint: "Beliebig viele Fotos. Werden als Galerie unter der Station gezeigt, NICHT zugeschnitten."
+            field: { name: "image", label: "Bild", widget: "image" }
           - { name: "title_en", label: "Ueberschrift (Englisch)", widget: "string", required: false }
           - { name: "text_en", label: "Beschreibung (Englisch)", widget: "text", required: false }
           - { name: "date_en", label: "Datum-Notiz (Englisch)", widget: "string", required: false }
       - { name: "has_english", label: "Englische Version?", widget: "boolean", default: false, required: false }
+      - name: "gallery"
+        label: "Reise-Galerie (Reisefazit)"
+        widget: "list"
+        required: false
+        hint: "Deine Lieblingsbilder der ganzen Reise. Werden am Ende der Reise als grosse Galerie gezeigt, NICHT zugeschnitten."
+        fields:
+          - { name: "image", label: "Bild", widget: "image" }
+          - { name: "caption_de", label: "Bildunterschrift (optional)", widget: "string", required: false }
+          - { name: "caption_en", label: "Bildunterschrift Englisch (optional)", widget: "string", required: false }
       - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
       - { name: "meta_en", label: "Zusatz-Info (Englisch, optional)", widget: "string", required: false }
       - { name: "summary_en", label: "Zusammenfassung (Englisch)", widget: "text", required: false }

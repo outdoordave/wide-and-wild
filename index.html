@@ -443,6 +443,18 @@
   .ww-edit-btn.ww-add { background: #2d6a4f; }
   .ww-edit-btn.ww-add:hover { background: #1f4d39; }
   .ww-editable { position: relative; }
+  /* Masonry-Galerie: jedes Bild im Originalformat, nichts abgeschnitten */
+  .ww-masonry { column-count: 3; column-gap: 10px; margin-top: 16px; }
+  .ww-masonry .ww-m-item { width: 100%; border-radius: var(--radius); margin-bottom: 10px; display: block; break-inside: avoid; cursor: zoom-in; transition: transform .2s; }
+  .ww-masonry .ww-m-item:hover { transform: scale(1.02); }
+  .ww-masonry figure { margin: 0 0 10px; break-inside: avoid; }
+  .ww-masonry figure img { width: 100%; border-radius: var(--radius); display: block; cursor: zoom-in; }
+  .ww-masonry figure figcaption { font-size: 12px; color: var(--c-ink-soft, #6e5e49); padding: 4px 2px 0; }
+  .ww-trip-gallery-title { font-size: 24px; font-weight: 600; margin: 40px 0 4px; }
+  .ww-station-photos { column-count: 2; column-gap: 8px; margin-top: 12px; }
+  .ww-station-photos img { width: 100%; border-radius: 8px; margin-bottom: 8px; display: block; break-inside: avoid; cursor: zoom-in; }
+  @media (max-width: 700px) { .ww-masonry { column-count: 2; } .ww-station-photos { column-count: 2; } }
+  @media (max-width: 480px) { .ww-masonry { column-count: 1; } .ww-station-photos { column-count: 1; } }
   .ww-hero-tools { top: 90px; right: 20px; z-index: 60; }
   body.ww-is-admin .ww-editable:hover { outline: 2px dashed rgba(167,103,47,.45); outline-offset: 4px; }
 
@@ -672,6 +684,7 @@
         <div class="trip-detail" id="tripDetail"></div>
       </div>
       <div class="trip-stoplist" id="tripStoplist" style="justify-content:center;"></div>
+      <div class="wrap" id="tripGallery"></div>
     </div>
     <section></section>
   </div>
@@ -1571,17 +1584,29 @@ function renderStory(i) {
 function buildTrip(data) {
   var hasEN = data.has_english === true;
   var stops = (data.stops || []).map(function(s){
+    // Mehrere Bilder pro Station (Liste von {image} oder direkten Pfaden)
+    var photos = (s.photos || []).map(function(p){
+      var src = (typeof p === 'string') ? p : (p && p.image) || '';
+      return normalizePath(src);
+    }).filter(Boolean);
     return {
       name: s.name, lat: s.lat, lon: s.lon,
       photo: s.photo || '',
+      photos: photos,
       de: { date: s.date_de || '', t: s.title_de || s.name, txt: s.text_de || '' },
       en: hasEN
         ? { date: s.date_en || s.date_de || '', t: s.title_en || s.title_de || s.name, txt: s.text_en || s.text_de || '' }
         : { date: s.date_de || '', t: s.title_de || s.name, txt: s.text_de || '' }
     };
   });
+  // Reise-Gesamtgalerie (Reisefazit)
+  var gallery = (data.gallery || []).map(function(g){
+    return {
+      src: normalizePath((typeof g === 'string') ? g : (g && g.image) || ''),
+      cap: { de: (g && g.caption_de) || '', en: (g && g.caption_en) || (g && g.caption_de) || '' }
+    };
+  }).filter(function(g){ return g.src; });
   function combineMeta(dateLabel, extra) {
-    // Wenn beides vorhanden: "September 2023 · 18 Tage". Sonst was da ist.
     if (dateLabel && extra) return dateLabel + ' · ' + extra;
     return dateLabel || extra || '';
   }
@@ -1600,7 +1625,8 @@ function buildTrip(data) {
       de: data.title_de || '',
       en: hasEN ? (data.title_en || data.title_de || '') : (data.title_de || '')
     },
-    stops: stops
+    stops: stops,
+    gallery: gallery
   };
 }
 
@@ -1864,6 +1890,27 @@ function renderTrip() {
   }
 
   renderStopDetail();
+  renderTripGallery();
+}
+
+/* Reise-Gesamtgalerie (Reisefazit) als Masonry rendern */
+function renderTripGallery() {
+  var box = document.getElementById('tripGallery');
+  if (!box) return;
+  var trip = trips[currentTrip];
+  var g = trip.gallery || [];
+  if (!g.length) { box.innerHTML = ''; return; }
+  var title = (currentLang === 'de' ? 'Bilder dieser Reise' : 'Photos from this trip');
+  var html = '<h3 class="ww-trip-gallery-title">' + title + '</h3><div class="ww-masonry">';
+  for (var i = 0; i < g.length; i++) {
+    var cap = g[i].cap[currentLang] || '';
+    html += '<figure>' +
+      '<img src="' + g[i].src + '" alt="' + cap.replace(/"/g,'&quot;') + '" loading="lazy" onclick="wwOpenImage(\'' + g[i].src + '\')">' +
+      (cap ? '<figcaption>' + cap + '</figcaption>' : '') +
+      '</figure>';
+  }
+  html += '</div>';
+  box.innerHTML = html;
 }
 
 function selectStop(i) {
@@ -1897,15 +1944,40 @@ function renderStopDetail() {
   var s = trips[currentTrip].stops[currentStop];
   var d = s[currentLang];
   var stepLabel = (currentLang === 'de' ? 'Station ' : 'Stop ') + (currentStop + 1) + '/' + trips[currentTrip].stops.length;
+  // Galerie der Stations-Bilder (mehrere, nicht zugeschnitten)
+  var photosHtml = '';
+  if (s.photos && s.photos.length) {
+    photosHtml = '<div class="ww-station-photos">';
+    for (var p = 0; p < s.photos.length; p++) {
+      photosHtml += '<img src="' + s.photos[p] + '" alt="" loading="lazy" onclick="wwOpenImage(\'' + s.photos[p] + '\')">';
+    }
+    photosHtml += '</div>';
+  }
   document.getElementById('tripDetail').innerHTML =
     '<div class="ww-editable" style="position:relative">' +
     '<div class="step">' + stepLabel + '</div>' +
     '<h3>' + d.t + '</h3>' +
     '<div class="date">' + d.date + '</div>' +
-    '<div ' + phAttrs(s.c1, s.c2, s.img) + '></div>' +
+    '<div ' + phAttrs(s.c1, s.c2, s.img, s.photo) + '></div>' +
     '<p>' + d.txt + '</p>' +
+    photosHtml +
     wwToolbar({ edit: { coll: 'trips', slug: currentTrip } }) +
     '</div>';
+}
+
+/* Einfache Bild-Lightbox fuer Galerie-Bilder */
+function wwOpenImage(src) {
+  var ov = document.getElementById('wwImgLightbox');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'wwImgLightbox';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(20,16,12,.92);display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:24px';
+    ov.onclick = function(){ ov.style.display = 'none'; };
+    ov.innerHTML = '<img style="max-width:95%;max-height:95%;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6)">';
+    document.body.appendChild(ov);
+  }
+  ov.querySelector('img').src = src;
+  ov.style.display = 'flex';
 }
 
 function setTrip(t) {
