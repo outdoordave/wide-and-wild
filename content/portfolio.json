@@ -55,6 +55,24 @@
       "title_en": "Fog forest, Pacific coast",
       "category": "landscape",
       "wide": false
+    },
+    {
+      "wide": false,
+      "english": {
+        "enabled": false
+      },
+      "image": "/uploads/img_6027.jpg",
+      "title_de": "Santa Monica",
+      "category": "landscape"
+    },
+    {
+      "wide": false,
+      "english": {
+        "enabled": false
+      },
+      "image": "/uploads/img_1418-2.jpg",
+      "title_de": "Lake Tahoe",
+      "category": "landscape"
     }
   ]
 }
