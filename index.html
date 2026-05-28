@@ -418,31 +418,38 @@
   footer .fnote .ww-admin-link { color: inherit; text-decoration: none; opacity: 0.8; border-bottom: 1px dotted currentColor; }
   footer .fnote .ww-admin-link:hover { color: #f0c9a8; opacity: 1; }
 
-  /* ===== Edit-Stifte (nur fuer eingeloggte Admins sichtbar) ===== */
+  /* ===== Edit-Stifte + Plus (nur fuer eingeloggte Admins sichtbar) ===== */
+  .ww-edit-toolbar {
+    position: absolute; top: 8px; right: 8px; z-index: 50;
+    display: none; gap: 6px;
+  }
+  body.ww-is-admin .ww-edit-toolbar { display: inline-flex; }
   .ww-edit-btn {
-    position: absolute; top: 10px; right: 10px; z-index: 50;
-    width: 38px; height: 38px; border-radius: 50%;
+    width: 34px; height: 34px; border-radius: 50%;
     background: var(--c-accent, #a7672f); color: #fff;
     border: 2px solid #f4ede1; cursor: pointer;
-    display: none; align-items: center; justify-content: center;
-    font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.35);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.35);
     transition: transform .15s, background .15s; padding: 0;
   }
-  .ww-edit-btn:hover { transform: scale(1.1); background: var(--c-accent-dk, #834e1f); }
-  body.ww-is-admin .ww-edit-btn { display: inline-flex; }
+  .ww-edit-btn:hover { transform: scale(1.12); background: var(--c-accent-dk, #834e1f); }
+  .ww-edit-btn svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ww-edit-btn.ww-add { background: #2d6a4f; }
+  .ww-edit-btn.ww-add:hover { background: #1f4d39; }
   .ww-editable { position: relative; }
-  /* dezenter Rahmen beim Hover ueber bearbeitbare Bereiche im Admin-Modus */
-  body.ww-is-admin .ww-editable:hover { outline: 2px dashed rgba(167,103,47,.5); outline-offset: 4px; }
+  body.ww-is-admin .ww-editable:hover { outline: 2px dashed rgba(167,103,47,.45); outline-offset: 4px; }
 
   /* Admin-Statusleiste oben */
   .ww-admin-bar {
     display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
     background: #2e2418; color: #f0c9a8; font-size: 13px;
-    padding: 7px 16px; text-align: center; font-family: var(--font-body);
+    padding: 8px 16px; text-align: center; font-family: var(--font-body);
+    box-shadow: 0 2px 10px rgba(0,0,0,.3);
   }
   body.ww-is-admin .ww-admin-bar { display: block; }
-  body.ww-is-admin { padding-top: 34px; }
+  body.ww-is-admin { padding-top: 36px; }
   .ww-admin-bar a { color: #f0c9a8; text-decoration: underline; cursor: pointer; margin: 0 6px; }
+  .ww-admin-bar strong { color: #fff; font-weight: 600; }
 
   /* ============ RESPONSIVE ============ */
   @media (max-width: 860px) {
@@ -476,8 +483,7 @@
 <body>
 
 <div class="ww-admin-bar">
-  <i class="ti ti-pencil" style="vertical-align:-2px"></i>
-  Admin-Modus aktiv — klicke auf ein Stift-Symbol, um Inhalte zu bearbeiten.
+  <strong>Admin-Modus aktiv</strong> — klicke auf ein Stift-Symbol zum Bearbeiten oder auf Grün zum Erstellen.
   <a onclick="wwOpenAdmin()">CMS öffnen</a> ·
   <a onclick="wwLogoutAdmin()">Admin-Ansicht verlassen</a>
 </div>
@@ -578,7 +584,7 @@
   <!-- ============ PORTFOLIO ============ -->
   <div class="page" id="page-portfolio">
     <div class="wrap">
-      <div class="page-title">
+      <div class="page-title" data-collection="portfolio">
         <div class="kicker" data-de="Portfolio" data-en="Portfolio">Portfolio</div>
         <h1 data-de="Ausgewählte Aufnahmen" data-en="Selected work">Ausgewählte Aufnahmen</h1>
         <p data-de="Eine Auswahl unserer liebsten Bilder — filtere nach dem, was dich interessiert." data-en="A selection of our favorite images — filter by what interests you.">Eine Auswahl unserer liebsten Bilder — filtere nach dem, was dich interessiert.</p>
@@ -597,7 +603,7 @@
   <!-- ============ STORIES LIST ============ -->
   <div class="page" id="page-stories">
     <div class="wrap">
-      <div class="page-title">
+      <div class="page-title" data-collection="stories">
         <div class="kicker" data-de="Reiseberichte" data-en="Travel stories">Reiseberichte</div>
         <h1 data-de="Geschichten von unterwegs" data-en="Stories from the road">Geschichten von unterwegs</h1>
         <p data-de="Was zwischen den Bildern passiert ist — die guten, die anstrengenden und die ziemlich lustigen Momente." data-en="What happened between the photos — the good, the exhausting, and the pretty funny moments.">Was zwischen den Bildern passiert ist — die guten, die anstrengenden und die ziemlich lustigen Momente.</p>
@@ -616,7 +622,7 @@
   <!-- ============ TRIPS ============ -->
   <div class="page" id="page-trips">
     <div class="wrap">
-      <div class="page-title">
+      <div class="page-title" data-collection="trips">
         <div class="kicker" data-de="Reisen" data-en="Trips">Reisen</div>
         <h1 data-de="Unsere Roadtrips" data-en="Our road trips">Unsere Roadtrips</h1>
         <p data-de="Tausende Kilometer, unzählige Stopps. Tippe auf eine Station, um zu sehen, was wir dort erlebt haben." data-en="Thousands of miles, countless stops. Tap a station to see what we got up to there.">Tausende Kilometer, unzählige Stopps. Tippe auf eine Station, um zu sehen, was wir dort erlebt haben.</p>
@@ -641,7 +647,7 @@
   <!-- ============ GEAR ============ -->
   <div class="page" id="page-gear">
     <div class="wrap">
-      <div class="page-title">
+      <div class="page-title" data-collection="equipment">
         <div class="kicker" data-de="Equipment" data-en="Gear">Equipment</div>
         <h1 data-de="Womit wir fotografieren" data-en="What we shoot with">Womit wir fotografieren</h1>
         <p data-de="Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben." data-en="Our gear at a glance — sorted by category. What we actually carry out there.">Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben.</p>
@@ -655,7 +661,7 @@
   <!-- ============ ABOUT ============ -->
   <div class="page" id="page-about">
     <div class="wrap">
-      <div class="page-title">
+      <div class="page-title" data-collection="homepage">
         <div class="kicker" data-de="Über uns" data-en="About us">Über uns</div>
         <h1 data-de="Wer hinter dem Logo steckt" data-en="Who's behind the logo">Wer hinter dem Logo steckt</h1>
         <p data-de="Zwei Menschen, eine gemeinsame Leidenschaft für die Weite — und zwei sehr unterschiedliche Arten, sie einzufangen." data-en="Two people, one shared love for wide open spaces — and two very different ways of capturing it.">Zwei Menschen, eine gemeinsame Leidenschaft für die Weite — und zwei sehr unterschiedliche Arten, sie einzufangen.</p>
@@ -1331,7 +1337,7 @@ function renderStories() {
         '<div ' + phAttrs(s.phC1, s.phC2, s.img, s.photo) + '></div>' +
         '<div class="body"><div class="meta">' + d.cat + '</div><h3>' + d.title + '</h3>' +
         '<div class="excerpt">' + d.excerpt + '</div><div class="read">' + readLabel + '</div></div>' +
-        wwEditBtn('stories', s.slug);
+        wwToolbar({ edit: { coll: 'stories', slug: s.slug } });
       grid.appendChild(card);
     })(i);
   }
@@ -1709,7 +1715,7 @@ function renderTrip() {
   document.getElementById('tripSummary').innerHTML =
     '<div class="ww-editable" style="position:relative">' +
     '<div class="meta">' + td.meta + '</div><p>' + td.summary + '</p>' +
-    wwEditBtn('trips', currentTrip) +
+    wwToolbar({ edit: { coll: 'trips', slug: currentTrip }, add: 'trips' }) +
     '</div>';
 
   var stops = trip.stops;
@@ -1976,15 +1982,37 @@ function wwIsAdmin() {
   } catch (e) { return false; }
 }
 
-/* Erzeugt einen Stift-Button als HTML-String. coll = Collection-Name,
-   slug = Eintrag-Slug (oder null fuer Datei-Collections wie home/about). */
+/* SVG-Icons (kein externer Font noetig) */
+var WW_PENCIL_SVG = '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+var WW_PLUS_SVG = '<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+
+/* Stift-Button: oeffnet einen bestehenden Eintrag im CMS.
+   coll = Collection-Name, slug = Eintrag-Slug (null fuer Datei-Collections). */
 function wwEditBtn(coll, slug) {
   var target = slug
     ? '/admin/#/collections/' + coll + '/entries/' + slug
     : '/admin/#/collections/' + coll;
   return '<button class="ww-edit-btn" title="Bearbeiten" ' +
     'onclick="event.stopPropagation(); window.open(\'' + target + '\',\'_blank\')">' +
-    '<i class="ti ti-pencil"></i></button>';
+    WW_PENCIL_SVG + '</button>';
+}
+
+/* Plus-Button: legt einen neuen Eintrag in einer Collection an. */
+function wwAddBtn(coll) {
+  var target = '/admin/#/collections/' + coll + '/new';
+  return '<button class="ww-edit-btn ww-add" title="Neu erstellen" ' +
+    'onclick="event.stopPropagation(); window.open(\'' + target + '\',\'_blank\')">' +
+    WW_PLUS_SVG + '</button>';
+}
+
+/* Toolbar mit mehreren Buttons zusammenbauen.
+   opts = { edit: {coll, slug}, add: coll }  (beide optional) */
+function wwToolbar(opts) {
+  var html = '<div class="ww-edit-toolbar">';
+  if (opts.edit) html += wwEditBtn(opts.edit.coll, opts.edit.slug);
+  if (opts.add) html += wwAddBtn(opts.add);
+  html += '</div>';
+  return html;
 }
 
 function wwOpenAdmin() { window.open('/admin/', '_blank'); }
@@ -1998,8 +2026,31 @@ function wwLogoutAdmin() {
 }
 
 function wwApplyAdminMode() {
-  if (wwIsAdmin()) document.body.classList.add('ww-is-admin');
-  else document.body.classList.remove('ww-is-admin');
+  if (wwIsAdmin()) {
+    document.body.classList.add('ww-is-admin');
+    wwInjectToolbars();
+  } else {
+    document.body.classList.remove('ww-is-admin');
+  }
+}
+
+/* Haengt an jeden markierten Seitenkopf (data-collection) eine Toolbar mit
+   Plus-Button (neuer Eintrag) an. Stories/Trips/Portfolio bekommen so eine
+   zentrale "Neu erstellen"-Aktion, ohne dass im HTML ueberall etwas steht. */
+function wwInjectToolbars() {
+  var titles = document.querySelectorAll('.page-title[data-collection]');
+  for (var i = 0; i < titles.length; i++) {
+    if (titles[i].querySelector('.ww-edit-toolbar')) continue; // schon da
+    var coll = titles[i].getAttribute('data-collection');
+    titles[i].style.position = 'relative';
+    titles[i].classList.add('ww-editable');
+    // Datei-Collections (homepage) koennen nicht "neu", nur bearbeiten
+    var fileColls = { homepage: true };
+    var opts = fileColls[coll]
+      ? { edit: { coll: coll, slug: null } }
+      : { edit: { coll: coll, slug: null }, add: coll };
+    titles[i].insertAdjacentHTML('beforeend', wwToolbar(opts));
+  }
 }
 
 /* Robust starten */
