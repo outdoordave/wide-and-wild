@@ -258,6 +258,7 @@
 
   /* ============ CONTACT ============ */
   .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; max-width: 960px; margin: 0 auto; }
+  .contact-grid > .contact-info, .contact-grid > .contact-form { min-width: 0; position: relative; }
   .contact-info h3 { font-family: var(--font-display); font-size: 26px; font-weight: 500; margin-bottom: 14px; }
   .contact-info p { color: var(--c-ink-soft); margin-bottom: 20px; }
   .contact-info .line { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 15px; }
@@ -750,14 +751,14 @@
     <section>
       <div class="wrap">
         <div class="contact-grid">
-          <div class="contact-info ww-editable" style="position:relative">
+          <div class="contact-info ww-editable">
+            <div class="ww-edit-toolbar"><button class="ww-edit-btn" title="Kontaktdaten & Kanäle bearbeiten" onclick="event.stopPropagation(); window.open('/admin/#/collections/sitetexts/entries/contact','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
             <h3 data-site="contact.direct_title" data-de="Schreib uns direkt" data-en="Reach us directly">Schreib uns direkt</h3>
             <p data-site="contact.direct_text" data-de="Am schnellsten erreichst du uns per E-Mail oder über Instagram. Wir antworten meist innerhalb weniger Tage." data-en="The fastest way to reach us is by email or Instagram. We usually reply within a few days.">Am schnellsten erreichst du uns per E-Mail oder über Instagram. Wir antworten meist innerhalb weniger Tage.</p>
             <div id="contactChannels"></div>
-            <div class="ww-edit-toolbar"><button class="ww-edit-btn" title="Kontaktdaten & Kanäle bearbeiten" onclick="event.stopPropagation(); window.open('/admin/#/collections/sitetexts/entries/contact','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
           </div>
-          <div class="contact-form ww-editable" style="position:relative">
-            <div class="ww-edit-toolbar"><button class="ww-edit-btn" title="Formular-Texte bearbeiten" onclick="event.stopPropagation(); window.open('/admin/#/collections/sitetexts/entries/contact','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+          <div class="contact-form ww-editable">
+            <div class="ww-edit-toolbar"><button class="ww-edit-btn" title="Formular-Texte bearbeiten" onclick="event.stopPropagation(); window.open('/admin/#/collections/sitetexts/entries/contact','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
             <div class="form-success" id="formSuccess" data-site="contact.form_success" data-de="Danke! Deine Nachricht ist angekommen — wir melden uns bald." data-en="Thanks! Your message came through — we'll be in touch soon.">Danke! Deine Nachricht ist angekommen — wir melden uns bald.</div>
             <div class="form-field">
               <label data-site="contact.form_name" data-de="Dein Name" data-en="Your name">Dein Name</label>
