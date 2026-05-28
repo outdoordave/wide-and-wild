@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
   <title>Wide &amp; Wild — Verwaltung</title>
-  <!-- Netlify Identity Widget: muss VOR Decap CMS geladen werden -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <!-- Decap CMS uebernimmt das GitHub-OAuth-Popup selbst.
+       Login geht ueber den Cloudflare-Worker (siehe admin/config.yml -> backend.base_url). -->
   <style>
     /* Zurück-zur-Website-Knopf oben rechts */
     .ww-back-btn {
@@ -101,14 +101,7 @@
   (function(){
     'use strict';
 
-    // ----------- 1) Netlify-Identity Login-Redirect -----------
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", function (user) {
-        if (!user) {
-          window.netlifyIdentity.on("login", function () { document.location.href = "/admin/"; });
-        }
-      });
-    }
+    // ----------- 1) (Login-Handling uebernimmt Decap CMS via GitHub-OAuth-Worker) -----------
 
     // ----------- 2) Upload-/Speicher-Fortschrittsanzeige -----------
     var progressEl   = document.getElementById('ww-progress');

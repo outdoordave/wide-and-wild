@@ -1,6 +1,10 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: outdoordave/AD-Photography
   branch: main
+  # OAuth-Handshake-Endpoint: Cloudflare Worker (statt Netlify Identity).
+  base_url: https://aanddphotography-oauth.davidbastisch.workers.dev
+  auth_endpoint: auth
 
 # Editorial Workflow DEAKTIVIERT - verursacht "API_ERROR: Not Found"
 # publish_mode: editorial_workflow
