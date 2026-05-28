@@ -1079,6 +1079,12 @@ function navigate(page) {
 
 /* ---------- Portfolio ---------- */
 /* Baut style+class fuer einen Platzhalter; nutzt Illustration falls vorhanden */
+/* Laedt Content-Dateien immer frisch (umgeht Browser- und CDN-Cache) */
+function wwFetch(url) {
+  var sep = url.indexOf('?') === -1 ? '?' : '&';
+  return fetch(url + sep + 'v=' + Date.now(), { cache: 'no-store' });
+}
+
 function normalizePath(p) {
   if (!p) return '';
   // Externe URL oder Daten-URL: lassen
@@ -1129,7 +1135,7 @@ function buildPortfolioFromItems(items) {
 }
 
 function loadPortfolio() {
-  fetch('content/portfolio.json', { cache: 'no-store' })
+  wwFetch('content/portfolio.json')
     .then(function(r){ if (!r.ok) throw new Error('not ok'); return r.json(); })
     .then(function(data){
       if (data && data.items && data.items.length) {
@@ -1376,14 +1382,14 @@ function buildStory(data, bodyDe) {
 }
 
 function loadStories() {
-  fetch('content/stories-index.json', { cache: 'no-store' })
+  wwFetch('content/stories-index.json')
     .then(function(r){ if (!r.ok) throw new Error('no index'); return r.json(); })
     .then(function(idx){
       var items = (idx && idx.items) ? idx.items : [];
       if (!items.length) { renderStories(); return; }
       // alle Story-Dateien parallel laden
       return Promise.all(items.map(function(it){
-        return fetch('content/stories/' + it.slug + '.md', { cache: 'no-store' })
+        return wwFetch('content/stories/' + it.slug + '.md')
           .then(function(r){ if (!r.ok) throw new Error('miss'); return r.text(); })
           .then(function(raw){ var p = parseFrontmatter(raw); var st = buildStory(p.data, p.body); st.slug = it.slug; return st; })
           .catch(function(){ return null; });
@@ -1511,7 +1517,7 @@ function buildGearFromItems(items) {
 
 /* Laedt gear.json vom Server; bei Misserfolg (z.B. reines Offline-Oeffnen) Fallback auf eingebaute Daten */
 function loadGear() {
-  fetch('content/gear.json', { cache: 'no-store' })
+  wwFetch('content/gear.json')
     .then(function(r){ if (!r.ok) throw new Error('not ok'); return r.json(); })
     .then(function(data){
       if (data && data.items && data.items.length) {
@@ -1657,7 +1663,7 @@ function buildTripTabs(order) {
 var heroSlideTimer = null;
 
 function loadHome() {
-  fetch('content/home.json', { cache: 'no-store' })
+  wwFetch('content/home.json')
     .then(function(r){ if (!r.ok) throw new Error('no home'); return r.json(); })
     .then(function(data){
       data = data || {};
@@ -1695,14 +1701,16 @@ function renderHero(home) {
   if (mode === 'video' && home.video) {
     var vid = document.createElement('video');
     vid.className = 'hero-vid';
-    vid.src = home.video;
+    vid.src = normalizePath(home.video);
     vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
     vid.setAttribute('muted', '');         // iOS-Autoplay
     vid.setAttribute('playsinline', '');
-    if (home.video_poster) vid.poster = home.video_poster;
+    vid.setAttribute('preload', 'auto');
+    // Poster sofort zeigen, damit nicht nur Leere zu sehen ist, bis das Video laeuft
+    if (home.video_poster) vid.poster = normalizePath(home.video_poster);
     media.appendChild(vid);
-    var play = vid.play(); if (play && play.catch) { play.catch(function(){}); }
     hero.classList.add('has-media');
+    var play = vid.play(); if (play && play.catch) { play.catch(function(){}); }
     return;
   }
 
@@ -1712,7 +1720,7 @@ function renderHero(home) {
     for (var i = 0; i < home.slideshow.length; i++) {
       var entry = home.slideshow[i];
       var src = (typeof entry === 'string') ? entry : (entry && entry.img);
-      if (src) imgs.push(src);
+      if (src) imgs.push(normalizePath(src));
     }
     if (!imgs.length) return;
 
@@ -1741,7 +1749,7 @@ function renderHero(home) {
   if (mode === 'image' && home.image) {
     var img = document.createElement('img');
     img.className = 'hero-img';
-    img.src = home.image;
+    img.src = normalizePath(home.image);
     img.alt = '';
     media.appendChild(img);
     hero.classList.add('has-media');
@@ -1752,13 +1760,13 @@ function renderHero(home) {
 }
 
 function loadTrips() {
-  fetch('content/trips-index.json', { cache: 'no-store' })
+  wwFetch('content/trips-index.json')
     .then(function(r){ if (!r.ok) throw new Error('no index'); return r.json(); })
     .then(function(idx){
       var items = (idx && idx.items) ? idx.items : [];
       if (!items.length) { renderTrip(); return; }
       return Promise.all(items.map(function(it, i){
-        return fetch('content/trips/' + it.slug + '.json', { cache: 'no-store' })
+        return wwFetch('content/trips/' + it.slug + '.json')
           .then(function(r){ if (!r.ok) throw new Error('miss'); return r.json(); })
           .then(function(data){ return { slug: it.slug, trip: buildTrip(data), idxOrder: (typeof it.order === 'number' ? it.order : i + 1) }; })
           .catch(function(){ return null; });
@@ -1928,13 +1936,13 @@ function wwDrawTrip() {
       var col = sel ? '#f0c9a8' : '#a7672f';
       var border = sel ? '#a7672f' : '#f4ede1';
       var el = document.createElement('div');
-      el.style.cssText = 'width:' + size + 'px;height:' + size + 'px;background:' + col + ';border:2.5px solid ' + border + ';border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.45);cursor:pointer;transition:all .2s';
+      el.style.cssText = 'width:' + size + 'px;height:' + size + 'px;background:' + col + ';border:2.5px solid ' + border + ';border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.45);cursor:pointer';
       var d = s[currentLang];
       var popup = new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(
         '<p class="ww-popup-name">' + (d ? d.t : s.name) + '</p>' +
         (d && d.date ? '<p class="ww-popup-date">' + d.date + '</p>' : '')
       );
-      var marker = new maplibregl.Marker({ element: el })
+      var marker = new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([s.lon, s.lat])
         .setPopup(popup)
         .addTo(map);
@@ -2161,7 +2169,7 @@ function initSite() {
 /* ===== Website-Texte aus content/site.json laden ===== */
 var WW_SITE = null;
 function loadSiteTexts() {
-  return fetch('content/site.json', { cache: 'no-store' })
+  return wwFetch('content/site.json')
     .then(function(r){ if (!r.ok) throw new Error('no site.json'); return r.json(); })
     .then(function(data){ WW_SITE = data; applySiteTexts(); })
     .catch(function(){ /* Fallback: feste HTML-Texte bleiben stehen */ });

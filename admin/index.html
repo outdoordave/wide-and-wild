@@ -269,6 +269,25 @@
       } catch(e){ /* still */ }
     }
 
+    // Echter Prozent-Fortschritt (fuer Datei-Uploads mit bekannter Groesse)
+    function startProgressPct(label){
+      try {
+        if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+        progressLbl.textContent = (label || 'Hochladen …') + ' 0%';
+        progressEl.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressEl.dataset.label = label || 'Hochladen …';
+      } catch(e){ /* still */ }
+    }
+    function setProgressPct(pct){
+      try {
+        if (pct < 0) pct = 0; if (pct > 100) pct = 100;
+        progressFill.style.width = pct + '%';
+        var base = progressEl.dataset.label || 'Hochladen …';
+        progressLbl.textContent = base + ' ' + pct + '%';
+      } catch(e){ /* still */ }
+    }
+
     // CMS-Events abfangen
     function hookCMSEvents(){
       try {
@@ -352,21 +371,56 @@
       }, 1500);
     })();
 
-    // Auch Datei-Upload (XHR) abfangen – das CMS lädt Bilder per fetch hoch
+    // Datei-Upload abfangen und mit ECHTEM Prozent-Fortschritt anzeigen.
+    // fetch() kennt keinen Upload-Fortschritt, daher leiten wir Uploads auf
+    // XMLHttpRequest um (das hat upload.onprogress mit echten Bytes).
     (function(){
       var origFetch = window.fetch;
       window.fetch = function(url, opts){
         try {
           var isUpload = opts && opts.method && /POST|PUT/i.test(opts.method)
                          && opts.body && (opts.body instanceof FormData
-                                          || (typeof opts.body === 'string' && opts.body.length > 50000));
-          if (isUpload) startProgress('Hochladen …');
-          var p = origFetch.apply(this, arguments);
-          if (isUpload) {
-            p.then(function(r){ endProgress(r && r.ok !== false); })
-             .catch(function(){ endProgress(false); });
-          }
-          return p;
+                                          || (typeof opts.body === 'string' && opts.body.length > 50000)
+                                          || opts.body instanceof Blob
+                                          || opts.body instanceof ArrayBuffer);
+          if (!isUpload) return origFetch.apply(this, arguments);
+
+          // Upload per XHR mit echtem Fortschritt
+          return new Promise(function(resolve, reject){
+            try {
+              var xhr = new XMLHttpRequest();
+              xhr.open(opts.method, (typeof url === 'string') ? url : url.url, true);
+              // Header uebernehmen
+              if (opts.headers) {
+                var h = opts.headers;
+                if (h.forEach) { h.forEach(function(v,k){ try{ xhr.setRequestHeader(k,v); }catch(e){} }); }
+                else { for (var k in h) { try { xhr.setRequestHeader(k, h[k]); } catch(e){} } }
+              }
+              startProgressPct('Hochladen …');
+              xhr.upload.onprogress = function(e){
+                if (e.lengthComputable) {
+                  var pct = Math.round((e.loaded / e.total) * 100);
+                  setProgressPct(pct);
+                }
+              };
+              xhr.onload = function(){
+                setProgressPct(100);
+                endProgress(xhr.status >= 200 && xhr.status < 300);
+                // fetch-aehnliche Response zurueckgeben
+                var body = xhr.responseText;
+                resolve(new Response(body, {
+                  status: xhr.status,
+                  statusText: xhr.statusText,
+                  headers: { 'Content-Type': xhr.getResponseHeader('Content-Type') || 'application/json' }
+                }));
+              };
+              xhr.onerror = function(){ endProgress(false); reject(new TypeError('Network request failed')); };
+              xhr.send(opts.body);
+            } catch(e){
+              endProgress(false);
+              reject(e);
+            }
+          });
         } catch(e){ return origFetch.apply(this, arguments); }
       };
     })();
