@@ -103,6 +103,99 @@
 
     // ----------- 1) (Login-Handling uebernimmt Decap CMS via GitHub-OAuth-Worker) -----------
 
+    // ----------- 1b) Beitrags-Vorschau wie auf der Website -----------
+    // Registriert ein Preview-Template fuer Stories, das das reader-hero/
+    // reader-body-Layout der echten Seite nachbildet (Farben, Schriften, Bilder).
+    var WW_PREVIEW_CSS = [
+      ':root{',
+      '  --c-bg:#f4ede1; --c-bg-alt:#ebe1d1; --c-ink:#2e2418; --c-ink-soft:#6e5e49;',
+      '  --c-line:#d8cab2; --c-accent:#a7672f; --c-accent-dk:#834e1f; --c-gold:#b08a4f;',
+      '  --radius:10px;',
+      '}',
+      'body{margin:0;background:var(--c-bg);color:var(--c-ink);',
+      '  font-family:Georgia,"Times New Roman",serif;}',
+      '.ww-prev-hero{position:relative;min-height:42vh;display:flex;align-items:flex-end;',
+      '  background-size:cover;background-position:center;background-color:var(--c-bg-alt);}',
+      '.ww-prev-hero::before{content:"";position:absolute;inset:0;z-index:1;',
+      '  background:linear-gradient(to top,var(--c-bg) 1%,rgba(244,237,225,0.1) 45%,transparent);}',
+      '.ww-prev-hero-inner{position:relative;z-index:2;max-width:760px;margin:0 auto;',
+      '  width:100%;padding:0 24px 36px;box-sizing:border-box;}',
+      '.ww-prev-hero-inner .meta{font-size:12px;letter-spacing:2px;text-transform:uppercase;',
+      '  color:var(--c-accent);font-weight:700;margin-bottom:12px;}',
+      '.ww-prev-hero-inner h1{font-size:clamp(30px,5vw,52px);font-weight:500;line-height:1.08;margin:0;}',
+      '.ww-prev-body{max-width:720px;margin:0 auto;padding:40px 24px 30px;box-sizing:border-box;}',
+      '.ww-prev-body p{font-size:18px;line-height:1.85;margin-bottom:24px;color:#4a3d2c;}',
+      '.ww-prev-body p:first-of-type::first-letter{font-size:60px;font-weight:600;float:left;',
+      '  line-height:0.8;padding:6px 12px 0 0;color:var(--c-accent);}',
+      '.ww-prev-body h2{font-size:30px;font-weight:600;line-height:1.2;margin:44px 0 16px;color:var(--c-ink);}',
+      '.ww-prev-body h3{font-size:23px;font-weight:600;line-height:1.25;margin:36px 0 12px;color:var(--c-ink);}',
+      '.ww-prev-body blockquote{font-size:27px;font-style:italic;line-height:1.35;color:var(--c-accent);',
+      '  border-left:3px solid var(--c-gold);padding-left:24px;margin:40px 0;}',
+      '.ww-prev-body ul,.ww-prev-body ol{font-size:18px;line-height:1.85;margin:0 0 24px 26px;color:#4a3d2c;}',
+      '.ww-prev-body a{color:var(--c-accent);text-underline-offset:2px;}',
+      '.ww-prev-body img{max-width:100%;max-height:540px;width:auto;height:auto;object-fit:cover;',
+      '  border-radius:var(--radius);margin:38px auto;display:block;}',
+      '.ww-prev-empty{max-width:720px;margin:0 auto;padding:24px;color:var(--c-ink-soft);font-style:italic;}'
+    ].join('\n');
+
+    // Bildpfad normalisieren (analog zur Website-Logik fuer /uploads/)
+    function wwNormalizeImage(path){
+      if (!path) return '';
+      if (/^https?:\/\//i.test(path)) return path;
+      if (path.charAt(0) === '/') return path;
+      // relative Pfade unter uploads/ zu /uploads/ machen
+      if (path.indexOf('uploads/') === 0) return '/' + path;
+      return '/uploads/' + path.replace(/^\.?\//, '');
+    }
+
+    function registerPreviews(){
+      // Decap stellt 'h' (React.createElement) und 'CMS' global bereit.
+      // In einer strict-IIFE kann window.h verzoegert sein – beide Wege pruefen.
+      var CMSref = window.CMS || (typeof CMS !== 'undefined' ? CMS : null);
+      var href   = window.h   || (typeof h   !== 'undefined' ? h   : null);
+      if (!CMSref || !href) return false;
+      var h = href;
+
+      try {
+        CMSref.registerPreviewStyle(WW_PREVIEW_CSS, { raw: true });
+
+        CMSref.registerPreviewTemplate('stories', function(props){
+        var entry = props.entry;
+        function get(field){ return entry.getIn(['data', field]) || ''; }
+
+        // DE bevorzugen; wenn leer, EN
+        var title = get('title_de') || get('title_en') || '(ohne Titel)';
+        var cat   = get('category_de') || get('category_en') || '';
+        var cover = wwNormalizeImage(get('cover'));
+
+        // Markdown-Body als gerendertes HTML holen (Decap liefert widgetFor)
+        var bodyDe = props.widgetFor('body_de');
+        var bodyEn = props.widgetFor('body_en');
+        var hasDe  = !!get('body_de');
+
+        var heroStyle = cover ? { backgroundImage: 'url("' + cover + '")' } : {};
+
+        return h('div', {},
+          h('div', { className: 'ww-prev-hero', style: heroStyle },
+            h('div', { className: 'ww-prev-hero-inner' },
+              cat ? h('div', { className: 'meta' }, cat) : null,
+              h('h1', {}, title)
+            )
+          ),
+          h('div', { className: 'ww-prev-body' },
+            hasDe ? bodyDe : (get('body_en') ? bodyEn :
+              h('div', { className: 'ww-prev-empty' }, 'Noch kein Text. Schreibe etwas im Feld „Haupttext".'))
+          )
+        );
+        });
+        return true;
+      } catch(e){
+        console.warn('[Wide & Wild] Vorschau-Registrierung fehlgeschlagen:', e);
+        return false;
+      }
+    }
+
+
     // ----------- 2) Upload-/Speicher-Fortschrittsanzeige -----------
     var progressEl   = document.getElementById('ww-progress');
     var progressLbl  = progressEl.querySelector('.ww-progress-label');
@@ -318,11 +411,13 @@
         attempts++;
         if (hookCMSEvents()) {
           clearInterval(iv);
+          registerPreviews();
           domObserver.observe(document.body, { childList: true, subtree: true });
           scanForPlaceFields();
           console.log('[Wide & Wild] Admin-Erweiterungen aktiv.');
         } else if (attempts > 50) {
           clearInterval(iv);
+          registerPreviews();
           // Trotzdem Ortssuche aktivieren, auch ohne CMS-Hooks
           domObserver.observe(document.body, { childList: true, subtree: true });
           scanForPlaceFields();

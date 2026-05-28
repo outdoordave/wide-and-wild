@@ -1,24 +1,29 @@
 {
   "items": [
     {
-      "slug": "birthday",
-      "order": 1
-    },
-    {
-      "slug": "west",
-      "order": 2
+      "slug": "alaska2026",
+      "order": 1,
+      "highlight": false
     },
     {
       "slug": "florida",
-      "order": 3
+      "order": 2,
+      "highlight": false
     },
     {
       "slug": "robin",
-      "order": 4
+      "order": 3,
+      "highlight": false
     },
     {
-      "slug": "alaska2026",
-      "order": 5
+      "slug": "west",
+      "order": 4,
+      "highlight": false
+    },
+    {
+      "slug": "birthday",
+      "order": 5,
+      "highlight": false
     }
   ]
 }

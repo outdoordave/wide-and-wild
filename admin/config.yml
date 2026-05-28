@@ -108,7 +108,7 @@ collections:
   - name: "trips"
     label: "Reisen"
     label_singular: "Reise"
-    description: "Reisen mit Stationen auf der Karte. Automatisch nach Datum sortiert."
+    description: "Reisen mit Stationen auf der Karte. Angepinnte zuerst, sonst nach Datum (neueste zuerst)."
     folder: "content/trips"
     create: true
     slug: "{{year}}-{{month}}-{{slug}}"
@@ -127,6 +127,8 @@ collections:
       - { name: "meta_de", label: "Zusatz-Info zum Zeitraum (optional)", widget: "string", required: false, hint: "Optional: ergaenzt das Datum, z.B. '18 Tage, der grosse Westen'. Leer = nur Monat/Jahr wird gezeigt." }
       - { name: "summary_de", label: "Zusammenfassung", widget: "text" }
       - { name: "upcoming", label: "Kommende Reise?", widget: "boolean", default: false, required: false }
+      - { name: "highlight", label: "Anpinnen (Highlight)", widget: "boolean", default: false, required: false, hint: "Ein = diese Reise wird oben angepinnt, unabhaengig vom Datum." }
+      - { name: "highlight_order", label: "Pin-Reihenfolge", widget: "number", value_type: "int", default: 1, required: false, hint: "Nur relevant wenn angepinnt. Kleine Zahl = weiter oben. Bei gleicher Zahl entscheidet das Datum." }
       - name: "stops"
         label: "Stationen"
         label_singular: "Station"
