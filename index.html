@@ -184,6 +184,8 @@
   .gallery .item .ph, .random-box .item .ph { position: absolute; inset: 0; transition: transform 0.5s; }
   .gallery .item:hover .ph, .random-box .item:hover .ph { transform: scale(1.06); }
   .gallery .item.wide, .random-box .item.wide { grid-column: span 2; aspect-ratio: 16/10; }
+  /* In den zufälligen Momentaufnahmen alle gleich groß (ruhigeres Raster) */
+  .random-box .item, .random-box .item.wide { aspect-ratio: 4/5; grid-column: span 1; }
   .gallery .item .label, .random-box .item .label { position: absolute; bottom: 0; left: 0; right: 0; z-index: 3; padding: 26px 20px 16px; background: linear-gradient(to top, rgba(28,24,18,0.85), transparent); color: #fff; }
   .gallery .item .label .cat, .random-box .item .label .cat { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #f0c9a8; font-weight: 700; }
   .gallery .item .label .ttl, .random-box .item .label .ttl { font-family: var(--font-display); font-size: 19px; font-weight: 500; }
@@ -355,15 +357,6 @@
   .insta-link .ig-ic { font-size: 18px; }
   .insta-row.on-dark .insta-link { background: rgba(240,229,212,0.08); border-color: rgba(240,229,212,0.2); color: #f0e5d4; }
   .insta-row.on-dark .insta-link:hover { border-color: #f0c9a8; color: #f0c9a8; }
-
-  /* ============ RANDOM-FOTO-BOX ============ */
-  .random-box { position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 16/9; max-width: 920px; margin: 0 auto; box-shadow: 0 20px 50px -24px rgba(46,36,24,0.5); }
-  .random-box .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease; }
-  .random-box .slide.active { opacity: 1; }
-  .random-box .slide .ph { position: absolute; inset: 0; }
-  .random-box .cap { position: absolute; bottom: 0; left: 0; right: 0; z-index: 5; padding: 40px 28px 22px; background: linear-gradient(to top, rgba(28,24,18,0.85), transparent); color: #fff; }
-  .random-box .cap .cat { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #f0c9a8; font-weight: 700; }
-  .random-box .cap .ttl { font-family: var(--font-display); font-size: 24px; font-weight: 500; }
 
   /* ============ REISE-SLIDESHOW & GALERIE ============ */
   .trip-detail .slideshow { position: relative; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
@@ -673,7 +666,9 @@
       </div>
       <div class="trip-summary" id="tripSummary"></div>
       <div class="map-layout">
-        <div class="map-box" id="mapBox"></div>
+        <div class="map-box ww-editable" id="mapBox" style="position:relative">
+          <div class="ww-edit-toolbar" style="z-index:5"><button class="ww-edit-btn" title="Karten-Stil ändern" onclick="event.stopPropagation(); window.open('/admin/#/collections/tripsettings/entries/settings','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
+        </div>
         <div class="trip-detail" id="tripDetail"></div>
       </div>
       <div class="trip-stoplist" id="tripStoplist" style="justify-content:center;"></div>
@@ -1697,13 +1692,18 @@ var heroSlideTimer = null;
 function loadHome() {
   wwFetch('content/home.json')
     .then(function(r){ if (!r.ok) throw new Error('no home'); return r.json(); })
-    .then(function(data){
-      data = data || {};
-      // Karten-Stil merken (für die Reisen-Karte)
-      if (data.map_style) window._wwMapStyle = data.map_style;
-      renderHero(data);
-    })
+    .then(function(data){ renderHero(data || {}); })
     .catch(function(){ renderHero(null); });
+}
+
+/* Reisen-Einstellungen (Kartenstil) laden */
+function loadTripSettings() {
+  return wwFetch('content/trips-settings.json')
+    .then(function(r){ return r.ok ? r.json() : {}; })
+    .then(function(data){
+      if (data && data.map_style) window._wwMapStyle = data.map_style;
+    })
+    .catch(function(){ /* Default-Stil bleibt */ });
 }
 
 /* Liefert die OpenFreeMap-Style-URL zum gewählten Stil-Namen */
@@ -1867,7 +1867,9 @@ function renderTrip() {
   // MapLibre-Karte mit OpenFreeMap (Vektor, edel, gratis, mehrsprachig)
   var mapBox = document.getElementById('mapBox');
   if (!window._mlMap) {
-    mapBox.innerHTML = '';
+    // bestehende Karte-Divs entfernen, aber die Edit-Toolbar (Stift) behalten
+    var oldMap = document.getElementById('mlMap');
+    if (oldMap) oldMap.remove();
     var mapDiv = document.createElement('div');
     mapDiv.id = 'mlMap';
     mapDiv.style.cssText = 'width:100%;height:100%';
@@ -2176,6 +2178,7 @@ function initSite() {
   loadGear();
   loadPortfolio();
   loadStories();
+  loadTripSettings();
   loadTrips();
   loadSiteTexts();
   wwApplyAdminMode();
