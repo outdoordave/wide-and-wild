@@ -46,6 +46,7 @@
     position: relative; background-color: var(--c-bg-alt);
     background-size: cover; background-position: center; overflow: hidden;
   }
+  .ph.ww-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .ph::before {
     content: ""; position: absolute; inset: 0;
     background: linear-gradient(135deg, var(--ph-c1, #c9b89a) 0%, var(--ph-c2, #9a8567) 100%);
@@ -204,7 +205,8 @@
   .lightbox { position: fixed; inset: 0; z-index: 1100; background: rgba(20,17,12,0.94); display: none; align-items: center; justify-content: center; padding: 40px; }
   .lightbox.open { display: flex; }
   .lightbox .lb-inner { max-width: 900px; width: 100%; text-align: center; }
-  .lightbox .ph { width: 100%; aspect-ratio: 3/2; border-radius: var(--radius); }
+  .lightbox .ph { width: 100%; aspect-ratio: 3/2; border-radius: var(--radius); position: relative; }
+  .lightbox .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
   .lightbox .cap { color: var(--c-dark-ink); margin-top: 18px; font-family: var(--font-display); font-size: 20px; }
   .lb-close { position: fixed; top: 22px; right: 24px; width: 46px; height: 46px; border-radius: 50%; background: rgba(240,229,212,0.16); color: #fff; border: none; font-size: 22px; cursor: pointer; }
 
@@ -812,7 +814,7 @@
 <div class="lightbox" id="lightbox">
   <button class="lb-close" id="lbClose">✕</button>
   <div class="lb-inner">
-    <div class="ph" id="lbImg" data-ph="PLATZHALTER"></div>
+    <div class="ph" id="lbImg" data-ph="PLATZHALTER"><img id="lbImgPhoto" alt="" style="display:none"></div>
     <div class="cap" id="lbCap"></div>
   </div>
 </div>
@@ -1117,6 +1119,22 @@ function phAttrs(c1, c2, imgKey, photo) {
   return 'class="' + cls + '" data-ph="PLATZHALTER" style="' + style + '"';
 }
 
+/* Bild-Box: liefert einen kompletten <div class="ph">-Block.
+   Bei echtem Foto ein zuverlässiges <img> (statt CSS-Hintergrund, der sich
+   in manchen Containern nicht zeigt), sonst der farbige Platzhalter.
+   extraClass kommt zusätzlich an die .ph-Box (z.B. 'wide'). */
+function wwMediaBox(c1, c2, imgKey, photo, extraClass) {
+  var ec = extraClass ? (' ' + extraClass) : '';
+  if (photo) {
+    var src = normalizePath(photo);
+    return '<div class="ph has-photo ww-photo' + ec + '" style="--ph-c1:' + c1 + '; --ph-c2:' + c2 + ';">' +
+           '<img src="' + src + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+           '</div>';
+  }
+  // kein Foto -> Platzhalter (mit evtl. Illustration)
+  return '<div ' + phAttrs(c1, c2, imgKey, photo).replace('class="ph', 'class="ph' + ec) + '></div>';
+}
+
 /* Standard-Illustration + Farben je Kategorie, falls noch kein echtes Foto da ist */
 var PORTFOLIO_CAT = {
   landscape: { img:'mountains', c1:'#8a9a7e', c2:'#3a4a38', de:'Landschaft', en:'Landscape' },
@@ -1163,7 +1181,7 @@ function renderGallery() {
       var item = document.createElement('div');
       item.className = 'item ww-editable' + (p.wide ? ' wide' : '');
       item.innerHTML =
-        '<div ' + phAttrs(p.c1, p.c2, p.img, p.photo) + '></div>' +
+        wwMediaBox(p.c1, p.c2, p.img, p.photo) +
         '<div class="label"><div class="cat">' + d.k + '</div><div class="ttl">' + d.t + '</div></div>' +
         wwFileToolbar('portfolio', 'photos');
       item.addEventListener('click', function() { openLightbox(p); });
@@ -1197,7 +1215,7 @@ function renderRandomMoments() {
       var item = document.createElement('div');
       item.className = 'item' + (p.wide ? ' wide' : '');
       item.innerHTML =
-        '<div ' + phAttrs(p.c1, p.c2, p.img, p.photo) + '></div>' +
+        wwMediaBox(p.c1, p.c2, p.img, p.photo) +
         '<div class="label"><div class="cat">' + d.k + '</div><div class="ttl">' + d.t + '</div></div>';
       item.addEventListener('click', function() { openLightbox(p); });
       box.appendChild(item);
@@ -1209,12 +1227,11 @@ function openLightbox(p) {
   if (typeof p === 'string') {
     var fixed = (/^(https?:|data:)/i.test(p) || p.charAt(0) === '/') ? p : '/' + p;
     var imgEl = document.getElementById('lbImg');
+    var lbPh = document.getElementById('lbImgPhoto');
     imgEl.classList.remove('has-illus');
     imgEl.classList.add('has-photo');
-    imgEl.style.backgroundImage = "url('" + fixed + "')";
-    imgEl.style.backgroundSize = 'contain';
-    imgEl.style.backgroundRepeat = 'no-repeat';
-    imgEl.style.backgroundPosition = 'center';
+    imgEl.style.backgroundImage = '';
+    if (lbPh) { lbPh.src = fixed; lbPh.style.display = 'block'; lbPh.style.objectFit = 'contain'; }
     document.getElementById('lbCap').textContent = '';
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -1222,19 +1239,21 @@ function openLightbox(p) {
   }
   var d = p[currentLang];
   var img = document.getElementById('lbImg');
+  var lbPhoto = document.getElementById('lbImgPhoto');
   img.style.setProperty('--ph-c1', p.c1);
   img.style.setProperty('--ph-c2', p.c2);
   if (p.photo) {
     img.classList.remove('has-illus');
     img.classList.add('has-photo');
-    img.style.backgroundImage = "url('" + normalizePath(p.photo) + "')";
-    img.style.backgroundSize = 'cover';
-    img.style.backgroundPosition = 'center';
+    if (lbPhoto) { lbPhoto.src = normalizePath(p.photo); lbPhoto.style.display = 'block'; lbPhoto.style.objectFit = 'cover'; }
+    img.style.backgroundImage = '';
   } else if (p.img && ILLUS[p.img]) {
+    if (lbPhoto) { lbPhoto.style.display = 'none'; lbPhoto.src = ''; }
     img.classList.remove('has-photo');
     img.classList.add('has-illus');
     img.style.backgroundImage = "url('" + ILLUS[p.img] + "')";
   } else {
+    if (lbPhoto) { lbPhoto.style.display = 'none'; lbPhoto.src = ''; }
     img.classList.remove('has-illus');
     img.classList.remove('has-photo');
     img.style.backgroundImage = '';
@@ -1429,7 +1448,7 @@ function renderStories() {
       card.className = 'story-card ww-editable';
       card.addEventListener('click', function() { openStory(idx); });
       card.innerHTML =
-        '<div ' + phAttrs(s.phC1, s.phC2, s.img, s.photo) + '></div>' +
+        wwMediaBox(s.phC1, s.phC2, s.img, s.photo) +
         '<div class="body"><div class="meta">' + d.cat + '</div><h3>' + d.title + '</h3>' +
         '<div class="excerpt">' + d.excerpt + '</div><div class="read">' + readLabel + '</div></div>' +
         wwToolbar({ edit: { coll: 'stories', slug: s.slug } });
@@ -1470,7 +1489,7 @@ function renderLatest() {
         var s = item.data;
         var d = s[currentLang];
         card.innerHTML =
-          '<div ' + phAttrs(s.phC1, s.phC2, s.img, s.photo) + '></div>' +
+          wwMediaBox(s.phC1, s.phC2, s.img, s.photo) +
           '<div class="body"><div class="tag">' + tag + '</div>' +
           '<h3>' + d.title + '</h3>' +
           '<div class="meta">' + (d.dateLabel || '') + (d.cat ? ' · ' + d.cat : '') + '</div></div>';
@@ -1486,7 +1505,7 @@ function renderLatest() {
           }
         }
         card.innerHTML =
-          '<div ' + phAttrs('#b08a4f', '#6e4a1c', 'desert', firstPhoto) + '></div>' +
+          wwMediaBox('#b08a4f', '#6e4a1c', 'desert', firstPhoto) +
           '<div class="body"><div class="tag">' + tag + '</div>' +
           '<h3>' + (tr.title[currentLang] || tr.title.de) + '</h3>' +
           '<div class="meta">' + (dt.meta || '') + '</div></div>';
@@ -2035,7 +2054,7 @@ function renderStopDetail() {
     '<div class="step">' + stepLabel + '</div>' +
     '<h3>' + d.t + '</h3>' +
     '<div class="date">' + d.date + '</div>' +
-    '<div ' + phAttrs(s.c1, s.c2, s.img, s.photo) + '></div>' +
+    wwMediaBox(s.c1, s.c2, s.img, s.photo) +
     '<p>' + d.txt + '</p>' +
     photosHtml +
     wwToolbar({ edit: { coll: 'trips', slug: currentTrip } }) +
