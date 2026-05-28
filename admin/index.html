@@ -259,16 +259,36 @@
           name: 'logout',
           handler: function(){ try { localStorage.removeItem('ww-admin-active'); } catch(e){} }
         });
-        // Falls schon eingeloggt (Seite neu geladen): Markierung sicherstellen
-        try {
-          for (var i = 0; i < localStorage.length; i++) {
-            var k = localStorage.key(i);
-            if (k && /(decap|netlify)-cms-user/i.test(k)) { localStorage.setItem('ww-admin-active', '1'); break; }
-          }
-        } catch(e){}
         return true;
       } catch(e){ console.warn('CMS-Hooks nicht möglich:', e); return false; }
     }
+
+    // Robuste Login-Erkennung per Polling: prueft regelmaessig, ob Decap einen
+    // eingeloggten User gespeichert hat, und setzt dann die Markierung.
+    // Funktioniert unabhaengig davon, ob das 'login'-Event feuert.
+    (function(){
+      function hasDecapUser(){
+        try {
+          for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && /(decap|netlify)-cms-user/i.test(k)) {
+              var v = localStorage.getItem(k);
+              if (v && v.indexOf('token') !== -1) return true;
+            }
+          }
+        } catch(e){}
+        return false;
+      }
+      var iv = setInterval(function(){
+        try {
+          if (hasDecapUser()) {
+            localStorage.setItem('ww-admin-active', '1');
+          } else {
+            localStorage.removeItem('ww-admin-active');
+          }
+        } catch(e){}
+      }, 1500);
+    })();
 
     // Auch Datei-Upload (XHR) abfangen – das CMS lädt Bilder per fetch hoch
     (function(){
