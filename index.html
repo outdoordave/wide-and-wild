@@ -668,7 +668,7 @@
       <div class="trip-summary" id="tripSummary"></div>
       <div class="map-layout">
         <div class="map-box ww-editable" id="mapBox" style="position:relative">
-          <div class="ww-edit-toolbar" style="z-index:5"><button class="ww-edit-btn" title="Karten-Stil ändern" onclick="event.stopPropagation(); window.open('/admin/#/collections/tripsettings/entries/settings','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
+          <div class="ww-edit-toolbar" style="z-index:5"><button class="ww-edit-btn" title="Karten-Stil ändern" onclick="event.stopPropagation(); window.open('/admin/#/collections/sitetexts/entries/mapstyle','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
         </div>
         <div class="trip-detail" id="tripDetail"></div>
       </div>
@@ -1082,6 +1082,42 @@ function wwFetch(url) {
   return fetch(url + sep + 'v=' + Date.now(), { cache: 'no-store' });
 }
 
+/* ============ CMS-DATEN-HELFER (Fallback alt -> neu) ============
+   Seit dem Umbau gruppiert das CMS optisch zusammengehoerige Felder in
+   eingeklappte Objekte (z.B. data.english.title_en statt data.title_en,
+   oder data.pin.highlight statt data.highlight). Bestehende Inhalte haben
+   noch die alte flache Struktur. Diese Helfer lesen beides:
+   pickField(data, 'title_en', 'english') liefert
+     data.english?.title_en  ?? data.title_en  ?? ''
+   Sobald ein Eintrag im CMS neu gespeichert wird, wandert er ins neue
+   Format -- ohne dass die Website etwas merkt. */
+function pickField(data, key, groupName) {
+  if (data == null) return undefined;
+  if (groupName && data[groupName] && data[groupName][key] !== undefined) {
+    return data[groupName][key];
+  }
+  return data[key];
+}
+function pickEN(data, key)  { return pickField(data, key, 'english'); }
+function pickPin(data, key) { return pickField(data, key, 'pin'); }
+/* Reise-Gesamtgalerie liegt jetzt unter gallery_block.gallery (statt data.gallery) */
+function pickTripGallery(data) {
+  if (data && data.gallery_block && Array.isArray(data.gallery_block.gallery)) {
+    return data.gallery_block.gallery;
+  }
+  return (data && Array.isArray(data.gallery)) ? data.gallery : [];
+}
+/* "Englisch aktiv?" liest jetzt english.enabled, bleibt mit has_english kompatibel */
+function pickHasEN(data) {
+  if (data && data.english && typeof data.english.enabled === 'boolean') return data.english.enabled;
+  return data && data.has_english === true;
+}
+/* Stations-Koordinaten liegen jetzt unter coords.lat/lon (alt: s.lat/s.lon) */
+function pickStopCoord(stop, which) {
+  if (stop && stop.coords && typeof stop.coords[which] === 'number') return stop.coords[which];
+  return stop && typeof stop[which] === 'number' ? stop[which] : null;
+}
+
 function normalizePath(p) {
   if (!p) return '';
   // Externe URL oder Daten-URL: lassen
@@ -1142,7 +1178,7 @@ function buildPortfolioFromItems(items) {
       c1: cat.c1, c2: cat.c2,
       photo: it.image || '',
       de: { t: it.title_de || '', k: cat.de },
-      en: { t: it.title_en || it.title_de || '', k: cat.en }
+      en: { t: pickEN(it, 'title_en') || it.title_de || '', k: cat.en }
     };
   });
 }
@@ -1376,11 +1412,12 @@ function dateSortKey(dateStr) {
 
 function buildStory(data, bodyFallback) {
   var coverPhoto = data.cover || '';
-  var hasEN = data.has_english === true;
+  var hasEN = pickHasEN(data);
   // Haupttext: bevorzugt body_de aus dem Frontmatter (das CMS-Feld),
   // sonst der Markdown-Body (Altdaten/Beispiele).
   var textDe = (data.body_de && data.body_de.trim()) ? data.body_de : (bodyFallback || '');
-  var textEn = (data.body_en && data.body_en.trim()) ? data.body_en : '';
+  var enBody = pickEN(data, 'body_en') || '';
+  var textEn = (enBody && enBody.trim()) ? enBody : '';
   return {
     phC1: '#8a9a7e', phC2: '#3a4a38', img: 'mountains',
     photo: coverPhoto,
@@ -1392,9 +1429,9 @@ function buildStory(data, bodyFallback) {
       dateLabel: formatMonthYear(data.date, 'de')
     },
     en: {
-      cat: hasEN ? (data.category_en || data.category_de || '') : (data.category_de || ''),
-      title: hasEN ? (data.title_en || data.title_de || '') : (data.title_de || ''),
-      excerpt: hasEN ? (data.excerpt_en || data.excerpt_de || '') : (data.excerpt_de || ''),
+      cat: hasEN ? (pickEN(data, 'category_en') || data.category_de || '') : (data.category_de || ''),
+      title: hasEN ? (pickEN(data, 'title_en') || data.title_de || '') : (data.title_de || ''),
+      excerpt: hasEN ? (pickEN(data, 'excerpt_en') || data.excerpt_de || '') : (data.excerpt_de || ''),
       bodyHtml: mdToHtml(hasEN ? (textEn || textDe) : textDe),
       dateLabel: formatMonthYear(data.date, 'en')
     }
@@ -1621,25 +1658,32 @@ function renderStory(i) {
 /* ---------- Reisen aus CMS-Dateien laden ---------- */
 /* Wandelt eine Reise-Datei (echte Koordinaten, DE/EN-Felder) ins Anzeigeformat */
 function buildTrip(data) {
-  var hasEN = data.has_english === true;
+  var hasEN = pickHasEN(data);
   var stops = (data.stops || []).map(function(s){
     // Mehrere Bilder pro Station (Liste von {image} oder direkten Pfaden)
     var photos = (s.photos || []).map(function(p){
       var src = (typeof p === 'string') ? p : (p && p.image) || '';
       return normalizePath(src);
     }).filter(Boolean);
+    // Koordinaten: neu aus coords.lat/lon, sonst alt direkt aus s.lat/lon
+    var sLat = pickStopCoord(s, 'lat');
+    var sLon = pickStopCoord(s, 'lon');
+    // EN-Felder der Station: neu aus s.english.*, sonst aus s.*_en
+    var sTitleEn = pickEN(s, 'title_en');
+    var sTextEn  = pickEN(s, 'text_en');
+    var sDateEn  = pickEN(s, 'date_en');
     return {
-      name: s.name, lat: s.lat, lon: s.lon,
+      name: s.name, lat: sLat, lon: sLon,
       photo: s.photo || '',
       photos: photos,
       de: { date: s.date_de || '', t: s.title_de || s.name, txt: s.text_de || '' },
       en: hasEN
-        ? { date: s.date_en || s.date_de || '', t: s.title_en || s.title_de || s.name, txt: s.text_en || s.text_de || '' }
+        ? { date: sDateEn || s.date_de || '', t: sTitleEn || s.title_de || s.name, txt: sTextEn || s.text_de || '' }
         : { date: s.date_de || '', t: s.title_de || s.name, txt: s.text_de || '' }
     };
   });
-  // Reise-Gesamtgalerie (Reisefazit)
-  var gallery = (data.gallery || []).map(function(g){
+  // Reise-Gesamtgalerie (Reisefazit) -- liegt jetzt unter gallery_block.gallery
+  var gallery = pickTripGallery(data).map(function(g){
     return {
       src: normalizePath((typeof g === 'string') ? g : (g && g.image) || ''),
       cap: { de: (g && g.caption_de) || '', en: (g && g.caption_en) || (g && g.caption_de) || '' }
@@ -1657,12 +1701,12 @@ function buildTrip(data) {
       summary: data.summary_de || ''
     },
     en: hasEN
-      ? { meta: combineMeta(formatMonthYear(data.date, 'en'), data.meta_en || data.meta_de), summary: data.summary_en || data.summary_de || '' }
+      ? { meta: combineMeta(formatMonthYear(data.date, 'en'), pickEN(data, 'meta_en') || data.meta_de), summary: pickEN(data, 'summary_en') || data.summary_de || '' }
       : { meta: combineMeta(formatMonthYear(data.date, 'de'), data.meta_de), summary: data.summary_de || '' },
     upcoming: !!data.upcoming,
     title: {
       de: data.title_de || '',
-      en: hasEN ? (data.title_en || data.title_de || '') : (data.title_de || '')
+      en: hasEN ? (pickEN(data, 'title_en') || data.title_de || '') : (data.title_de || '')
     },
     stops: stops,
     gallery: gallery

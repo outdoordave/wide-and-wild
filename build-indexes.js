@@ -89,8 +89,14 @@ function buildTripsIndex() {
     try {
       const data = JSON.parse(fs.readFileSync(path.join(TRIPS_DIR, file), 'utf8'));
       date = data.date || '';
-      highlight = data.highlight === true;
-      if (typeof data.highlight_order === 'number') highlightOrder = data.highlight_order;
+      // Pin-Felder liegen seit dem CMS-Umbau unter data.pin.*. Aeltere Reisen
+      // haben sie noch flach auf data.*. Beide Strukturen unterstuetzen:
+      const pin = (data && data.pin && typeof data.pin === 'object') ? data.pin : null;
+      const hi = pin && pin.highlight !== undefined ? pin.highlight : data.highlight;
+      const ho = pin && typeof pin.highlight_order === 'number' ? pin.highlight_order
+               : (typeof data.highlight_order === 'number' ? data.highlight_order : null);
+      highlight = hi === true;
+      if (typeof ho === 'number') highlightOrder = ho;
     } catch (e) {
       console.warn(`[trips] ${file} ist kein gueltiges JSON, nehme es trotzdem auf.`);
     }
