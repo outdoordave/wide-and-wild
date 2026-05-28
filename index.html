@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<!-- Netlify Identity Widget -->
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<!-- Leaflet: echte zoombare Weltkarte fuer die Reisen-Sektion -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wide &amp; Wild — Travel &amp; Outdoor Photography</title>
@@ -283,7 +283,15 @@
   .trip-tabs button:hover { border-color: var(--c-accent); color: var(--c-accent); }
   .trip-tabs button.active { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
   .map-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start; }
-  .map-box { background: var(--c-dark); border-radius: var(--radius); padding: 10px; position: relative; overflow: hidden; }
+  .map-box { border-radius: var(--radius); overflow: hidden; position: relative; height: 420px; }
+  .map-box .leaflet-container { height: 100%; border-radius: var(--radius); }
+  /* Leaflet-Popup im Website-Stil */
+  .leaflet-popup-content-wrapper { background: var(--c-dark); color: var(--c-dark-ink); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.4); border: none; }
+  .leaflet-popup-tip { background: var(--c-dark); }
+  .leaflet-popup-content { margin: 10px 14px; font-family: var(--font-body); }
+  .ww-popup-name { font-size: 14px; font-weight: 700; color: #f0c9a8; margin: 0 0 2px; }
+  .ww-popup-date { font-size: 12px; color: #9a8c76; margin: 0; }
+  @media (max-width: 700px) { .map-box { height: 300px; } }
   .dual-map { display: flex; gap: 8px; }
   .dual-map .dm-part { flex: 1; min-width: 0; position: relative; }
   .dual-map .dm-label {
@@ -1664,80 +1672,79 @@ function ensureXY(stop) {
 function renderTrip() {
   var trip = trips[currentTrip];
   var td = trip[currentLang];
-  // Zusammenfassung
   document.getElementById('tripSummary').innerHTML =
     '<div class="meta">' + td.meta + '</div><p>' + td.summary + '</p>';
 
   var stops = trip.stops;
-  for (var e = 0; e < stops.length; e++) { ensureXY(stops[e]); }
-  var hasAlaska = false;
-  for (var a = 0; a < stops.length; a++) { if (stops[a].ak) hasAlaska = true; }
 
-  // Hilfsfunktion: zeichnet Stationspunkt + Label
-  function dotSvg(s, i) {
-    var sel = (i === currentStop) ? ' sel' : '';
-    var anchor = s.anchor || ((s.x > 820) ? 'end' : 'start');
-    var ldx = (s.ldx !== undefined) ? s.ldx : ((s.x > 820) ? -14 : 14);
-    var ldy = (s.ldy !== undefined) ? s.ldy : 4;
-    return '<g class="map-stop' + sel + '" data-stop="' + i + '">' +
-      '<circle class="ring" cx="' + s.x + '" cy="' + s.y + '" r="14" fill="none" stroke="#b08a4f" stroke-width="1.5" opacity="0.4"/>' +
-      '<circle class="dot" cx="' + s.x + '" cy="' + s.y + '" r="6.5" fill="#b08a4f"/>' +
-      '<text x="' + (s.x + ldx) + '" y="' + (s.y + ldy) + '" text-anchor="' + anchor + '">' + s.name + '</text>' +
-      '</g>';
-  }
-  // Hilfsfunktion: Route-Linie aus einer Teilmenge von Stops
-  function routeOf(subset) {
-    if (subset.length < 2) return '';
-    var pts = subset.map(function(s){ return s.x + ',' + s.y; }).join(' ');
-    return '<polyline points="' + pts + '" fill="none" stroke="#a7672f" stroke-width="2.5" stroke-dasharray="7 6" opacity="0.8" stroke-linecap="round"/>';
-  }
-
+  // Leaflet-Karte aufbauen (oder aktualisieren)
   var mapBox = document.getElementById('mapBox');
-
-  if (hasAlaska) {
-    // Zwei Karten nebeneinander: USA (Festland-Stops) + Alaska (ak-Stops)
-    var usMap = '<path d="' + USA_PATH + '" fill="#2e2820" stroke="#b08a4f" stroke-width="1" stroke-linejoin="round" opacity="0.9"/>';
-    var akMap = '<path d="' + ALASKA_PATH + '" fill="#2e2820" stroke="#b08a4f" stroke-width="1" stroke-linejoin="round" opacity="0.9"/>';
-    var usStops = [], akStops = [];
-    for (var i = 0; i < stops.length; i++) {
-      (stops[i].ak ? akStops : usStops).push({ s: stops[i], i: i });
-    }
-    var usDots = usStops.map(function(o){ return dotSvg(o.s, o.i); }).join('');
-    var akDots = akStops.map(function(o){ return dotSvg(o.s, o.i); }).join('');
-    var usRoute = routeOf(usStops.map(function(o){ return o.s; }));
-    var akRoute = routeOf(akStops.map(function(o){ return o.s; }));
-
-    mapBox.innerHTML =
-      '<div class="dual-map">' +
-        '<div class="dm-part"><div class="dm-label" data-de="Kalifornien" data-en="California">Kalifornien</div>' +
-          '<svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">' + usMap + usRoute + usDots + '</svg></div>' +
-        '<div class="dm-part"><div class="dm-label">Alaska</div>' +
-          '<svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">' + akMap + akRoute + akDots + '</svg></div>' +
-      '</div>';
-  } else {
-    // Einzelne USA-Karte wie bisher
-    var usa = '<path d="' + USA_PATH + '" fill="#2e2820" stroke="#b08a4f" stroke-width="1" stroke-linejoin="round" opacity="0.9"/>';
-    var dots = stops.map(function(s, i){ return dotSvg(s, i); }).join('');
-    var routeLine = routeOf(stops);
-    mapBox.innerHTML =
-      '<svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">' + usa + routeLine + dots + '</svg>';
+  if (!window._leafletMap) {
+    // Erste Initialisierung
+    mapBox.innerHTML = '';
+    var mapDiv = document.createElement('div');
+    mapDiv.id = 'leafletMap';
+    mapDiv.style.cssText = 'width:100%;height:100%';
+    mapBox.appendChild(mapDiv);
+    window._leafletMap = L.map('leafletMap', { zoomControl: true, scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18
+    }).addTo(window._leafletMap);
   }
 
-  // Klicks auf Stationen
-  var groups = mapBox.querySelectorAll('.map-stop');
-  for (var g = 0; g < groups.length; g++) {
-    (function(grp){ grp.addEventListener('click', function(){ selectStop(parseInt(grp.getAttribute('data-stop'),10)); }); })(groups[g]);
+  var lmap = window._leafletMap;
+
+  // Alte Marker + Linie entfernen
+  if (window._leafletLayers) {
+    for (var r = 0; r < window._leafletLayers.length; r++) lmap.removeLayer(window._leafletLayers[r]);
   }
-  // Sprache fuer dynamische Labels in der Dual-Map anwenden
-  if (hasAlaska) {
-    var dl = mapBox.querySelectorAll('.dm-label[data-de]');
-    for (var p = 0; p < dl.length; p++) {
-      var txt = dl[p].getAttribute('data-' + currentLang);
-      if (txt) dl[p].textContent = txt;
-    }
+  window._leafletLayers = [];
+  window._leafletMarkers = [];
+
+  if (!stops || stops.length === 0) return;
+
+  // Marker-Icon im Website-Stil
+  function makeIcon(selected) {
+    var col = selected ? '#f0c9a8' : '#a7672f';
+    var border = selected ? '#a7672f' : '#f4ede1';
+    var size = selected ? 18 : 14;
+    return L.divIcon({
+      className: '',
+      html: '<div style="width:' + size + 'px;height:' + size + 'px;background:' + col + ';border:2.5px solid ' + border + ';border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.45);transition:all .2s"></div>',
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2]
+    });
   }
 
-  // Stop-Liste als Buttons (gut fuers Handy)
+  // Route-Linie
+  var latlngs = stops.map(function(s){ return [s.lat, s.lon]; });
+  var line = L.polyline(latlngs, { color: '#a7672f', weight: 2.5, dashArray: '7,6', opacity: 0.85 });
+  line.addTo(lmap);
+  window._leafletLayers.push(line);
+
+  // Marker
+  for (var m = 0; m < stops.length; m++) {
+    (function(idx){
+      var s = stops[idx];
+      var marker = L.marker([s.lat, s.lon], { icon: makeIcon(idx === currentStop) });
+      var d = s[currentLang];
+      marker.bindPopup(
+        '<p class="ww-popup-name">' + (d ? d.t : s.name) + '</p>' +
+        (d && d.date ? '<p class="ww-popup-date">' + d.date + '</p>' : '')
+      );
+      marker.on('click', function(){ selectStop(idx); });
+      marker.addTo(lmap);
+      window._leafletLayers.push(marker);
+      window._leafletMarkers.push(marker);
+    })(m);
+  }
+
+  // Karte auf alle Stops einzoomen
+  lmap.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
+  setTimeout(function(){ lmap.invalidateSize(); }, 150);
+
+  // Stop-Liste als Buttons
   var list = document.getElementById('tripStoplist');
   list.innerHTML = '';
   for (var k = 0; k < stops.length; k++) {
@@ -1755,13 +1762,30 @@ function renderTrip() {
 
 function selectStop(i) {
   currentStop = i;
-  // Karte: Auswahl markieren
-  var groups = document.querySelectorAll('#mapBox .map-stop');
-  for (var g = 0; g < groups.length; g++) groups[g].classList.toggle('sel', g === i);
+  // Marker-Icons aktualisieren
+  if (window._leafletMarkers) {
+    var stops = trips[currentTrip].stops;
+    for (var m = 0; m < window._leafletMarkers.length; m++) {
+      var col = (m === i) ? '#f0c9a8' : '#a7672f';
+      var border = (m === i) ? '#a7672f' : '#f4ede1';
+      var size = (m === i) ? 18 : 14;
+      window._leafletMarkers[m].setIcon(L.divIcon({
+        className: '',
+        html: '<div style="width:' + size + 'px;height:' + size + 'px;background:' + col + ';border:2.5px solid ' + border + ';border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.45);transition:all .2s"></div>',
+        iconSize: [size, size],
+        iconAnchor: [size/2, size/2]
+      }));
+    }
+    // Auf selektierten Stop zentrieren
+    if (stops && stops[i]) {
+      window._leafletMap.panTo([stops[i].lat, stops[i].lon], { animate: true });
+    }
+  }
   var btns = document.querySelectorAll('#tripStoplist button');
   for (var b = 0; b < btns.length; b++) btns[b].classList.toggle('active', b === i);
   renderStopDetail();
 }
+
 
 function renderStopDetail() {
   var s = trips[currentTrip].stops[currentStop];
@@ -1911,5 +1935,6 @@ if (window.netlifyIdentity) {
   });
 }
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>
