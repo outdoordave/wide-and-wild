@@ -233,3 +233,73 @@ collections:
                   - { label: "Stativ und Traeger", value: "support" }
                   - { label: "Kochen und Camp", value: "cooking" }
               - { name: "link", label: "Link (optional)", widget: "string", required: false }
+
+  # ============================================================
+  #  WEBSITE-TEXTE (alle festen Texte editierbar)
+  # ============================================================
+  - name: "sitetexts"
+    label: "Website-Texte"
+    files:
+      - name: "site"
+        label: "Alle Texte"
+        file: "content/site.json"
+        description: "Saemtliche feste Texte der Website. Jeweils Deutsch + Englisch."
+        fields:
+          - name: "hero"
+            label: "Startseite - Grosser Kopfbereich"
+            widget: "object"
+            fields:
+              - { name: "headline", label: "Hauptzeile", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "text" }, { name: "en", label: "Englisch", widget: "text" } ] }
+              - { name: "subline", label: "Unterzeile", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+              - { name: "subtext", label: "Zusatztext", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "text" }, { name: "en", label: "Englisch", widget: "text" } ] }
+              - { name: "cta_portfolio", label: "Button: Portfolio", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+              - { name: "cta_stories", label: "Button: Stories", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+          - name: "sections"
+            label: "Startseite - Abschnitte"
+            widget: "object"
+            fields:
+              - { name: "gallery_kicker", label: "Galerie - Mini-Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+              - { name: "gallery_title", label: "Galerie - Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+              - { name: "latest_kicker", label: "Aktuell - Mini-Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+              - { name: "latest_title", label: "Aktuell - Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+              - { name: "discover_kicker", label: "Entdecken - Mini-Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+              - { name: "discover_title", label: "Entdecken - Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
+          - name: "pagetitles"
+            label: "Seiten-Ueberschriften"
+            widget: "object"
+            fields:
+              - { name: "portfolio_kicker", label: "Portfolio Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "portfolio_title", label: "Portfolio Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "portfolio_intro", label: "Portfolio Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "stories_kicker", label: "Stories Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "stories_title", label: "Stories Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "stories_intro", label: "Stories Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "trips_kicker", label: "Reisen Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "trips_title", label: "Reisen Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "trips_intro", label: "Reisen Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "gear_kicker", label: "Equipment Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "gear_title", label: "Equipment Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "gear_intro", label: "Equipment Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+          - name: "about"
+            label: "Ueber uns"
+            widget: "object"
+            fields:
+              - { name: "kicker", label: "Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "title", label: "Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "intro", label: "Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "person1_role", label: "Alexandra - Rolle", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "person1_bio", label: "Alexandra - Bio", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "person2_role", label: "David - Rolle", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "person2_bio", label: "David - Bio", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "why_title", label: "Warum USA - Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "why_text", label: "Warum USA - Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+          - name: "contact"
+            label: "Kontakt"
+            widget: "object"
+            fields:
+              - { name: "kicker", label: "Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "title", label: "Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "intro", label: "Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "direct_title", label: "Direkt-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "direct_text", label: "Direkt-Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "location", label: "Standort-Zeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
