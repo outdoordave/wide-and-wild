@@ -1074,6 +1074,11 @@ function navigate(page) {
   }
   window.scrollTo(0, 0);
   if (page === 'trips') renderTrip();
+  // Edit-Stifte für die neue Seite sicherstellen (falls Admin-Modus aktiv)
+  if (document.body.classList.contains('ww-is-admin')) {
+    wwInjectToolbars();
+    setTimeout(wwInjectToolbars, 300);
+  }
   closeMenu();
 }
 
@@ -1565,8 +1570,11 @@ function renderStory(i) {
   var s = stories[i];
   var d = s[currentLang];
   var html =
-    '<div class="reader-hero"><div ' + phAttrs(s.phC1, s.phC2, s.img, s.photo) + '></div>' +
-    '<div class="reader-hero-inner"><div class="meta">' + d.cat + '</div><h1>' + d.title + '</h1></div></div>' +
+    '<div class="reader-hero ww-editable">' +
+    '<div ' + phAttrs(s.phC1, s.phC2, s.img, s.photo) + '></div>' +
+    '<div class="reader-hero-inner"><div class="meta">' + d.cat + '</div><h1>' + d.title + '</h1></div>' +
+    wwToolbar({ edit: { coll: 'stories', slug: s.slug } }) +
+    '</div>' +
     '<div class="reader-body">';
   html += d.bodyHtml || '';
   html += '</div>';
