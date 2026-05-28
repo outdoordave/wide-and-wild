@@ -323,6 +323,8 @@ collections:
               - { name: "person2_bio", label: "David - Bio", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
               - { name: "why_title", label: "Warum USA - Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
               - { name: "why_text", label: "Warum USA - Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "person1_gear", label: "Alexandra - Ausrüstungszeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "person2_gear", label: "David - Ausrüstungszeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
           - name: "contact"
             label: "Kontakt"
             widget: "object"
@@ -333,6 +335,12 @@ collections:
               - { name: "direct_title", label: "Direkt-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
               - { name: "direct_text", label: "Direkt-Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
               - { name: "location", label: "Standort-Zeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "form_success", label: "Formular: Danke-Meldung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
+              - { name: "form_name", label: "Formular: Label Name", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "form_email", label: "Formular: Label E-Mail", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "form_message", label: "Formular: Label Nachricht", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "form_send", label: "Formular: Button-Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - { name: "form_note", label: "Formular: Hinweistext", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
               - name: "channels"
                 label: "Kontakt-Kanäle (E-Mail, Social Media)"
                 widget: "list"
