@@ -62,6 +62,19 @@ collections:
             label: "Video-Vorschaubild"
             widget: "image"
             required: false
+          - name: "map_style"
+            label: "Karten-Stil (Reisen-Karte)"
+            widget: "select"
+            required: false
+            default: "liberty"
+            hint: "Bestimmt das Aussehen der Karte auf der Reisen-Seite."
+            options:
+              - { label: "Liberty (ausgewogen, farbig)", value: "liberty" }
+              - { label: "Positron (hell, minimalistisch)", value: "positron" }
+              - { label: "Bright (hell, farbenfroh)", value: "bright" }
+              - { label: "Fiord (gedämpftes Grau, edel)", value: "fiord" }
+              - { label: "Dark (dunkel)", value: "dark" }
+              - { label: "3D (mit Gebäuden)", value: "3d" }
 
   # ============================================================
   #  PORTFOLIO
@@ -320,3 +333,26 @@ collections:
               - { name: "direct_title", label: "Direkt-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
               - { name: "direct_text", label: "Direkt-Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
               - { name: "location", label: "Standort-Zeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
+              - name: "channels"
+                label: "Kontakt-Kanäle (E-Mail, Social Media)"
+                widget: "list"
+                label_singular: "Kanal"
+                summary: "{{fields.type}}: {{fields.label}}"
+                hint: "Beliebig erweiterbar. Wähle den Typ, dann erscheint das passende Symbol automatisch."
+                fields:
+                  - name: "type"
+                    label: "Typ / Plattform"
+                    widget: "select"
+                    options:
+                      - { label: "E-Mail", value: "email" }
+                      - { label: "Instagram", value: "instagram" }
+                      - { label: "Facebook", value: "facebook" }
+                      - { label: "TikTok", value: "tiktok" }
+                      - { label: "YouTube", value: "youtube" }
+                      - { label: "X / Twitter", value: "x" }
+                      - { label: "Telefon", value: "phone" }
+                      - { label: "WhatsApp", value: "whatsapp" }
+                      - { label: "Pinterest", value: "pinterest" }
+                      - { label: "Website / Sonstiges", value: "web" }
+                  - { name: "label", label: "Anzeigetext", widget: "string", hint: "z.B. @euername oder die E-Mail-Adresse" }
+                  - { name: "url", label: "Link", widget: "string", hint: "z.B. https://instagram.com/euername oder mailto:hallo@... " }
