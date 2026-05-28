@@ -407,6 +407,8 @@
   .footer-nav a { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; color: #c8bba6; cursor: pointer; transition: color 0.2s; }
   .footer-nav a:hover { color: #f0c9a8; }
   footer .fnote { font-size: 13px; opacity: 0.7; line-height: 1.8; }
+  footer .fnote .ww-admin-link { color: inherit; text-decoration: none; opacity: 0.8; border-bottom: 1px dotted currentColor; }
+  footer .fnote .ww-admin-link:hover { color: #f0c9a8; opacity: 1; }
 
   /* ============ RESPONSIVE ============ */
   @media (max-width: 860px) {
@@ -708,7 +710,7 @@
     <a data-nav="contact" data-de="Kontakt" data-en="Contact">Kontakt</a>
   </div>
   <div class="fnote">
-    <div>© 2026 Alexandra Apostel &amp; David Bastisch</div>
+    <div>© 2026 Alexandra Apostel &amp; David Bastisch · <a href="/admin/" class="ww-admin-link">Admin</a></div>
     <div data-de="Travel &amp; Outdoor Photography · Alle Bilder sind Platzhalter" data-en="Travel &amp; Outdoor Photography · All images are placeholders">Travel &amp; Outdoor Photography · Alle Bilder sind Platzhalter</div>
   </div>
 </footer>
@@ -1831,6 +1833,17 @@ function initSite() {
         navigate(el.getAttribute('data-nav'));
       });
     })(navEls[i]);
+  }
+
+  // Versteckter Admin-Zugang: einfacher Klick aufs ©-Zeichen im Footer
+  // oeffnet die CMS-Verwaltung. Fuer Besucher unsichtbar (sieht aus wie Text),
+  // funktioniert auf Handy und Desktop, loest kein Bild-Menue/Zoom aus.
+  var secretAdmin = document.getElementById('ww-secret-admin');
+  if (secretAdmin) {
+    secretAdmin.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = '/admin/';
+    });
   }
 
   // Portfolio-Filter

@@ -20,6 +20,48 @@ locale: "de"
 # Reihenfolge = Website-Navigation: Portfolio -> Stories -> Reisen -> Equipment -> Startseite
 
 collections:
+  # ============================================================
+  #  STARTSEITE
+  # ============================================================
+  - name: "homepage"
+    label: "Startseite (Hero)"
+    files:
+      - name: "hero"
+        label: "Grosses Bild / Video oben"
+        file: "content/home.json"
+        description: "Was ganz oben auf der Startseite gezeigt wird."
+        fields:
+          - name: "mode"
+            label: "Was anzeigen?"
+            widget: "select"
+            default: "image"
+            options:
+              - { label: "Einzelbild", value: "image" }
+              - { label: "Diashow (zufallige Bilder)", value: "random" }
+              - { label: "Video", value: "video" }
+          - name: "image"
+            label: "Einzelbild"
+            widget: "image"
+            required: false
+            hint: "JPG/PNG bis ca. 10 MB."
+          - name: "slideshow"
+            label: "Diashow-Bilder"
+            widget: "list"
+            required: false
+            summary: "{{fields.img}}"
+            field:
+              name: "img"
+              label: "Bild"
+              widget: "image"
+          - name: "video"
+            label: "Video (MP4)"
+            widget: "file"
+            required: false
+            hint: "MP4, stumm. Max ca. 30 MB."
+          - name: "video_poster"
+            label: "Video-Vorschaubild"
+            widget: "image"
+            required: false
 
   # ============================================================
   #  PORTFOLIO
@@ -63,6 +105,9 @@ collections:
     description: "Reise-Geschichten. Werden automatisch nach Datum sortiert (neueste zuerst)."
     folder: "content/stories"
     create: true
+    extension: "md"
+    format: "frontmatter"
+    identifier_field: "title_de"
     slug: "{{year}}-{{month}}-{{slug}}"
     summary: "{{title_de}}  -  {{date}}"
     sortable_fields: ["date", "title_de"]
@@ -111,6 +156,9 @@ collections:
     description: "Reisen mit Stationen auf der Karte. Angepinnte zuerst, sonst nach Datum (neueste zuerst)."
     folder: "content/trips"
     create: true
+    extension: "json"
+    format: "json"
+    identifier_field: "title_de"
     slug: "{{year}}-{{month}}-{{slug}}"
     summary: "{{title_de}}  -  {{date}}"
     sortable_fields: ["date", "title_de"]
@@ -185,46 +233,3 @@ collections:
                   - { label: "Stativ und Traeger", value: "support" }
                   - { label: "Kochen und Camp", value: "cooking" }
               - { name: "link", label: "Link (optional)", widget: "string", required: false }
-
-  # ============================================================
-  #  STARTSEITE
-  # ============================================================
-  - name: "homepage"
-    label: "Startseite (Hero)"
-    files:
-      - name: "hero"
-        label: "Grosses Bild / Video oben"
-        file: "content/home.json"
-        description: "Was ganz oben auf der Startseite gezeigt wird."
-        fields:
-          - name: "mode"
-            label: "Was anzeigen?"
-            widget: "select"
-            default: "image"
-            options:
-              - { label: "Einzelbild", value: "image" }
-              - { label: "Diashow (zufallige Bilder)", value: "random" }
-              - { label: "Video", value: "video" }
-          - name: "image"
-            label: "Einzelbild"
-            widget: "image"
-            required: false
-            hint: "JPG/PNG bis ca. 10 MB."
-          - name: "slideshow"
-            label: "Diashow-Bilder"
-            widget: "list"
-            required: false
-            summary: "{{fields.img}}"
-            field:
-              name: "img"
-              label: "Bild"
-              widget: "image"
-          - name: "video"
-            label: "Video (MP4)"
-            widget: "file"
-            required: false
-            hint: "MP4, stumm. Max ca. 30 MB."
-          - name: "video_poster"
-            label: "Video-Vorschaubild"
-            widget: "image"
-            required: false
