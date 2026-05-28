@@ -50,25 +50,6 @@ collections:
       label: Video-Vorschaubild
       widget: image
       required: false
-    - name: map_style
-      label: Karten-Stil (Reisen-Karte)
-      widget: select
-      required: false
-      default: liberty
-      hint: Bestimmt das Aussehen der Karte auf der Reisen-Seite.
-      options:
-      - label: Liberty (ausgewogen, farbig)
-        value: liberty
-      - label: Positron (hell, minimalistisch)
-        value: positron
-      - label: Bright (hell, farbenfroh)
-        value: bright
-      - label: Fiord (gedämpftes Grau, edel)
-        value: fiord
-      - label: Dark (dunkel)
-        value: dark
-      - label: 3D (mit Gebäuden)
-        value: 3d
 - name: portfolio
   label: Portfolio (Fotos)
   files:
@@ -358,6 +339,33 @@ collections:
     label: Zusammenfassung (Englisch)
     widget: text
     required: false
+- name: tripsettings
+  label: Reisen-Einstellungen
+  description: Globale Einstellungen für die Reisen-Karte.
+  files:
+  - name: settings
+    label: 🗺️ Karten-Stil
+    file: content/trips-settings.json
+    description: Bestimmt das Aussehen der Karte auf der Reisen-Seite.
+    fields:
+    - name: map_style
+      label: Karten-Stil
+      widget: select
+      default: liberty
+      hint: Wähle das Aussehen der Reise-Karte. Nach dem Speichern auf der Reisen-Seite sichtbar.
+      options:
+      - label: Liberty (ausgewogen, farbig)
+        value: liberty
+      - label: Positron (hell, minimalistisch)
+        value: positron
+      - label: Bright (hell, farbenfroh)
+        value: bright
+      - label: Fiord (gedämpftes Grau, edel)
+        value: fiord
+      - label: Dark (dunkel)
+        value: dark
+      - label: 3D (mit Gebäuden)
+        value: 3d
 - name: equipment
   label: Equipment (Ausruestung)
   files:
