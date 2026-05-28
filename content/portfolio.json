@@ -1,12 +1,60 @@
 {
   "items": [
-    { "image": "", "title_de": "Goldene Stunde, Sierra Nevada", "title_en": "Golden hour, Sierra Nevada", "category": "landscape", "wide": true },
-    { "image": "", "title_de": "Bison im Morgennebel", "title_en": "Bison in morning mist", "category": "wildlife", "wide": false },
-    { "image": "", "title_de": "Weißkopfseeadler", "title_en": "Bald eagle", "category": "wildlife", "wide": false },
-    { "image": "", "title_de": "Mäander von oben", "title_en": "Meander from above", "category": "aerial", "wide": false },
-    { "image": "", "title_de": "Sterne über der Wüste", "title_en": "Stars over the desert", "category": "landscape", "wide": true },
-    { "image": "", "title_de": "Küstenlinie aus 120m", "title_en": "Coastline from 120m", "category": "aerial", "wide": false },
-    { "image": "", "title_de": "Kojote in der Dämmerung", "title_en": "Coyote at dusk", "category": "wildlife", "wide": false },
-    { "image": "", "title_de": "Nebelwald, Pazifikküste", "title_en": "Fog forest, Pacific coast", "category": "landscape", "wide": false }
+    {
+      "image": "/uploads/a7406420.jpg",
+      "title_de": "Goldene Stunde, Sierra Nevada",
+      "title_en": "Golden hour, Sierra Nevada",
+      "category": "landscape",
+      "wide": true
+    },
+    {
+      "image": "/uploads/img_5916-3.jpg",
+      "title_de": "Bison im Morgennebel",
+      "title_en": "Bison in morning mist",
+      "category": "wildlife",
+      "wide": false
+    },
+    {
+      "image": "/uploads/img_5666.jpg",
+      "title_de": "Weißkopfseeadler",
+      "title_en": "Bald eagle",
+      "category": "wildlife",
+      "wide": false
+    },
+    {
+      "image": "/uploads/img_5273.jpg",
+      "title_de": "Mäander von oben",
+      "title_en": "Meander from above",
+      "category": "aerial",
+      "wide": false
+    },
+    {
+      "image": "/uploads/a7406508.jpg",
+      "title_de": "Sterne über der Wüste",
+      "title_en": "Stars over the desert",
+      "category": "landscape",
+      "wide": true
+    },
+    {
+      "image": "/uploads/img_5916-3.jpg",
+      "title_de": "Küstenlinie aus 120m",
+      "title_en": "Coastline from 120m",
+      "category": "aerial",
+      "wide": false
+    },
+    {
+      "image": "/uploads/img_4101.jpg",
+      "title_de": "Kojote in der Dämmerung",
+      "title_en": "Coyote at dusk",
+      "category": "wildlife",
+      "wide": false
+    },
+    {
+      "image": "/uploads/dji_0136_edit.jpeg",
+      "title_de": "Nebelwald, Pazifikküste",
+      "title_en": "Fog forest, Pacific coast",
+      "category": "landscape",
+      "wide": false
+    }
   ]
 }
