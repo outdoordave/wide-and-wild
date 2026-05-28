@@ -355,7 +355,7 @@
   .insta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
   .insta-link { display: inline-flex; align-items: center; gap: 10px; background: var(--c-bg-alt); border: 1px solid var(--c-line); border-radius: 30px; padding: 10px 20px; font-weight: 700; font-size: 14px; color: var(--c-ink); transition: all 0.2s; cursor: pointer; }
   .insta-link:hover { border-color: var(--c-accent); color: var(--c-accent); transform: translateY(-2px); }
-  .insta-link .ig-ic { font-size: 18px; }
+  .insta-link .ig-ic { display: inline-flex; align-items: center; }
   .insta-row.on-dark .insta-link { background: rgba(240,229,212,0.08); border-color: rgba(240,229,212,0.2); color: #f0e5d4; }
   .insta-row.on-dark .insta-link:hover { border-color: #f0c9a8; color: #f0c9a8; }
 
@@ -561,8 +561,8 @@
           <div class="divider-orn">✦</div>
           <p data-site="hero.subtext" data-de="Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen." data-en="Alexandra captures animals and light with her camera, David sends the drone into the sky. Together we tell the story of the American landscape — one frame at a time.">Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen.</p>
           <div class="insta-row">
-            <a class="insta-link" href="https://instagram.com/a3_flow" target="_blank" rel="noopener"><span class="ig-ic">◎</span> @a3_flow</a>
-            <a class="insta-link" href="https://instagram.com/davidbastisch" target="_blank" rel="noopener"><span class="ig-ic">◎</span> @davidbastisch</a>
+            <a class="insta-link" href="https://instagram.com/a3_flow" target="_blank" rel="noopener"><span class="ig-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:middle"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></span> @a3_flow</a>
+            <a class="insta-link" href="https://instagram.com/davidbastisch" target="_blank" rel="noopener"><span class="ig-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:middle"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></span> @davidbastisch</a>
           </div>
         </div>
       </div>
@@ -601,11 +601,11 @@
           </div>
           <div class="teaser" data-filter="wildlife" data-nav="portfolio">
             <div class="ph" data-ph="PLATZHALTER" data-illus="desert" style="--ph-c1:#b08a5e; --ph-c2:#5e3f20;"></div>
-            <div class="ov"><div class="cat" data-de="Wildlife" data-en="Wildlife">Wildlife</div><div class="ttl" data-de="Auge in Auge" data-en="Eye to eye">Auge in Auge</div></div>
+            <div class="ov"><div class="cat" data-de="Tiere" data-en="Wildlife">Tiere</div><div class="ttl" data-de="Auge in Auge" data-en="Eye to eye">Auge in Auge</div></div>
           </div>
           <div class="teaser" data-filter="aerial" data-nav="portfolio">
             <div class="ph" data-ph="PLATZHALTER" data-illus="coast" style="--ph-c1:#7e98a0; --ph-c2:#3a5058;"></div>
-            <div class="ov"><div class="cat" data-de="Aus der Luft" data-en="Aerial">Aus der Luft</div><div class="ttl" data-de="Neue Perspektiven" data-en="New perspectives">Neue Perspektiven</div></div>
+            <div class="ov"><div class="cat" data-de="Luftaufnahmen" data-en="Aerial">Luftaufnahmen</div><div class="ttl" data-de="Neue Perspektiven" data-en="New perspectives">Neue Perspektiven</div></div>
           </div>
         </div>
       </div>
@@ -623,8 +623,17 @@
       <div class="filter-bar" id="filterBar">
         <button class="active" data-cat="all" data-de="Alle" data-en="All">Alle</button>
         <button data-cat="landscape" data-de="Landschaft" data-en="Landscape">Landschaft</button>
-        <button data-cat="wildlife" data-de="Wildlife" data-en="Wildlife">Wildlife</button>
-        <button data-cat="aerial" data-de="Aus der Luft" data-en="Aerial">Aus der Luft</button>
+        <button data-cat="wildlife" data-de="Tiere" data-en="Wildlife">Tiere</button>
+        <button data-cat="aerial" data-de="Luftaufnahmen" data-en="Aerial">Luftaufnahmen</button>
+        <button data-cat="lifestyle" data-de="Lifestyle" data-en="Lifestyle">Lifestyle</button>
+        <button data-cat="cars" data-de="Autos" data-en="Cars">Autos</button>
+        <button data-cat="architecture" data-de="Architektur" data-en="Architecture">Architektur</button>
+        <button data-cat="portrait" data-de="Portrait" data-en="Portrait">Portrait</button>
+        <button data-cat="street" data-de="Street" data-en="Street">Street</button>
+        <button data-cat="night" data-de="Nacht/Sterne" data-en="Night/Stars">Nacht/Sterne</button>
+        <button data-cat="macro" data-de="Makro" data-en="Macro">Makro</button>
+        <button data-cat="travel" data-de="Reise" data-en="Travel">Reise</button>
+        <button data-cat="bw" data-de="Schwarz-Weiß" data-en="Black &amp; White">Schwarz-Weiß</button>
       </div>
       <div class="gallery" id="galleryGrid"></div>
     </div>
@@ -1162,9 +1171,18 @@ function wwMediaBox(c1, c2, imgKey, photo, extraClass) {
 
 /* Standard-Illustration + Farben je Kategorie, falls noch kein echtes Foto da ist */
 var PORTFOLIO_CAT = {
-  landscape: { img:'mountains', c1:'#8a9a7e', c2:'#3a4a38', de:'Landschaft', en:'Landscape' },
-  wildlife:  { img:'desert',    c1:'#b08a5e', c2:'#5e3f20', de:'Wildlife',   en:'Wildlife' },
-  aerial:    { img:'coast',     c1:'#7e98a0', c2:'#3a5058', de:'Aus der Luft', en:'Aerial' }
+  landscape:   { img:'mountains', c1:'#8a9a7e', c2:'#3a4a38', de:'Landschaft',    en:'Landscape' },
+  wildlife:    { img:'desert',    c1:'#b08a5e', c2:'#5e3f20', de:'Tiere',         en:'Wildlife' },
+  aerial:      { img:'coast',     c1:'#7e98a0', c2:'#3a5058', de:'Luftaufnahmen', en:'Aerial' },
+  lifestyle:   { img:'mountains', c1:'#c69b7a', c2:'#6b4a30', de:'Lifestyle',     en:'Lifestyle' },
+  cars:        { img:'desert',    c1:'#6e7a8a', c2:'#2e3a4a', de:'Autos',         en:'Cars' },
+  architecture:{ img:'coast',     c1:'#9a8a7e', c2:'#4a3e38', de:'Architektur',   en:'Architecture' },
+  portrait:    { img:'mountains', c1:'#b09a8a', c2:'#5e4a3a', de:'Portrait',      en:'Portrait' },
+  street:      { img:'desert',    c1:'#8a7e6e', c2:'#3e3a2e', de:'Street',        en:'Street' },
+  night:       { img:'mountains', c1:'#3a4a6e', c2:'#1a2238', de:'Nacht/Sterne',  en:'Night/Stars' },
+  macro:       { img:'coast',     c1:'#7a9a7e', c2:'#3a4a38', de:'Makro',         en:'Macro' },
+  travel:      { img:'mountains', c1:'#a08a6e', c2:'#4a3e20', de:'Reise',         en:'Travel' },
+  bw:          { img:'desert',    c1:'#6e6e6e', c2:'#2a2a2a', de:'Schwarz-Weiß',  en:'Black & White' }
 };
 
 /* Wandelt die flache portfolio.json in das Anzeigeformat */
@@ -1487,7 +1505,9 @@ function renderStories() {
 function renderLatest() {
   var grid = document.getElementById('latestGrid');
   if (!grid) return;
-  // Stories und Trips zu einer gemeinsamen Liste mit dateKey kombinieren
+  // Stories und Trips zu einer gemeinsamen Liste mit dateKey kombinieren.
+  // Kommende Reisen ("upcoming") werden bewusst NICHT in "Aktuelles" gezeigt,
+  // damit dort wirklich nur zuletzt Veroeffentlichtes / Erlebtes erscheint.
   var combined = [];
   for (var i = 0; i < stories.length; i++) {
     combined.push({ type: 'story', dateKey: stories[i].dateKey || 0, idx: i, data: stories[i] });
@@ -1495,7 +1515,9 @@ function renderLatest() {
   if (typeof trips === 'object' && trips) {
     var slugs = Object.keys(trips);
     for (var t = 0; t < slugs.length; t++) {
-      combined.push({ type: 'trip', dateKey: trips[slugs[t]].dateKey || 0, slug: slugs[t], data: trips[slugs[t]] });
+      var tr = trips[slugs[t]];
+      if (tr && tr.upcoming) continue; // kommende Reisen ueberspringen
+      combined.push({ type: 'trip', dateKey: tr.dateKey || 0, slug: slugs[t], data: tr });
     }
   }
   // Nach Datum sortieren, neueste zuerst
@@ -1997,17 +2019,10 @@ function wwDrawTrip() {
   }
   window._mlMarkers = [];
 
-  // Route-Linie als GeoJSON-Source (entfernen falls vorhanden)
-  var coords = stops.map(function(s){ return [s.lon, s.lat]; });
-  var geo = { type: 'Feature', geometry: { type: 'LineString', coordinates: coords } };
+  // Route-Linie wurde bewusst entfernt (uebersichtlicher ohne Striche).
+  // Falls von frueheren Renderings noch eine Linie da ist, sauber entfernen:
   if (map.getLayer('ww-route')) map.removeLayer('ww-route');
   if (map.getSource('ww-route')) map.removeSource('ww-route');
-  map.addSource('ww-route', { type: 'geojson', data: geo });
-  map.addLayer({
-    id: 'ww-route', type: 'line', source: 'ww-route',
-    layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: { 'line-color': '#a7672f', 'line-width': 2.5, 'line-dasharray': [2, 2], 'line-opacity': 0.85 }
-  });
 
   // Marker setzen
   for (var m = 0; m < stops.length; m++) {
