@@ -3,7 +3,7 @@ title_de: Tacoma in der Wildniss
 category_de: "Utah "
 date: 2024-09-25
 cover: /uploads/img_5666.jpg
-excerpt_de: Ein Wilder Waco wurde gesichtet!
+excerpt_de: "Ein Wilder Waco wurde gesichtet! "
 body_de: >-
   ### Ich habe an der roten Ampel im Nirgendwo einen Traumhaften Toyota Tacoma
   gesehen!
