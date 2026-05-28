@@ -1,0 +1,24 @@
+{
+  "upcoming": false,
+  "pin": {
+    "highlight": true,
+    "highlight_order": 1
+  },
+  "english": {
+    "enabled": false
+  },
+  "date": "2026-05-28",
+  "stops": [
+    {
+      "place_search": "Los Angeles, Los Angeles County, Kalifornien, Vereinigte Staaten von Amerika",
+      "name": "Los Angeles",
+      "coords": {
+        "lat": 34.0536909,
+        "lon": -118.242766
+      },
+      "photo": "/uploads/img_6111.jpg"
+    }
+  ],
+  "title_de": "Los Ángeles ",
+  "summary_de": "Lakers Spiel"
+}
