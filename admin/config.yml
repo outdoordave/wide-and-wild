@@ -2,365 +2,933 @@ backend:
   name: github
   repo: outdoordave/AD-Photography
   branch: main
-  # OAuth-Handshake-Endpoint: Cloudflare Worker (statt Netlify Identity).
   base_url: https://aanddphotography-oauth.davidbastisch.workers.dev
   auth_endpoint: auth
-
-# Editorial Workflow DEAKTIVIERT - verursacht "API_ERROR: Not Found"
-# publish_mode: editorial_workflow
-
-# Lokales Testen: 'local_backend: true' einkommentieren + 'npx decap-server' starten
-# local_backend: true
-
-media_folder: "uploads"
-public_folder: "/uploads"
-
-locale: "de"
-
-# Reihenfolge = Website-Navigation: Portfolio -> Stories -> Reisen -> Equipment -> Startseite
-
+media_folder: uploads
+public_folder: /uploads
+locale: de
 collections:
-  # ============================================================
-  #  STARTSEITE
-  # ============================================================
-  - name: "homepage"
-    label: "Startseite (Hero)"
-    files:
-      - name: "hero"
-        label: "Grosses Bild / Video oben"
-        file: "content/home.json"
-        description: "Was ganz oben auf der Startseite gezeigt wird."
-        fields:
-          - name: "mode"
-            label: "Was anzeigen?"
-            widget: "select"
-            default: "image"
-            options:
-              - { label: "Einzelbild", value: "image" }
-              - { label: "Diashow (zufallige Bilder)", value: "random" }
-              - { label: "Video", value: "video" }
-          - name: "image"
-            label: "Einzelbild"
-            widget: "image"
-            required: false
-            hint: "JPG/PNG bis ca. 10 MB."
-          - name: "slideshow"
-            label: "Diashow-Bilder"
-            widget: "list"
-            required: false
-            summary: "{{fields.img}}"
-            field:
-              name: "img"
-              label: "Bild"
-              widget: "image"
-          - name: "video"
-            label: "Video (MP4)"
-            widget: "file"
-            required: false
-            hint: "MP4, stumm. Max ca. 30 MB."
-          - name: "video_poster"
-            label: "Video-Vorschaubild"
-            widget: "image"
-            required: false
-          - name: "map_style"
-            label: "Karten-Stil (Reisen-Karte)"
-            widget: "select"
-            required: false
-            default: "liberty"
-            hint: "Bestimmt das Aussehen der Karte auf der Reisen-Seite."
-            options:
-              - { label: "Liberty (ausgewogen, farbig)", value: "liberty" }
-              - { label: "Positron (hell, minimalistisch)", value: "positron" }
-              - { label: "Bright (hell, farbenfroh)", value: "bright" }
-              - { label: "Fiord (gedämpftes Grau, edel)", value: "fiord" }
-              - { label: "Dark (dunkel)", value: "dark" }
-              - { label: "3D (mit Gebäuden)", value: "3d" }
-
-  # ============================================================
-  #  PORTFOLIO
-  # ============================================================
-  - name: "portfolio"
-    label: "Portfolio (Fotos)"
-    files:
-      - name: "photos"
-        label: "Portfolio-Fotos"
-        file: "content/portfolio.json"
-        description: "Eure Galerie-Bilder. Mit + ein neues Foto hinzufuegen, Kategorie waehlen."
-        fields:
-          - name: "items"
-            label: "Fotos"
-            label_singular: "Foto"
-            widget: "list"
-            summary: "{{fields.title_de}}"
-            fields:
-              - name: "image"
-                label: "Foto"
-                widget: "image"
-                hint: "Bild hochladen. Empfohlen: JPG/PNG bis ca. 10 MB."
-              - { name: "title_de", label: "Titel", widget: "string" }
-              - name: "category"
-                label: "Kategorie"
-                widget: "select"
-                options:
-                  - { label: "Landschaft", value: "landscape" }
-                  - { label: "Wildlife", value: "wildlife" }
-                  - { label: "Aus der Luft", value: "aerial" }
-              - { name: "wide", label: "Breites Bild (2 Spalten)", widget: "boolean", default: false, required: false }
-              - { name: "has_english", label: "Englischen Titel?", widget: "boolean", default: false, required: false }
-              - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
-
-  # ============================================================
-  #  STORIES
-  # ============================================================
-  - name: "stories"
-    label: "Stories / Beitraege"
-    label_singular: "Beitrag"
-    description: "Reise-Geschichten. Werden automatisch nach Datum sortiert (neueste zuerst)."
-    folder: "content/stories"
-    create: true
-    extension: "md"
-    format: "frontmatter"
-    identifier_field: "title_de"
-    slug: "{{year}}-{{month}}-{{slug}}"
-    summary: "{{title_de}}  -  {{date}}"
-    sortable_fields: ["date", "title_de"]
+- name: homepage
+  label: Startseite (Hero)
+  files:
+  - name: hero
+    label: Grosses Bild / Video oben
+    file: content/home.json
+    description: Was ganz oben auf der Startseite gezeigt wird.
     fields:
-      - { name: "title_de", label: "Titel", widget: "string" }
-      - { name: "category_de", label: "Ort / Kategorie", widget: "string", hint: "z.B. Kalifornien, USA" }
-      - name: "date"
-        label: "Wann (Monat + Jahr)"
-        widget: "datetime"
-        date_format: "YYYY-MM"
-        time_format: false
-        format: "YYYY-MM-DD"
-        picker_utc: false
-        hint: "Nur Monat + Jahr. Bestimmt die Reihenfolge (neueste zuerst)."
-      - name: "cover"
-        label: "Titelbild"
-        widget: "image"
-        required: false
-        hint: "Grosses Bild oben. JPG/PNG bis ca. 10 MB."
-      - { name: "excerpt_de", label: "Anriss / Vorschautext", widget: "text", hint: "1-2 Saetze fuer die Uebersicht." }
-      - name: "body_de"
-        label: "Haupttext"
-        widget: "markdown"
-        hint: "Der eigentliche Beitrag."
-        modes: ["rich_text", "raw"]
-        buttons: ["bold", "italic", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
-        editor_components: ["image"]
-      - { name: "has_english", label: "Englische Version?", widget: "boolean", default: false, required: false, hint: "Ein = englische Felder werden auf der Website gezeigt." }
-      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
-      - { name: "category_en", label: "Ort / Kategorie (Englisch)", widget: "string", required: false }
-      - { name: "excerpt_en", label: "Anriss (Englisch)", widget: "text", required: false }
-      - name: "body_en"
-        label: "Haupttext (Englisch)"
-        widget: "markdown"
-        required: false
-        modes: ["rich_text", "raw"]
-        buttons: ["bold", "italic", "heading-one", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list", "link"]
-        editor_components: ["image"]
-
-  # ============================================================
-  #  REISEN
-  # ============================================================
-  - name: "trips"
-    label: "Reisen"
-    label_singular: "Reise"
-    description: "Reisen mit Stationen auf der Karte. Angepinnte zuerst, sonst nach Datum (neueste zuerst)."
-    folder: "content/trips"
-    create: true
-    extension: "json"
-    format: "json"
-    identifier_field: "title_de"
-    slug: "{{year}}-{{month}}-{{slug}}"
-    summary: "{{title_de}}  -  {{date}}"
-    sortable_fields: ["date", "title_de"]
+    - name: mode
+      label: Was anzeigen?
+      widget: select
+      default: image
+      options:
+      - label: Einzelbild
+        value: image
+      - label: Diashow (zufallige Bilder)
+        value: random
+      - label: Video
+        value: video
+    - name: image
+      label: Einzelbild
+      widget: image
+      required: false
+      hint: JPG/PNG bis ca. 10 MB.
+    - name: slideshow
+      label: Diashow-Bilder
+      widget: list
+      required: false
+      summary: '{{fields.img}}'
+      field:
+        name: img
+        label: Bild
+        widget: image
+    - name: video
+      label: Video (MP4)
+      widget: file
+      required: false
+      hint: MP4, stumm. Max ca. 30 MB.
+    - name: video_poster
+      label: Video-Vorschaubild
+      widget: image
+      required: false
+    - name: map_style
+      label: Karten-Stil (Reisen-Karte)
+      widget: select
+      required: false
+      default: liberty
+      hint: Bestimmt das Aussehen der Karte auf der Reisen-Seite.
+      options:
+      - label: Liberty (ausgewogen, farbig)
+        value: liberty
+      - label: Positron (hell, minimalistisch)
+        value: positron
+      - label: Bright (hell, farbenfroh)
+        value: bright
+      - label: Fiord (gedämpftes Grau, edel)
+        value: fiord
+      - label: Dark (dunkel)
+        value: dark
+      - label: 3D (mit Gebäuden)
+        value: 3d
+- name: portfolio
+  label: Portfolio (Fotos)
+  files:
+  - name: photos
+    label: Portfolio-Fotos
+    file: content/portfolio.json
+    description: Eure Galerie-Bilder. Mit + ein neues Foto hinzufuegen, Kategorie waehlen.
     fields:
-      - { name: "title_de", label: "Titel", widget: "string", hint: "z.B. West-Runde 2024" }
-      - name: "date"
-        label: "Wann (Monat + Jahr)"
-        widget: "datetime"
-        date_format: "YYYY-MM"
-        time_format: false
-        format: "YYYY-MM-DD"
-        picker_utc: false
-        hint: "Nur Monat + Jahr. Zukunftige Reisen erscheinen ganz oben."
-      - { name: "meta_de", label: "Zusatz-Info zum Zeitraum (optional)", widget: "string", required: false, hint: "Optional: ergaenzt das Datum, z.B. '18 Tage, der grosse Westen'. Leer = nur Monat/Jahr wird gezeigt." }
-      - { name: "summary_de", label: "Zusammenfassung", widget: "text" }
-      - { name: "upcoming", label: "Kommende Reise?", widget: "boolean", default: false, required: false }
-      - { name: "highlight", label: "Anpinnen (Highlight)", widget: "boolean", default: false, required: false, hint: "Ein = diese Reise wird oben angepinnt, unabhaengig vom Datum." }
-      - { name: "highlight_order", label: "Pin-Reihenfolge", widget: "number", value_type: "int", default: 1, required: false, hint: "Nur relevant wenn angepinnt. Kleine Zahl = weiter oben. Bei gleicher Zahl entscheidet das Datum." }
-      - name: "stops"
-        label: "Stationen"
-        label_singular: "Station"
-        widget: "list"
-        summary: "{{fields.name}}"
-        hint: "Ort suchen eingeben, aus Dropdown waehlen, Koordinaten werden automatisch gefuellt."
-        fields:
-          - { name: "place_search", label: "Ort suchen (Autocomplete)", widget: "string", required: false, hint: "z.B. Austin, Texas eingeben und aus Liste waehlen." }
-          - { name: "name", label: "Ort (Anzeigename)", widget: "string" }
-          - { name: "lat", label: "Breitengrad (lat)", widget: "number", value_type: "float" }
-          - { name: "lon", label: "Laengengrad (lon)", widget: "number", value_type: "float" }
-          - { name: "title_de", label: "Ueberschrift", widget: "string", required: false }
-          - { name: "text_de", label: "Beschreibung", widget: "text", required: false }
-          - { name: "date_de", label: "Datum-Notiz", widget: "string", required: false, hint: "z.B. 28. Sept - 01. Okt" }
-          - name: "photo"
-            label: "Titelbild der Station (optional)"
-            widget: "image"
-            required: false
-            hint: "Dieses Bild wird zugeschnitten als Vorschau gezeigt. Waehle eins, dessen Bildmitte gut aussieht."
-          - name: "photos"
-            label: "Weitere Bilder dieser Station (optional)"
-            widget: "list"
-            required: false
-            hint: "Beliebig viele Fotos. Werden als Galerie unter der Station gezeigt, NICHT zugeschnitten."
-            field: { name: "image", label: "Bild", widget: "image" }
-          - { name: "title_en", label: "Ueberschrift (Englisch)", widget: "string", required: false }
-          - { name: "text_en", label: "Beschreibung (Englisch)", widget: "text", required: false }
-          - { name: "date_en", label: "Datum-Notiz (Englisch)", widget: "string", required: false }
-      - { name: "has_english", label: "Englische Version?", widget: "boolean", default: false, required: false }
-      - name: "gallery"
-        label: "Reise-Galerie (Reisefazit)"
-        widget: "list"
+    - name: items
+      label: Fotos
+      label_singular: Foto
+      widget: list
+      summary: '{{fields.title_de}}'
+      fields:
+      - name: image
+        label: Foto
+        widget: image
+        hint: 'Bild hochladen. Empfohlen: JPG/PNG bis ca. 10 MB.'
+      - name: title_de
+        label: Titel
+        widget: string
+      - name: category
+        label: Kategorie
+        widget: select
+        options:
+        - label: Landschaft
+          value: landscape
+        - label: Wildlife
+          value: wildlife
+        - label: Aus der Luft
+          value: aerial
+      - name: wide
+        label: Breites Bild (2 Spalten)
+        widget: boolean
+        default: false
         required: false
-        hint: "Deine Lieblingsbilder der ganzen Reise. Werden am Ende der Reise als grosse Galerie gezeigt, NICHT zugeschnitten."
+      - name: has_english
+        label: Englischen Titel?
+        widget: boolean
+        default: false
+        required: false
+      - name: title_en
+        label: Titel (Englisch)
+        widget: string
+        required: false
+- name: stories
+  label: Stories / Beitraege
+  label_singular: Beitrag
+  description: Reise-Geschichten. Werden automatisch nach Datum sortiert (neueste zuerst).
+  folder: content/stories
+  create: true
+  extension: md
+  format: frontmatter
+  identifier_field: title_de
+  slug: '{{year}}-{{month}}-{{slug}}'
+  summary: '{{title_de}}  -  {{date}}'
+  sortable_fields:
+  - date
+  - title_de
+  fields:
+  - name: title_de
+    label: Titel
+    widget: string
+  - name: category_de
+    label: Ort / Kategorie
+    widget: string
+    hint: z.B. Kalifornien, USA
+  - name: date
+    label: Wann (Monat + Jahr)
+    widget: datetime
+    date_format: YYYY-MM
+    time_format: false
+    format: YYYY-MM-DD
+    picker_utc: false
+    hint: Nur Monat + Jahr. Bestimmt die Reihenfolge (neueste zuerst).
+  - name: cover
+    label: Titelbild
+    widget: image
+    required: false
+    hint: Grosses Bild oben. JPG/PNG bis ca. 10 MB.
+  - name: excerpt_de
+    label: Anriss / Vorschautext
+    widget: text
+    hint: 1-2 Saetze fuer die Uebersicht.
+  - name: body_de
+    label: Haupttext
+    widget: markdown
+    hint: Der eigentliche Beitrag.
+    modes:
+    - rich_text
+    - raw
+    buttons:
+    - bold
+    - italic
+    - heading-one
+    - heading-two
+    - heading-three
+    - quote
+    - bulleted-list
+    - numbered-list
+    - link
+    editor_components:
+    - image
+  - name: has_english
+    label: Englische Version?
+    widget: boolean
+    default: false
+    required: false
+    hint: Ein = englische Felder werden auf der Website gezeigt.
+  - name: title_en
+    label: Titel (Englisch)
+    widget: string
+    required: false
+  - name: category_en
+    label: Ort / Kategorie (Englisch)
+    widget: string
+    required: false
+  - name: excerpt_en
+    label: Anriss (Englisch)
+    widget: text
+    required: false
+  - name: body_en
+    label: Haupttext (Englisch)
+    widget: markdown
+    required: false
+    modes:
+    - rich_text
+    - raw
+    buttons:
+    - bold
+    - italic
+    - heading-one
+    - heading-two
+    - heading-three
+    - quote
+    - bulleted-list
+    - numbered-list
+    - link
+    editor_components:
+    - image
+- name: trips
+  label: Reisen
+  label_singular: Reise
+  description: Reisen mit Stationen auf der Karte. Angepinnte zuerst, sonst nach Datum (neueste zuerst).
+  folder: content/trips
+  create: true
+  extension: json
+  format: json
+  identifier_field: title_de
+  slug: '{{year}}-{{month}}-{{slug}}'
+  summary: '{{title_de}}  -  {{date}}'
+  sortable_fields:
+  - date
+  - title_de
+  fields:
+  - name: title_de
+    label: Titel
+    widget: string
+    hint: z.B. West-Runde 2024
+  - name: date
+    label: Wann (Monat + Jahr)
+    widget: datetime
+    date_format: YYYY-MM
+    time_format: false
+    format: YYYY-MM-DD
+    picker_utc: false
+    hint: Nur Monat + Jahr. Zukunftige Reisen erscheinen ganz oben.
+  - name: meta_de
+    label: Zusatz-Info zum Zeitraum (optional)
+    widget: string
+    required: false
+    hint: 'Optional: ergaenzt das Datum, z.B. ''18 Tage, der grosse Westen''. Leer = nur Monat/Jahr wird gezeigt.'
+  - name: summary_de
+    label: Zusammenfassung
+    widget: text
+  - name: upcoming
+    label: Kommende Reise?
+    widget: boolean
+    default: false
+    required: false
+  - name: highlight
+    label: Anpinnen (Highlight)
+    widget: boolean
+    default: false
+    required: false
+    hint: Ein = diese Reise wird oben angepinnt, unabhaengig vom Datum.
+  - name: highlight_order
+    label: Pin-Reihenfolge
+    widget: number
+    value_type: int
+    default: 1
+    required: false
+    hint: Nur relevant wenn angepinnt. Kleine Zahl = weiter oben. Bei gleicher Zahl entscheidet das Datum.
+  - name: stops
+    label: Stationen
+    label_singular: Station
+    widget: list
+    summary: '{{fields.name}}'
+    hint: Ort suchen eingeben, aus Dropdown waehlen, Koordinaten werden automatisch gefuellt.
+    fields:
+    - name: place_search
+      label: Ort suchen (Autocomplete)
+      widget: string
+      required: false
+      hint: z.B. Austin, Texas eingeben und aus Liste waehlen.
+    - name: name
+      label: Ort (Anzeigename)
+      widget: string
+    - name: lat
+      label: Breitengrad (lat)
+      widget: number
+      value_type: float
+    - name: lon
+      label: Laengengrad (lon)
+      widget: number
+      value_type: float
+    - name: title_de
+      label: Ueberschrift
+      widget: string
+      required: false
+    - name: text_de
+      label: Beschreibung
+      widget: text
+      required: false
+    - name: date_de
+      label: Datum-Notiz
+      widget: string
+      required: false
+      hint: z.B. 28. Sept - 01. Okt
+    - name: photo
+      label: Titelbild der Station (optional)
+      widget: image
+      required: false
+      hint: Dieses Bild wird zugeschnitten als Vorschau gezeigt. Waehle eins, dessen Bildmitte gut aussieht.
+    - name: photos
+      label: Weitere Bilder dieser Station (optional)
+      widget: list
+      required: false
+      hint: Beliebig viele Fotos. Werden als Galerie unter der Station gezeigt, NICHT zugeschnitten.
+      field:
+        name: image
+        label: Bild
+        widget: image
+    - name: title_en
+      label: Ueberschrift (Englisch)
+      widget: string
+      required: false
+    - name: text_en
+      label: Beschreibung (Englisch)
+      widget: text
+      required: false
+    - name: date_en
+      label: Datum-Notiz (Englisch)
+      widget: string
+      required: false
+  - name: has_english
+    label: Englische Version?
+    widget: boolean
+    default: false
+    required: false
+  - name: gallery
+    label: Reise-Galerie (Reisefazit)
+    widget: list
+    required: false
+    hint: Deine Lieblingsbilder der ganzen Reise. Werden am Ende der Reise als grosse Galerie gezeigt, NICHT zugeschnitten.
+    fields:
+    - name: image
+      label: Bild
+      widget: image
+    - name: caption_de
+      label: Bildunterschrift (optional)
+      widget: string
+      required: false
+    - name: caption_en
+      label: Bildunterschrift Englisch (optional)
+      widget: string
+      required: false
+  - name: title_en
+    label: Titel (Englisch)
+    widget: string
+    required: false
+  - name: meta_en
+    label: Zusatz-Info (Englisch, optional)
+    widget: string
+    required: false
+  - name: summary_en
+    label: Zusammenfassung (Englisch)
+    widget: text
+    required: false
+- name: equipment
+  label: Equipment (Ausruestung)
+  files:
+  - name: gear
+    label: Gear-Liste
+    file: content/gear.json
+    description: Eure gesamte Ausruestung.
+    fields:
+    - name: items
+      label: Ausruestung
+      label_singular: Ausruestungsteil
+      widget: list
+      summary: '{{fields.name}} - {{fields.brand}}'
+      fields:
+      - name: name
+        label: Name
+        widget: string
+        hint: z.B. Sony A7 IV
+      - name: brand
+        label: Marke
+        widget: string
+      - name: category
+        label: Kategorie
+        widget: select
+        options:
+        - label: Kameras
+          value: cameras
+        - label: Objektive
+          value: lenses
+        - label: Drohne & Action
+          value: drones
+        - label: Smartphone
+          value: phone
+        - label: Stativ
+          value: tripod
+        - label: Rucksack
+          value: backpack
+        - label: Kochen und Camp
+          value: cooking
+      - name: link
+        label: Link (optional)
+        widget: string
+        required: false
+- name: sitetexts
+  label: Website-Texte
+  description: Die festen Texte der Website, übersichtlich nach Seite getrennt.
+  files:
+  - name: home
+    label: 🏠 Startseite
+    file: content/home-texts.json
+    description: Großer Kopfbereich und die Abschnitte der Startseite.
+    fields:
+    - name: hero
+      label: Großer Kopfbereich
+      widget: object
+      fields:
+      - name: headline
+        label: Hauptzeile
+        widget: object
         fields:
-          - { name: "image", label: "Bild", widget: "image" }
-          - { name: "caption_de", label: "Bildunterschrift (optional)", widget: "string", required: false }
-          - { name: "caption_en", label: "Bildunterschrift Englisch (optional)", widget: "string", required: false }
-      - { name: "title_en", label: "Titel (Englisch)", widget: "string", required: false }
-      - { name: "meta_en", label: "Zusatz-Info (Englisch, optional)", widget: "string", required: false }
-      - { name: "summary_en", label: "Zusammenfassung (Englisch)", widget: "text", required: false }
-
-  # ============================================================
-  #  EQUIPMENT
-  # ============================================================
-  - name: "equipment"
-    label: "Equipment (Ausruestung)"
-    files:
-      - name: "gear"
-        label: "Gear-Liste"
-        file: "content/gear.json"
-        description: "Eure gesamte Ausruestung."
+        - name: de
+          label: Deutsch
+          widget: text
+        - name: en
+          label: Englisch
+          widget: text
+      - name: subline
+        label: Unterzeile
+        widget: object
         fields:
-          - name: "items"
-            label: "Ausruestung"
-            label_singular: "Ausruestungsteil"
-            widget: "list"
-            summary: "{{fields.name}} - {{fields.brand}}"
-            fields:
-              - { name: "name", label: "Name", widget: "string", hint: "z.B. Sony A7 IV" }
-              - { name: "brand", label: "Marke", widget: "string" }
-              - name: "category"
-                label: "Kategorie"
-                widget: "select"
-                options:
-                  - { label: "Kameras", value: "cameras" }
-                  - { label: "Objektive", value: "lenses" }
-                  - { label: "Drohne & Action", value: "drones" }
-                  - { label: "Smartphone", value: "phone" }
-                  - { label: "Stativ", value: "tripod" }
-                  - { label: "Rucksack", value: "backpack" }
-                  - { label: "Kochen und Camp", value: "cooking" }
-              - { name: "link", label: "Link (optional)", widget: "string", required: false }
-
-  # ============================================================
-  #  WEBSITE-TEXTE (alle festen Texte editierbar)
-  # ============================================================
-  - name: "sitetexts"
-    label: "Website-Texte"
-    files:
-      - name: "site"
-        label: "Alle Texte"
-        file: "content/site.json"
-        description: "Saemtliche feste Texte der Website. Jeweils Deutsch + Englisch."
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+      - name: subtext
+        label: Zusatztext
+        widget: object
         fields:
-          - name: "hero"
-            label: "Startseite - Grosser Kopfbereich"
-            widget: "object"
-            fields:
-              - { name: "headline", label: "Hauptzeile", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "text" }, { name: "en", label: "Englisch", widget: "text" } ] }
-              - { name: "subline", label: "Unterzeile", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-              - { name: "subtext", label: "Zusatztext", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "text" }, { name: "en", label: "Englisch", widget: "text" } ] }
-              - { name: "cta_portfolio", label: "Button: Portfolio", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-              - { name: "cta_stories", label: "Button: Stories", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-          - name: "sections"
-            label: "Startseite - Abschnitte"
-            widget: "object"
-            fields:
-              - { name: "gallery_kicker", label: "Galerie - Mini-Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-              - { name: "gallery_title", label: "Galerie - Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-              - { name: "latest_kicker", label: "Aktuell - Mini-Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-              - { name: "latest_title", label: "Aktuell - Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-              - { name: "discover_kicker", label: "Entdecken - Mini-Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-              - { name: "discover_title", label: "Entdecken - Titel", widget: "object", fields: [ { name: "de", label: "Deutsch", widget: "string" }, { name: "en", label: "Englisch", widget: "string" } ] }
-          - name: "pagetitles"
-            label: "Seiten-Ueberschriften"
-            widget: "object"
-            fields:
-              - { name: "portfolio_kicker", label: "Portfolio Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "portfolio_title", label: "Portfolio Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "portfolio_intro", label: "Portfolio Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "stories_kicker", label: "Stories Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "stories_title", label: "Stories Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "stories_intro", label: "Stories Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "trips_kicker", label: "Reisen Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "trips_title", label: "Reisen Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "trips_intro", label: "Reisen Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "gear_kicker", label: "Equipment Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "gear_title", label: "Equipment Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "gear_intro", label: "Equipment Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-          - name: "about"
-            label: "Ueber uns"
-            widget: "object"
-            fields:
-              - { name: "kicker", label: "Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "title", label: "Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "intro", label: "Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "person1_role", label: "Alexandra - Rolle", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "person1_bio", label: "Alexandra - Bio", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "person2_role", label: "David - Rolle", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "person2_bio", label: "David - Bio", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "why_title", label: "Warum USA - Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "why_text", label: "Warum USA - Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "person1_gear", label: "Alexandra - Ausrüstungszeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "person2_gear", label: "David - Ausrüstungszeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-          - name: "contact"
-            label: "Kontakt"
-            widget: "object"
-            fields:
-              - { name: "kicker", label: "Mini-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "title", label: "Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "intro", label: "Einleitung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "direct_title", label: "Direkt-Titel", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "direct_text", label: "Direkt-Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "location", label: "Standort-Zeile", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "form_success", label: "Formular: Danke-Meldung", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - { name: "form_name", label: "Formular: Label Name", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "form_email", label: "Formular: Label E-Mail", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "form_message", label: "Formular: Label Nachricht", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "form_send", label: "Formular: Button-Text", widget: "object", fields: [ { name: "de", label: "DE", widget: "string" }, { name: "en", label: "EN", widget: "string" } ] }
-              - { name: "form_note", label: "Formular: Hinweistext", widget: "object", fields: [ { name: "de", label: "DE", widget: "text" }, { name: "en", label: "EN", widget: "text" } ] }
-              - name: "channels"
-                label: "Kontakt-Kanäle (E-Mail, Social Media)"
-                widget: "list"
-                label_singular: "Kanal"
-                summary: "{{fields.type}}: {{fields.label}}"
-                hint: "Beliebig erweiterbar. Wähle den Typ, dann erscheint das passende Symbol automatisch."
-                fields:
-                  - name: "type"
-                    label: "Typ / Plattform"
-                    widget: "select"
-                    options:
-                      - { label: "E-Mail", value: "email" }
-                      - { label: "Instagram", value: "instagram" }
-                      - { label: "Facebook", value: "facebook" }
-                      - { label: "TikTok", value: "tiktok" }
-                      - { label: "YouTube", value: "youtube" }
-                      - { label: "X / Twitter", value: "x" }
-                      - { label: "Telefon", value: "phone" }
-                      - { label: "WhatsApp", value: "whatsapp" }
-                      - { label: "Pinterest", value: "pinterest" }
-                      - { label: "Website / Sonstiges", value: "web" }
-                  - { name: "label", label: "Anzeigetext", widget: "string", hint: "z.B. @euername oder die E-Mail-Adresse" }
-                  - { name: "url", label: "Link", widget: "string", hint: "z.B. https://instagram.com/euername oder mailto:hallo@... " }
+        - name: de
+          label: Deutsch
+          widget: text
+        - name: en
+          label: Englisch
+          widget: text
+      - name: cta_portfolio
+        label: 'Button: Portfolio'
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+      - name: cta_stories
+        label: 'Button: Stories'
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+    - name: sections
+      label: Abschnitte
+      widget: object
+      fields:
+      - name: gallery_kicker
+        label: Galerie - Mini-Titel
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+      - name: gallery_title
+        label: Galerie - Titel
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+      - name: latest_kicker
+        label: Aktuell - Mini-Titel
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+      - name: latest_title
+        label: Aktuell - Titel
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+      - name: discover_kicker
+        label: Entdecken - Mini-Titel
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+      - name: discover_title
+        label: Entdecken - Titel
+        widget: object
+        fields:
+        - name: de
+          label: Deutsch
+          widget: string
+        - name: en
+          label: Englisch
+          widget: string
+  - name: pagetitles
+    label: 📐 Seiten-Überschriften
+    file: content/page-titles.json
+    description: Die Überschriften von Portfolio, Stories, Reisen und Equipment.
+    fields:
+    - name: portfolio_kicker
+      label: Portfolio Mini-Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: portfolio_title
+      label: Portfolio Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: portfolio_intro
+      label: Portfolio Einleitung
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: stories_kicker
+      label: Stories Mini-Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: stories_title
+      label: Stories Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: stories_intro
+      label: Stories Einleitung
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: trips_kicker
+      label: Reisen Mini-Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: trips_title
+      label: Reisen Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: trips_intro
+      label: Reisen Einleitung
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: gear_kicker
+      label: Equipment Mini-Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: gear_title
+      label: Equipment Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: gear_intro
+      label: Equipment Einleitung
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+  - name: about
+    label: 👥 Über uns
+    file: content/about.json
+    description: Alle Texte der Über-uns-Seite.
+    fields:
+    - name: kicker
+      label: Mini-Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: title
+      label: Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: intro
+      label: Einleitung
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: person1_role
+      label: Alexandra - Rolle
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: person1_bio
+      label: Alexandra - Bio
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: person2_role
+      label: David - Rolle
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: person2_bio
+      label: David - Bio
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: why_title
+      label: Warum USA - Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: why_text
+      label: Warum USA - Text
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: person1_gear
+      label: Alexandra - Ausrüstungszeile
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: person2_gear
+      label: David - Ausrüstungszeile
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+  - name: contact
+    label: ✉️ Kontakt
+    file: content/contact.json
+    description: Texte, Formular und Kontakt-Kanäle der Kontaktseite.
+    fields:
+    - name: kicker
+      label: Mini-Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: title
+      label: Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: intro
+      label: Einleitung
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: direct_title
+      label: Direkt-Titel
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: direct_text
+      label: Direkt-Text
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: location
+      label: Standort-Zeile
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: form_success
+      label: 'Formular: Danke-Meldung'
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: form_name
+      label: 'Formular: Label Name'
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: form_email
+      label: 'Formular: Label E-Mail'
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: form_message
+      label: 'Formular: Label Nachricht'
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: form_send
+      label: 'Formular: Button-Text'
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: string
+      - name: en
+        label: EN
+        widget: string
+    - name: form_note
+      label: 'Formular: Hinweistext'
+      widget: object
+      fields:
+      - name: de
+        label: DE
+        widget: text
+      - name: en
+        label: EN
+        widget: text
+    - name: channels
+      label: Kontakt-Kanäle (E-Mail, Social Media)
+      widget: list
+      label_singular: Kanal
+      summary: '{{fields.type}}: {{fields.label}}'
+      hint: Beliebig erweiterbar. Wähle den Typ, dann erscheint das passende Symbol automatisch.
+      fields:
+      - name: type
+        label: Typ / Plattform
+        widget: select
+        options:
+        - label: E-Mail
+          value: email
+        - label: Instagram
+          value: instagram
+        - label: Facebook
+          value: facebook
+        - label: TikTok
+          value: tiktok
+        - label: YouTube
+          value: youtube
+        - label: X / Twitter
+          value: x
+        - label: Telefon
+          value: phone
+        - label: WhatsApp
+          value: whatsapp
+        - label: Pinterest
+          value: pinterest
+        - label: Website / Sonstiges
+          value: web
+      - name: label
+        label: Anzeigetext
+        widget: string
+        hint: z.B. @euername oder die E-Mail-Adresse
+      - name: url
+        label: Link
+        widget: string
+        hint: 'z.B. https://instagram.com/euername oder mailto:hallo@... '
