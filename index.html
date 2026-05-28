@@ -510,9 +510,10 @@
 <body>
 
 <div class="ww-admin-bar">
-  <strong>Admin-Modus aktiv</strong> — klicke auf ein Stift-Symbol zum Bearbeiten oder auf Grün zum Erstellen.
+  <strong>Admin-Modus aktiv</strong> — Stift = bearbeiten, Grün = neu erstellen.
   <a onclick="wwOpenAdmin()">CMS öffnen</a> ·
-  <a onclick="wwLogoutAdmin()">Admin-Ansicht verlassen</a>
+  <a onclick="wwLogoutAdmin()">Ansicht verlassen</a> ·
+  <a onclick="wwFullLogout()">Abmelden</a>
 </div>
 
 <header>
@@ -2083,22 +2084,26 @@ function wwHasDecapToken() {
 
 function wwIsAdmin() {
   try {
-    // Reiner Test-Schalter (?admin=1) – unabhaengig vom Login, nur zum Ansehen
-    if (sessionStorage.getItem('ww-admin-on') === '1') return true;
-    if (location.search.indexOf('admin=1') !== -1) {
-      sessionStorage.setItem('ww-admin-on', '1');
-      return true;
+    // Frisches Logout-Signal aus dem CMS hat IMMER Vorrang
+    var lo = localStorage.getItem('ww-just-logged-out');
+    if (lo) {
+      localStorage.removeItem('ww-just-logged-out');
+      try {
+        sessionStorage.removeItem('ww-admin-on');
+        localStorage.removeItem('ww-admin-active');
+      } catch(e){}
+      return false;
     }
+    // Reiner Test-Schalter (?admin=1) – gilt nur fuer diesen Seitenaufruf,
+    // wird NICHT dauerhaft gespeichert (sonst bleibt der Admin-Modus haengen).
+    if (location.search.indexOf('admin=1') !== -1) return true;
     // Manuell verlassen?
     if (sessionStorage.getItem('ww-admin-off') === '1') return false;
-    // MASSGEBLICH: echter Decap-Login-Token. Kein Token = ausgeloggt.
-    var loggedIn = wwHasDecapToken();
-    // Hilfsmarkierung mit dem echten Zustand synchron halten
-    try {
-      if (loggedIn) localStorage.setItem('ww-admin-active', '1');
-      else localStorage.removeItem('ww-admin-active');
-    } catch(e){}
-    return loggedIn;
+    // MASSGEBLICH: die Markierung, die die admin-Seite (CMS) beim Login setzt
+    // und beim Logout entfernt. Decap 3.x speichert den Token nicht zuverlaessig
+    // im localStorage, daher ist diese vom CMS gepflegte Markierung der
+    // verlaessliche Weg.
+    return localStorage.getItem('ww-admin-active') === '1';
   } catch (e) { return false; }
 }
 
@@ -2158,27 +2163,25 @@ function wwOpenAdmin() { window.open('/admin/', '_blank'); }
    - Noch nicht → CMS-Login in neuem Tab; nach Login hier zurueck (Polling). */
 function wwEnterAdmin() {
   try { sessionStorage.removeItem('ww-admin-off'); } catch(e){}
-  if (wwIsAdmin()) {
-    sessionStorage.setItem('ww-admin-on', '1');
+  // Schon eingeloggt (CMS hat Markierung gesetzt)? -> Admin-Modus sofort an.
+  if (localStorage.getItem('ww-admin-active') === '1') {
     wwApplyAdminMode();
     window.scrollTo(0, 0);
     return;
   }
-  // Nicht eingeloggt: CMS-Login oeffnen und auf erfolgreichen Login warten
-  var cmsTab = window.open('/admin/', '_blank');
+  // Nicht eingeloggt: CMS-Login in neuem Tab; sobald eingeloggt, hier umschalten.
+  window.open('/admin/', '_blank');
   var tries = 0;
   var iv = setInterval(function(){
     tries++;
     if (localStorage.getItem('ww-admin-active') === '1') {
       clearInterval(iv);
-      sessionStorage.setItem('ww-admin-on', '1');
       wwApplyAdminMode();
       window.scrollTo(0, 0);
-      // Hinweis-Leiste kurz hervorheben
       var bar = document.querySelector('.ww-admin-bar');
       if (bar) { bar.style.background = '#2d6a4f'; setTimeout(function(){ bar.style.background = ''; }, 1500); }
     }
-    if (tries > 240) clearInterval(iv); // nach ~6 Min aufgeben
+    if (tries > 240) clearInterval(iv);
   }, 1500);
 }
 
@@ -2188,6 +2191,26 @@ function wwLogoutAdmin() {
     sessionStorage.removeItem('ww-admin-on');
   } catch (e) {}
   document.body.classList.remove('ww-is-admin');
+}
+
+/* Vollstaendige Abmeldung direkt von der Website: loescht den Decap-Login.
+   Danach muss man sich neu einloggen, um wieder in den Admin-Modus zu kommen. */
+function wwFullLogout() {
+  try {
+    var toDel = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && (/(decap|netlify)-cms-user/i.test(k) || k === 'ww-admin-active')) toDel.push(k);
+    }
+    for (var j = 0; j < toDel.length; j++) localStorage.removeItem(toDel[j]);
+    sessionStorage.removeItem('ww-admin-on');
+    sessionStorage.removeItem('ww-admin-off');
+  } catch (e) {}
+  document.body.classList.remove('ww-is-admin');
+  // kurze Bestaetigung
+  var bar = document.querySelector('.ww-admin-bar');
+  if (bar) bar.textContent = 'Abgemeldet.';
+  setTimeout(function(){ window.location.href = '/'; }, 500);
 }
 
 function wwApplyAdminMode() {

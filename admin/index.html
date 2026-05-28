@@ -298,35 +298,56 @@
         });
         window.CMS.registerEventListener({
           name: 'logout',
-          handler: function(){ try { localStorage.removeItem('ww-admin-active'); } catch(e){} }
+          handler: function(){
+            try {
+              localStorage.removeItem('ww-admin-active');
+              // alle Decap-User-Keys aufraeumen, damit kein Resttoken bleibt
+              var toDel = [];
+              for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && /(decap|netlify)-cms-user/i.test(k)) toDel.push(k);
+              }
+              for (var j = 0; j < toDel.length; j++) localStorage.removeItem(toDel[j]);
+              // Signal fuer die Hauptseite, den Admin-Modus zu verlassen
+              localStorage.setItem('ww-just-logged-out', String(Date.now()));
+            } catch(e){}
+            // Nach kurzer Verzoegerung zur Hauptwebsite umleiten
+            setTimeout(function(){ window.location.href = '/'; }, 600);
+          }
         });
         return true;
       } catch(e){ console.warn('CMS-Hooks nicht möglich:', e); return false; }
     }
 
-    // Robuste Login-Erkennung per Polling: prueft regelmaessig, ob Decap einen
-    // eingeloggten User gespeichert hat, und setzt dann die Markierung.
-    // Funktioniert unabhaengig davon, ob das 'login'-Event feuert.
+    // Login-Erkennung per DOM: Wenn das CMS eingeloggt ist, rendert es die
+    // Verwaltungsoberflaeche (App-Header, Collections). Ist es ausgeloggt,
+    // zeigt es nur den Login-Bildschirm mit "Login"-Button.
+    // Das ist zuverlaessiger als die Token-Suche (Decap 3.x speichert den
+    // Token nicht zwingend im localStorage).
     (function(){
-      function hasDecapUser(){
+      function isLoggedIn(){
         try {
-          for (var i = 0; i < localStorage.length; i++) {
-            var k = localStorage.key(i);
-            if (k && /(decap|netlify)-cms-user/i.test(k)) {
-              var v = localStorage.getItem(k);
-              if (v && v.indexOf('token') !== -1) return true;
-            }
+          // Der Login-Screen hat einen Button mit "Login"-Text und KEINE
+          // Collection-Navigation. Die eingeloggte App hat eine Sidebar/Nav.
+          var loginBtns = document.querySelectorAll('button');
+          var hasLoginScreen = false;
+          for (var i = 0; i < loginBtns.length; i++) {
+            var t = (loginBtns[i].textContent || '').toLowerCase();
+            if (t.indexOf('login') !== -1 || t.indexOf('anmeld') !== -1) hasLoginScreen = true;
           }
-        } catch(e){}
-        return false;
+          // Eingeloggte App: es gibt einen "Quick add"/"New"-Bereich oder die
+          // Collection-Links im Seitenmenue.
+          var hasApp = !!document.querySelector('[class*="SidebarHeading"], [class*="Card"], [class*="ListCard"], nav a[href*="/collections/"]');
+          if (hasApp) return true;
+          if (hasLoginScreen) return false;
+          // Unklar -> letzten bekannten Zustand beibehalten
+          return localStorage.getItem('ww-admin-active') === '1';
+        } catch(e){ return false; }
       }
       var iv = setInterval(function(){
         try {
-          if (hasDecapUser()) {
-            localStorage.setItem('ww-admin-active', '1');
-          } else {
-            localStorage.removeItem('ww-admin-active');
-          }
+          if (isLoggedIn()) localStorage.setItem('ww-admin-active', '1');
+          else localStorage.removeItem('ww-admin-active');
         } catch(e){}
       }, 1500);
     })();
