@@ -708,6 +708,10 @@ collections:
       - name: en
         label: EN
         widget: text
+    - name: person1_photo
+      label: Alexandra - Foto
+      widget: image
+      required: false
     - name: person2_role
       label: David - Rolle
       widget: object
@@ -728,6 +732,10 @@ collections:
       - name: en
         label: EN
         widget: text
+    - name: person2_photo
+      label: David - Foto
+      widget: image
+      required: false
     - name: why_title
       label: Warum USA - Titel
       widget: object
