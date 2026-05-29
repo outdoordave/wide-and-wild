@@ -1369,11 +1369,11 @@ function buildAlbumFromData(slug, data) {
         // NEUES Format: photos ist ein flaches Array von Bildpfaden.
         if (!ph) continue;
         imgPath = ph;
-        isHi = !!hlSet[normalizePath(ph)];
+        isHi = !!hlSet[normalizePath(ph)] || !!G_HIGHLIGHTS[normalizePath(ph)];
       } else if (ph && ph.image) {
         // ALTES Format: photos ist eine Liste von Objekten { image, highlight }.
         imgPath = ph.image;
-        isHi = (ph.highlight === true) || !!hlSet[normalizePath(ph.image)];
+        isHi = (ph.highlight === true) || !!hlSet[normalizePath(ph.image)] || !!G_HIGHLIGHTS[normalizePath(ph.image)];
       } else {
         continue;
       }
@@ -1443,10 +1443,34 @@ function rebuildPortfolioFromAlbums() {
   portfolio = flat;
 }
 
+/* ZENTRALE Highlights (album-uebergreifend).
+   Gepflegt im CMS-Menue "⭐ Highlights" -> content/highlights.json
+   ({ images: ["/uploads/x.jpg", ...] }). Wird als normalisiertes Pfad-Set
+   gehalten und in buildAlbumFromData mit dem (alten) Per-Foto-Flag ver-ODER-t,
+   damit ein zentral markiertes Foto ueberall als Highlight gilt. */
+var G_HIGHLIGHTS = {};
+function loadHighlights() {
+  return wwFetch('content/highlights.json')
+    .then(function(r){ return r.ok ? r.json() : {}; })
+    .then(function(data){
+      G_HIGHLIGHTS = {};
+      var arr = (data && Array.isArray(data.images)) ? data.images : [];
+      for (var i = 0; i < arr.length; i++) {
+        var p = arr[i];
+        // Liste kann flache Pfade ODER {image:"..."}-Objekte enthalten.
+        if (p && typeof p === 'object' && p.image) p = p.image;
+        if (typeof p === 'string' && p) G_HIGHLIGHTS[normalizePath(p)] = true;
+      }
+    })
+    .catch(function(){ G_HIGHLIGHTS = {}; });
+}
+
 /* Laedt alle Alben aus content/albums/ via Index-Datei.
    Sortierung kommt aus dem Index (build-indexes.js): angepinnte zuerst,
-   dann nach Datum (neueste oben). */
+   dann nach Datum (neueste oben). Vorher werden die zentralen Highlights
+   geladen, damit beim Aufbau der Alben das Highlight-Set bereitsteht. */
 function loadAlbums() {
+  loadHighlights().then(function(){
   wwFetch('content/albums-index.json')
     .then(function(r){ if (!r.ok) throw new Error('no album index'); return r.json(); })
     .then(function(idx){
@@ -1487,6 +1511,7 @@ function loadAlbums() {
       rebuildPortfolioFromAlbums();
       renderGallery(); renderRandomMoments();
     });
+  });
 }
 
 /* Galerie-Sortier-Modus:
@@ -1760,6 +1785,22 @@ function escapeHtml(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* Macht aus einer im CMS hinterlegten Link-Eingabe eine sichere, klickbare URL.
+   - leer -> '' (kein Link)
+   - javascript:/data:/vbscript: -> '' (ignoriert, Sicherheit)
+   - http(s)://, mailto:, tel: -> unveraendert uebernommen
+   - //host -> https: davor
+   - alles andere (z.B. "amazon.de/..", "www.x.de") -> "https://" davor,
+     damit kein kaputter interner Link entsteht. */
+function wwSafeUrl(raw) {
+  var s = String(raw == null ? '' : raw).trim();
+  if (!s) return '';
+  if (/^(javascript|data|vbscript):/i.test(s)) return '';
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(s)) return s;
+  if (/^\/\//.test(s)) return 'https:' + s;
+  return 'https://' + s.replace(/^\/+/, '');
 }
 
 /* Momentaufnahmen auf der Startseite:
@@ -2414,12 +2455,13 @@ function renderGear() {
     var itemsHtml = '';
     for (var j = 0; j < c.items.length; j++) {
       var it = c.items[j];
-      var nameHtml = it.link
-        ? '<a class="gr-name" href="' + it.link + '" target="_blank" rel="noopener">' + it.name + '</a>'
-        : '<span class="gr-name">' + it.name + '</span>';
+      var safeLink = wwSafeUrl(it.link);
+      var nameHtml = safeLink
+        ? '<a class="gr-name" href="' + escapeHtml(safeLink) + '" target="_blank" rel="noopener">' + escapeHtml(it.name) + '</a>'
+        : '<span class="gr-name">' + escapeHtml(it.name) + '</span>';
       itemsHtml +=
         '<div class="gear-row">' + nameHtml +
-        '<span class="gr-brand">' + it.brand + '</span></div>';
+        '<span class="gr-brand">' + escapeHtml(it.brand) + '</span></div>';
     }
     html +=
       '<div class="gear-cat"><h3>' + d.name + '</h3>' + itemsHtml + '</div>';
