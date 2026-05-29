@@ -186,6 +186,31 @@ collections:
       default: false
       hint: Aus = Stories-Reiter und Hero-Button werden auf der Webseite versteckt. Bestehende Stories bleiben hier im CMS erhalten.
 
+# === 🖼️ Galerie-Sortierung (Schalter) ===
+- name: gallery_settings
+  label: 🖼️ Galerie-Sortierung
+  files:
+  - name: sortmodes
+    label: Sortier-Knöpfe der Galerie
+    file: content/gallery-settings.json
+    description: Steuert, welche Sortier-Knöpfe über der Galerie erscheinen (Alben / Neueste / A–Z). Mindestens einer sollte an sein.
+    fields:
+    - name: show_album
+      label: „Alben" anzeigen (nach Alben gruppiert)
+      widget: boolean
+      default: true
+      hint: Zeigt die Galerie in Album-Sektionen mit Überschrift.
+    - name: show_chronological
+      label: „Neueste" anzeigen (nach Datum)
+      widget: boolean
+      default: true
+      hint: Alle Fotos flach, neueste zuerst.
+    - name: show_alphabetical
+      label: „A–Z" anzeigen (nach Albumname)
+      widget: boolean
+      default: true
+      hint: Alle Fotos flach, Alben alphabetisch.
+
 # === 📖 Stories / Beiträge ===
 - name: stories
   label: 📖 Stories
