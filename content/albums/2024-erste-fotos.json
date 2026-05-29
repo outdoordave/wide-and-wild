@@ -1,16 +1,40 @@
 {
-  "name_de": "Erste Fotos",
+  "name_de": "Firsts ",
   "date": "2024-01-01",
-  "note_de": "Beispiel-Album zum Rumprobieren. Hier sind die bestehenden Bilder gesammelt - kann später gelöscht oder umbenannt werden.",
+  "note_de": "Erstes Album, mit einigen unserer Werke",
   "photos": [
-    { "image": "/uploads/a7406420.jpg", "highlight": true },
-    { "image": "/uploads/img_5916-3.jpg", "highlight": false },
-    { "image": "/uploads/img_5666.jpg", "highlight": false },
-    { "image": "/uploads/img_5273.jpg", "highlight": false },
-    { "image": "/uploads/img_0206.jpg", "highlight": true },
-    { "image": "/uploads/img_6039.jpg", "highlight": false },
-    { "image": "/uploads/img_4101.jpg", "highlight": false },
-    { "image": "/uploads/dji_0136_edit.jpeg", "highlight": false }
+    {
+      "image": "/uploads/a7406420.jpg",
+      "highlight": true
+    },
+    {
+      "image": "/uploads/img_5916-3.jpg",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/img_5666.jpg",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/img_5273.jpg",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/img_0206.jpg",
+      "highlight": true
+    },
+    {
+      "image": "/uploads/img_6039.jpg",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/img_4101.jpg",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/dji_0136_edit.jpeg",
+      "highlight": false
+    }
   ],
   "linked_trip": "",
   "pin": {
