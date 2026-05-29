@@ -213,6 +213,49 @@
   .album-section:last-child { margin-bottom: 0; }
   .gallery-group-title { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--c-ink); margin-bottom: 6px; padding-top: 4px; }
   .album-note { font-size: 15px; color: var(--c-ink-soft); margin-bottom: 18px; max-width: 720px; line-height: 1.5; }
+  /* Kopfzeile mit Aufklapp-Schalter */
+  .album-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+  .album-head-text { cursor: pointer; flex: 1; }
+  .album-head-text .gallery-group-title { margin-bottom: 4px; }
+  .album-head-text .album-note { margin-bottom: 0; }
+  .album-toggle {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; border: 1.5px solid var(--c-line); color: var(--c-ink-soft);
+    border-radius: 999px; padding: 7px 14px; cursor: pointer; font-family: var(--font-body);
+    font-size: 13px; font-weight: 600; transition: border-color .2s, color .2s, background .2s;
+    white-space: nowrap; margin-top: 4px;
+  }
+  .album-toggle:hover { border-color: var(--c-accent); color: var(--c-accent); }
+  .album-toggle[aria-expanded="true"] { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
+  .album-toggle-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+    background: rgba(0,0,0,0.08); font-size: 11px; font-weight: 700;
+  }
+  .album-toggle[aria-expanded="true"] .album-toggle-count { background: rgba(255,255,255,0.22); }
+  /* Zugeklappte Diashow */
+  .album-slideshow { position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 16/9; background: #2a241c; }
+  .album-slide-stage { position: absolute; inset: 0; cursor: pointer; }
+  .album-slide {
+    position: absolute; inset: 0; background-size: cover; background-position: center;
+    opacity: 0; transition: opacity .9s ease;
+  }
+  .album-slide.active { opacity: 1; }
+  .album-slide-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(28,24,18,0.42); color: #fff; font-size: 26px; line-height: 1;
+    display: flex; align-items: center; justify-content: center; padding-bottom: 3px;
+    transition: background .2s; z-index: 2;
+  }
+  .album-slide-arrow:hover { background: var(--c-accent); }
+  .album-slide-arrow.prev { left: 12px; }
+  .album-slide-arrow.next { right: 12px; }
+  @media (max-width: 640px) {
+    .album-head { flex-direction: column; gap: 8px; }
+    .album-slideshow { aspect-ratio: 4/3; }
+    .album-slide-arrow { width: 34px; height: 34px; font-size: 22px; }
+  }
   /* Link zum Album auf der Reise-Detailseite */
   .trip-album-link { margin: 24px 0; padding: 16px 20px; background: var(--c-bg-alt); border-left: 3px solid var(--c-accent); border-radius: 4px; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; transition: background .15s; }
   .trip-album-link:hover { background: var(--c-line); }
@@ -220,12 +263,12 @@
   .trip-album-link .arrow { color: var(--c-accent); font-weight: 700; }
 
   /* ============ LIGHTBOX ============ */
-  .lightbox { position: fixed; inset: 0; z-index: 1100; background: rgba(20,17,12,0.94); display: none; align-items: center; justify-content: center; padding: 40px; }
+  .lightbox { position: fixed; inset: 0; z-index: 1100; background: rgba(20,17,12,0.94); display: none; align-items: center; justify-content: center; padding: 24px; }
   .lightbox.open { display: flex; }
-  .lightbox .lb-inner { max-width: 900px; width: 100%; text-align: center; }
-  .lightbox .ph { width: 100%; aspect-ratio: 3/2; border-radius: var(--radius); position: relative; }
-  .lightbox .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
-  .lightbox .cap { color: var(--c-dark-ink); margin-top: 18px; font-family: var(--font-display); font-size: 20px; }
+  .lightbox .lb-inner { max-width: 1500px; width: 100%; text-align: center; margin-bottom: 92px; }
+  .lightbox .ph { width: 100%; height: 78vh; border-radius: var(--radius); position: relative; }
+  .lightbox .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border-radius: var(--radius); }
+  .lightbox .cap { color: var(--c-dark-ink); margin-top: 12px; font-family: var(--font-display); font-size: 14px; opacity: .85; }
   .lb-close { position: fixed; top: 22px; right: 24px; width: 46px; height: 46px; border-radius: 50%; background: rgba(240,229,212,0.16); color: #fff; border: none; font-size: 22px; cursor: pointer; z-index: 1102; }
   /* Blätter-Pfeile links/rechts außen */
   .lb-nav {
@@ -1436,31 +1479,137 @@ function setGalleryMode(mode) {
   renderGallery();
 }
 
+/* Merkt sich pro Album-Slug, ob es aufgeklappt ist (Default: zu).
+   Bleibt über Re-Renders (z.B. Sprachwechsel) erhalten. */
+var albumOpenState = {};
+/* Laufende Diashow-Timer, damit wir sie bei Re-Render sauber stoppen. */
+var albumSlideTimers = [];
+function clearAlbumSlideTimers(){
+  for (var i = 0; i < albumSlideTimers.length; i++) clearInterval(albumSlideTimers[i]);
+  albumSlideTimers = [];
+}
+
+/* Baut die zugeklappte Album-Ansicht: eine automatische Diashow der Fotos
+   mit kleinen Pfeilen zum manuellen Durchschauen. Klick aufs Bild oeffnet
+   die Lightbox (ganzes Album, blaetterbar). */
+function makeAlbumSlideshow(alb) {
+  var box = document.createElement('div');
+  box.className = 'album-slideshow';
+  if (!alb.photos.length) { box.textContent = ''; return box; }
+
+  var idx = 0;
+  var stage = document.createElement('div');
+  stage.className = 'album-slide-stage';
+  // alle Fotos als gestapelte Schichten (CSS blendet die aktive ein)
+  for (var p = 0; p < alb.photos.length; p++) {
+    var ph = alb.photos[p];
+    var layer = document.createElement('div');
+    layer.className = 'album-slide' + (p === 0 ? ' active' : '');
+    var src = normalizePath(ph.image);
+    if (src) layer.style.backgroundImage = "url('" + src + "')";
+    stage.appendChild(layer);
+  }
+  box.appendChild(stage);
+
+  var layers = stage.querySelectorAll('.album-slide');
+  function show(n){
+    idx = (n + layers.length) % layers.length;
+    for (var i = 0; i < layers.length; i++) layers[i].classList.toggle('active', i === idx);
+  }
+
+  // Klick aufs Bild -> Lightbox mit ganzem Album, beim aktuellen Bild starten
+  stage.addEventListener('click', function(){
+    var list = alb.photos.map(function(x){ return { photo: x.image, c1: x.c1, c2: x.c2, img: x.img }; });
+    var albName = (currentLang === 'en' && alb.hasEN) ? alb.name_en : alb.name_de;
+    openLightboxGallery(list, idx, albName);
+  });
+
+  // kleine Pfeile (nur wenn mehr als 1 Foto)
+  if (alb.photos.length > 1) {
+    var prev = document.createElement('button');
+    prev.className = 'album-slide-arrow prev'; prev.type = 'button';
+    prev.setAttribute('aria-label','Vorheriges'); prev.textContent = '‹';
+    var next = document.createElement('button');
+    next.className = 'album-slide-arrow next'; next.type = 'button';
+    next.setAttribute('aria-label','Nächstes'); next.textContent = '›';
+    var auto;
+    function restartAuto(){
+      clearInterval(auto);
+      auto = setInterval(function(){ show(idx + 1); }, 4000);
+      // Timer registrieren, damit clearAlbumSlideTimers ihn stoppen kann
+      albumSlideTimers.push(auto);
+    }
+    prev.addEventListener('click', function(e){ e.stopPropagation(); show(idx - 1); restartAuto(); });
+    next.addEventListener('click', function(e){ e.stopPropagation(); show(idx + 1); restartAuto(); });
+    box.appendChild(prev); box.appendChild(next);
+    // Wischen auf der Diashow: links = nächstes, rechts = vorheriges
+    attachSwipe(stage,
+      function(){ show(idx + 1); restartAuto(); },
+      function(){ show(idx - 1); restartAuto(); });
+    restartAuto();
+  }
+  return box;
+}
+
 function renderGallery() {
+  // Laufende Diashow-Timer stoppen, bevor neu gezeichnet wird
+  clearAlbumSlideTimers();
   var grid = document.getElementById('galleryGrid');
   if (!grid) return;
   grid.innerHTML = '';
   if (!albums || !albums.length) return;
 
   if (galleryMode === 'album') {
-    // Alben in vorbestimmter Reihenfolge (aus Index): jeweils Titel + optional Notiz + Foto-Grid
+    // Alben in vorbestimmter Reihenfolge. Jedes Album startet ZUGEKLAPPT:
+    // Karte mit Titel + Diashow + kleinen Pfeilen. Aufklappen zeigt alle Fotos.
     for (var a = 0; a < albums.length; a++) {
       var alb = albums[a];
-      // Sektions-Wrapper, damit Toolbar (Stift zum Bearbeiten) ans Album dran kann
       var section = document.createElement('div');
       section.className = 'album-section ww-editable';
       var name = (currentLang === 'en' && alb.hasEN) ? alb.name_en : alb.name_de;
       var note = (currentLang === 'en' && alb.hasEN) ? alb.note_en : alb.note_de;
-      var head = '<h3 class="gallery-group-title">' + escapeHtml(name) + '</h3>';
-      if (note) head += '<p class="album-note">' + escapeHtml(note) + '</p>';
-      section.innerHTML = head + wwFileToolbar('portfolio', alb.slug);
-      // Foto-Grid
-      var sub = document.createElement('div');
-      sub.className = 'gallery';
-      for (var p = 0; p < alb.photos.length; p++) {
-        sub.appendChild(makeGalleryTile(alb, alb.photos[p]));
+      var isOpen = !!albumOpenState[alb.slug];
+
+      // Kopfzeile mit Aufklapp-Schalter
+      var head = document.createElement('div');
+      head.className = 'album-head';
+      head.innerHTML =
+        '<div class="album-head-text">' +
+          '<h3 class="gallery-group-title">' + escapeHtml(name) + '</h3>' +
+          (note ? '<p class="album-note">' + escapeHtml(note) + '</p>' : '') +
+        '</div>' +
+        '<button class="album-toggle" type="button" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
+          '<span class="album-toggle-label">' + (isOpen ? (currentLang==='en'?'Collapse':'Zuklappen') : (currentLang==='en'?'Show all':'Alle anzeigen')) + '</span>' +
+          '<span class="album-toggle-count">' + alb.photos.length + '</span>' +
+        '</button>';
+      section.appendChild(head);
+      // Bearbeiten-Toolbar (Stift) wie gehabt
+      var tb = document.createElement('div');
+      tb.innerHTML = wwFileToolbar('portfolio', alb.slug);
+      if (tb.firstChild) section.appendChild(tb.firstChild);
+
+      if (isOpen) {
+        // AUFGEKLAPPT: alle Fotos als Grid (wie bisher)
+        var sub = document.createElement('div');
+        sub.className = 'gallery';
+        for (var p = 0; p < alb.photos.length; p++) {
+          sub.appendChild(makeGalleryTile(alb, alb.photos[p]));
+        }
+        section.appendChild(sub);
+      } else {
+        // ZUGEKLAPPT: Diashow
+        section.appendChild(makeAlbumSlideshow(alb));
       }
-      section.appendChild(sub);
+
+      // Klick auf Kopfzeile/Toggle klappt um
+      (function(slug, sectionEl){
+        var toggleBtn = head.querySelector('.album-toggle');
+        var textEl = head.querySelector('.album-head-text');
+        function flip(){ albumOpenState[slug] = !albumOpenState[slug]; renderGallery(); }
+        toggleBtn.addEventListener('click', function(e){ e.stopPropagation(); flip(); });
+        textEl.addEventListener('click', flip);
+      })(alb.slug, section);
+
       grid.appendChild(section);
     }
   } else {
@@ -1613,8 +1762,10 @@ function centerFilmstripThumb(idx) {
 
 function showLbIndex(idx) {
   if (!lbGallery) return;
-  if (idx < 0) idx = 0;
-  if (idx > lbGallery.length - 1) idx = lbGallery.length - 1;
+  var n = lbGallery.length;
+  // Endlos umlaufen: nach dem letzten Bild wieder zum ersten und umgekehrt
+  if (idx < 0) idx = n - 1;
+  if (idx > n - 1) idx = 0;
   lbIndex = idx;
   var p = lbGallery[idx];
   var img = document.getElementById('lbImg');
@@ -1641,17 +1792,46 @@ function lbStep(dir) {
   showLbIndex(lbIndex + dir);
 }
 
+/* Macht ein Element horizontal wischbar (Touch).
+   onLeft  = nach links gewischt  -> "nächstes"
+   onRight = nach rechts gewischt -> "vorheriges"
+   Eine Mindeststrecke verhindert, dass ein Tippen als Wisch zählt.
+   Vertikales Scrollen bleibt möglich (wir reagieren nur auf überwiegend
+   horizontale Bewegungen). */
+function attachSwipe(el, onLeft, onRight) {
+  if (!el) return;
+  var x0 = null, y0 = null, t0 = 0;
+  el.addEventListener('touchstart', function(e){
+    if (!e.touches || !e.touches.length) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
+  }, { passive: true });
+  el.addEventListener('touchend', function(e){
+    if (x0 === null) return;
+    var t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+    if (!t) { x0 = null; return; }
+    var dx = t.clientX - x0;
+    var dy = t.clientY - y0;
+    var dt = Date.now() - t0;
+    x0 = null; y0 = null;
+    // Mindeststrecke 40px, überwiegend horizontal, nicht zu langsam
+    if (Math.abs(dx) < 40) return;
+    if (Math.abs(dx) < Math.abs(dy) * 1.4) return; // eher vertikal -> ignorieren
+    if (dt > 800) return;
+    if (dx < 0) { if (onLeft) onLeft(); }
+    else { if (onRight) onRight(); }
+  }, { passive: true });
+}
+
 function updateLbNav() {
   var prev = document.getElementById('lbPrev');
   var next = document.getElementById('lbNext');
   var strip = document.getElementById('lbFilmstrip');
   var multi = !!(lbGallery && lbGallery.length > 1);
-  // Im Einzelbild-Modus (kein lbGallery) Pfeile + Streifen verstecken
+  // Pfeile + Streifen nur im Galerie-Modus mit mehreren Bildern zeigen.
+  // Da endlos umlaufen wird, bleiben beide Pfeile durchgehend sichtbar.
   if (prev) prev.classList.toggle('lb-hidden', !multi);
   if (next) next.classList.toggle('lb-hidden', !multi);
   if (strip) strip.style.display = lbGallery ? 'flex' : 'none';
-  if (prev && multi) prev.classList.toggle('lb-hidden', lbIndex <= 0);
-  if (next && multi) next.classList.toggle('lb-hidden', lbIndex >= lbGallery.length - 1);
 }
 
 function openLightbox(p) {
@@ -2110,11 +2290,19 @@ function renderStory(i) {
   for (var n = 0; n < gb.length; n++) {
     (function(btn) { btn.addEventListener('click', function() { openStory(parseInt(btn.getAttribute('data-go'), 10)); }); })(gb[n]);
   }
-  // Bilder im Beitrag klickbar machen (oeffnet Lightbox)
+  // Bilder im Beitrag klickbar machen: als blätterbare/wischbare Gruppe öffnen
   var bodyImgs = content.querySelectorAll('.reader-body img');
+  var storyList = [];
+  for (var bi = 0; bi < bodyImgs.length; bi++) storyList.push(bodyImgs[bi].src);
+  var storyTitle = d.title || '';
   for (var k = 0; k < bodyImgs.length; k++) {
     (function(im){
-      im.addEventListener('click', function(){ openLightbox(im.src); });
+      im.style.cursor = 'pointer';
+      im.addEventListener('click', function(){
+        // Ganze Bildergruppe des Beitrags übergeben -> Blättern + Wischen
+        if (storyList.length > 1) wwOpenImage(im.src, storyList, storyTitle);
+        else wwOpenImage(im.src);
+      });
     })(bodyImgs[k]);
   }
 }
@@ -2535,12 +2723,21 @@ function renderTripGallery() {
   for (var i = 0; i < g.length; i++) {
     var cap = g[i].cap[currentLang] || '';
     html += '<figure>' +
-      '<img src="' + g[i].src + '" alt="' + cap.replace(/"/g,'&quot;') + '" loading="lazy" onclick="wwOpenImage(\'' + g[i].src + '\')">' +
+      '<img src="' + g[i].src + '" alt="' + cap.replace(/"/g,'&quot;') + '" loading="lazy" data-ww-grp="trip" data-ww-idx="' + i + '">' +
       (cap ? '<figcaption>' + cap + '</figcaption>' : '') +
       '</figure>';
   }
   html += '</div>';
   box.innerHTML = html;
+  // Klicks blätterbar machen: ganze Trip-Galerie als Gruppe
+  var list = g.map(function(x){ return x.src; });
+  var imgs = box.querySelectorAll('img[data-ww-grp="trip"]');
+  for (var k = 0; k < imgs.length; k++) {
+    (function(idx){
+      imgs[idx].style.cursor = 'pointer';
+      imgs[idx].addEventListener('click', function(){ wwOpenImage(list[idx], list, title); });
+    })(k);
+  }
 }
 
 function selectStop(i) {
@@ -2568,7 +2765,7 @@ function renderStopDetail() {
   if (s.photos && s.photos.length) {
     photosHtml = '<div class="ww-station-photos">';
     for (var p = 0; p < s.photos.length; p++) {
-      photosHtml += '<img src="' + s.photos[p] + '" alt="" loading="lazy" onclick="wwOpenImage(\'' + s.photos[p] + '\')">';
+      photosHtml += '<img src="' + s.photos[p] + '" alt="" loading="lazy" data-ww-grp="stop" data-ww-idx="' + p + '" style="cursor:pointer">';
     }
     photosHtml += '</div>';
   }
@@ -2582,21 +2779,37 @@ function renderStopDetail() {
     photosHtml +
     wwToolbar({ edit: { coll: 'trips', slug: currentTrip } }) +
     '</div>';
+  // Station-Fotos blätterbar machen (eigene Gruppe)
+  if (s.photos && s.photos.length) {
+    var slist = s.photos.slice();
+    var stitle = d.t || '';
+    var simgs = document.getElementById('tripDetail').querySelectorAll('img[data-ww-grp="stop"]');
+    for (var q = 0; q < simgs.length; q++) {
+      (function(idx){ simgs[idx].addEventListener('click', function(){ wwOpenImage(slist[idx], slist, stitle); }); })(q);
+    }
+  }
 }
 
-/* Einfache Bild-Lightbox fuer Galerie-Bilder */
-function wwOpenImage(src) {
-  var ov = document.getElementById('wwImgLightbox');
-  if (!ov) {
-    ov = document.createElement('div');
-    ov.id = 'wwImgLightbox';
-    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(20,16,12,.92);display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:24px';
-    ov.onclick = function(){ ov.style.display = 'none'; };
-    ov.innerHTML = '<img style="max-width:95%;max-height:95%;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6)">';
-    document.body.appendChild(ov);
+/* Öffnet ein Bild "voll" in der zentralen Lightbox.
+   - wwOpenImage(src): Einzelbild (Rückwärtskompatibilität, z.B. ein einzelnes Foto)
+   - wwOpenImage(src, list, title): blätterbare Gruppe. 'list' ist ein Array von
+     Bildpfaden (Strings) oder {src}-Objekten; es wird beim geklickten Bild
+     gestartet. Dadurch ist ÜBERALL Blättern + Wischen möglich, ohne je eine
+     Aufrufstelle zu vergessen -- alles läuft durch openLightboxGallery. */
+function wwOpenImage(src, list, title) {
+  if (list && list.length) {
+    var photos = [];
+    var startIdx = 0;
+    for (var i = 0; i < list.length; i++) {
+      var p = (typeof list[i] === 'string') ? list[i] : (list[i] && (list[i].src || list[i].image));
+      if (!p) continue;
+      photos.push({ photo: p });
+      if (normalizePath(p) === normalizePath(src)) startIdx = photos.length - 1;
+    }
+    if (photos.length) { openLightboxGallery(photos, startIdx, title || ''); return; }
   }
-  ov.querySelector('img').src = src;
-  ov.style.display = 'flex';
+  // Fallback: Einzelbild ohne Blättern
+  openLightbox(src);
 }
 
 function setTrip(t) {
@@ -2686,6 +2899,10 @@ function initSite() {
   // Blätter-Pfeile
   document.getElementById('lbPrev').addEventListener('click', function(e){ e.stopPropagation(); lbStep(-1); });
   document.getElementById('lbNext').addEventListener('click', function(e){ e.stopPropagation(); lbStep(1); });
+  // Wischen auf dem Lightbox-Bild: links = nächstes, rechts = vorheriges
+  attachSwipe(document.getElementById('lbImg'),
+    function(){ if (lbGallery) lbStep(1); },
+    function(){ if (lbGallery) lbStep(-1); });
 
   // Kontakt
   document.getElementById('cSend').addEventListener('click', handleSend);
@@ -2754,10 +2971,12 @@ function loadSiteTexts() {
     getJson('content/page-titles.json'),
     getJson('content/about.json'),
     getJson('content/contact.json'),
-    getJson('content/stories-settings.json')
+    getJson('content/stories-settings.json'),
+    getJson('content/gallery-settings.json')
   ]).then(function(parts){
     var home = parts[0] || {};
     var storiesSettings = parts[4] || {};
+    var gallerySettings = parts[5] || {};
     WW_SITE = {
       hero: home.hero || {},
       sections: home.sections || {},
@@ -2766,11 +2985,47 @@ function loadSiteTexts() {
       contact: parts[3] || {},
       // Stories-Schalter: liegt jetzt in stories-settings.json.
       // Fallback auf home.show_stories fuer alte Datenstaende.
-      show_stories: (storiesSettings.show_stories === true) || (home.show_stories === true)
+      show_stories: (storiesSettings.show_stories === true) || (home.show_stories === true),
+      // Galerie-Sortier-Knoepfe. Fallback: fehlt die Datei oder ein Feld,
+      // gilt der Knopf als AN (= bisheriges Verhalten, nichts bricht).
+      gallery_modes: {
+        album:         gallerySettings.show_album !== false,
+        chronological: gallerySettings.show_chronological !== false,
+        alphabetical:  gallerySettings.show_alphabetical !== false
+      }
     };
     applySiteTexts();
     applyStoriesVisibility();
+    applyGalleryModes();
   }).catch(function(){ /* Fallback: feste HTML-Texte bleiben stehen */ });
+}
+
+/* Blendet die Galerie-Sortier-Knoepfe gemaess CMS-Einstellung ein/aus und
+   sorgt dafuer, dass der aktive Modus immer ein erlaubter ist.
+   Fallback: ist alles aus (versehentlich), bleibt 'album' als Standard an. */
+function applyGalleryModes() {
+  var modes = (WW_SITE && WW_SITE.gallery_modes) || { album:true, chronological:true, alphabetical:true };
+  var bar = document.getElementById('galleryModes');
+  if (!bar) return;
+  var anyOn = modes.album || modes.chronological || modes.alphabetical;
+  if (!anyOn) modes = { album:true, chronological:false, alphabetical:false };
+  var btns = bar.querySelectorAll('button');
+  var firstVisible = null;
+  for (var i = 0; i < btns.length; i++) {
+    var m = btns[i].getAttribute('data-mode');
+    var on = !!modes[m];
+    btns[i].style.display = on ? '' : 'none';
+    if (on && !firstVisible) firstVisible = m;
+  }
+  // Ganze Leiste verstecken, wenn nur EIN Modus aktiv ist (Knopf waere sinnlos)
+  var visibleCount = (modes.album?1:0) + (modes.chronological?1:0) + (modes.alphabetical?1:0);
+  bar.style.display = (visibleCount <= 1) ? 'none' : '';
+  // Falls der aktuelle Modus abgeschaltet wurde -> auf ersten sichtbaren wechseln
+  if (!modes[galleryMode] && firstVisible) {
+    setGalleryMode(firstVisible);
+  } else {
+    renderGallery();
+  }
 }
 
 /* Schaltet alle Stories-Bereiche der Webseite ein/aus.
