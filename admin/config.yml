@@ -56,85 +56,121 @@ collections:
 # === 🖼️ Portfolio ===
 - name: portfolio
   label: 🖼️ Galerie
-  files:
+  label_singular: Album
+  description: Alle Galerie-Alben. Ein Album = ein Ordner mit Fotos. Mehrere Fotos auf einmal hochladen mit Strg/Cmd+Klick im Datei-Dialog.
+  folder: content/albums
+  create: true
+  extension: json
+  format: json
+  identifier_field: name_de
+  slug: '{{year}}-{{slug}}'
+  summary: '{{name_de}}  -  {{date}}'
+  view_style: grid
+  sortable_fields:
+  - date
+  - name_de
+  fields:
+  - name: name_de
+    label: Album-Name
+    widget: string
+    hint: z.B. USA-Westen 2024, Yosemite Frühling 2025
+  - name: date
+    label: Datum
+    widget: datetime
+    date_format: YYYY-MM-DD
+    time_format: false
+    format: YYYY-MM-DD
+    picker_utc: false
+    hint: 'Bestimmt die Sortierung (neueste oben). Bei Reisen: Datum der Reise.'
+  - name: note_de
+    label: Notiz / Beschreibung (optional)
+    widget: text
+    required: false
+    hint: 'Optional: ein, zwei Sätze, die unter dem Album-Titel erscheinen.'
   - name: photos
-    label: Galerie-Fotos
-    file: content/portfolio.json
-    description: Alle Galerie-Bilder. Mit + ein neues Foto hinzufügen (oder mehrere auf einmal). Anlass eintippen, vorhandene werden vorgeschlagen.
+    label: Fotos
+    label_singular: Foto
+    widget: list
+    summary: '{{fields.image | default("(Foto)")}}'
+    hint: Mit + ein neues Foto hinzufügen. Im Datei-Dialog mehrere mit Strg/Cmd+Klick auswählen.
     fields:
-    - name: items
-      label: Fotos
-      label_singular: Foto
-      widget: list
-      summary: '{{fields.title_de}} — {{fields.occasion}}'
-      fields:
-      - name: image
-        label: Foto
-        widget: image
-        hint: 'Bild hochladen. Empfohlen: JPG/PNG bis ca. 10 MB. Mehrere Bilder auf einmal: im Datei-Dialog Strg/Cmd+Klick.'
-        media_library:
-          config:
-            multiple: true
-      - name: title_de
-        label: Titel
-        widget: string
-        required: false
-      - name: occasion
-        label: Anlass
-        widget: relation
-        collection: portfolio
-        file: photos
-        search_fields:
-        - 'items.*.occasion'
-        value_field: 'items.*.occasion'
-        display_fields:
-        - 'items.*.occasion'
-        required: false
-        multiple: false
-        hint: 'Frei eingeben oder vorhandenen auswählen. Beispiele: "USA-Roadtrip 2024", "2024", "Iceland 2025". Leer = Sonstiges.'
-      - name: wide
-        label: Breites Bild (2 Spalten)
-        widget: boolean
-        default: false
-        required: false
-      - name: upload_date
-        label: Upload-Datum
-        widget: hidden
-        default: ''
-      - name: pin
-        label: 📌 Anpinnen & Sortierung
-        widget: object
-        collapsed: true
-        required: false
-        fields:
-        - name: highlight
-          label: Anpinnen
-          widget: boolean
-          default: false
-          required: false
-          hint: Angepinnte Fotos erscheinen oben in der Galerie.
-        - name: highlight_order
-          label: Pin-Reihenfolge
-          widget: number
-          value_type: int
-          default: 1
-          required: false
-          hint: Kleine Zahl = weiter oben.
-      - name: english
-        label: 🌐 Englische Version
-        widget: object
-        collapsed: true
-        required: false
-        fields:
-        - name: enabled
-          label: Englischen Titel anzeigen?
-          widget: boolean
-          default: false
-          required: false
-        - name: title_en
-          label: Titel (Englisch)
-          widget: string
-          required: false
+    - name: image
+      label: Bild
+      widget: image
+      media_library:
+        config:
+          multiple: true
+    - name: highlight
+      label: ⭐ Als Highlight markieren?
+      widget: boolean
+      default: false
+      required: false
+      hint: Highlights erscheinen in den Momentaufnahmen auf der Startseite.
+  - name: linked_trip
+    label: Gehört zu Reise (optional)
+    widget: relation
+    collection: trips
+    search_fields:
+    - title_de
+    value_field: '{{slug}}'
+    display_fields:
+    - title_de
+    required: false
+    multiple: false
+    hint: Wenn das Album zu einer Reise gehört, wird auf der Reise-Seite ein Link zum Album angezeigt.
+  - name: pin
+    label: 📌 Album anpinnen
+    widget: object
+    collapsed: true
+    required: false
+    fields:
+    - name: highlight
+      label: Album anpinnen
+      widget: boolean
+      default: false
+      required: false
+      hint: Angepinnte Alben erscheinen oben in der Galerie.
+    - name: highlight_order
+      label: Pin-Reihenfolge
+      widget: number
+      value_type: int
+      default: 1
+      required: false
+      hint: Kleine Zahl = weiter oben.
+  - name: english
+    label: 🌐 Englische Version
+    widget: object
+    collapsed: true
+    required: false
+    fields:
+    - name: enabled
+      label: Englischen Album-Namen anzeigen?
+      widget: boolean
+      default: false
+      required: false
+    - name: name_en
+      label: Album-Name (Englisch)
+      widget: string
+      required: false
+    - name: note_en
+      label: Notiz (Englisch)
+      widget: text
+      required: false
+
+# === 📖 Stories-Sichtbarkeit (Schalter) ===
+- name: stories_settings
+  label: 📖 Stories-Sichtbarkeit
+  files:
+  - name: visibility
+    label: Stories anzeigen?
+    file: content/stories-settings.json
+    description: Steuert, ob der Stories-Bereich auf der Webseite sichtbar ist. Wenn aus, ist auch der Reiter ausgeblendet.
+    fields:
+    - name: show_stories
+      label: 📖 Stories-Bereich auf der Webseite anzeigen?
+      widget: boolean
+      default: false
+      hint: Aus = Stories-Reiter und Hero-Button werden auf der Webseite versteckt. Bestehende Stories bleiben hier im CMS erhalten.
 
 # === 📖 Stories / Beiträge ===
 - name: stories
@@ -379,6 +415,19 @@ collections:
       default: 1
       required: false
       hint: Nur relevant wenn angepinnt. Kleine Zahl = weiter oben. Bei gleicher Zahl entscheidet das Datum.
+  - name: album_hint
+    label: 🖼️ Verknüpftes Album
+    widget: object
+    collapsed: false
+    required: false
+    hint: 'Wenn ein Album zu dieser Reise gehört (in der Galerie unter "Gehört zu Reise" einstellen), erscheint auf der Reise-Seite automatisch ein Link "Mehr Fotos im Album X". Diese Verknüpfung wird im Album gepflegt, nicht hier.'
+    fields:
+    - name: _info
+      label: Hinweis
+      widget: string
+      required: false
+      default: 'Album-Verknüpfung wird im Galerie-Album eingestellt'
+      hint: Dieses Feld ist nur ein Hinweis. Die Verknüpfung selbst stellst du in der Galerie beim jeweiligen Album ein (Dropdown "Gehört zu Reise").
   - name: gallery_block
     label: 🖼️ Reise-Galerie (Reisefazit)
     widget: object
@@ -482,12 +531,6 @@ collections:
     file: content/home-texts.json
     description: Großer Kopfbereich und die Abschnitte der Startseite.
     fields:
-    - name: show_stories
-      label: 📖 Stories-Bereich anzeigen?
-      widget: boolean
-      default: false
-      required: false
-      hint: Aus = Stories-Reiter und -Teaser auf der Website komplett versteckt (im CMS bleibt Stories aber pflegbar).
     - name: hero
       label: Großer Kopfbereich
       widget: object
