@@ -113,18 +113,11 @@ collections:
     widget: list
     label_singular: Foto
     required: false
-    summary: '{{fields.image}}'
-    hint: 'Mehrere Bilder auf einmal: im Datei-Dialog mit Strg/Cmd mehrere markieren – oder per Drag & Drop ziehen. Bei jedem Foto „⭐ Highlight" ankreuzen, wenn es zufällig in den Momentaufnahmen auf der Startseite erscheinen soll.'
-    fields:
-    - name: image
+    hint: 'Mehrere Bilder auf einmal: im Datei-Dialog mit Strg/Cmd mehrere markieren – oder per Drag & Drop ziehen. Highlights für die Startseite werden jetzt zentral im Menü „⭐ Highlights" gepflegt, nicht mehr hier pro Foto.'
+    field:
+      name: image
       label: Bild
       widget: image
-    - name: highlight
-      label: ⭐ Highlight (Startseite)
-      widget: boolean
-      default: false
-      required: false
-      hint: Angekreuzte Fotos erscheinen zufällig auf der Startseite.
   - name: linked_trip
     label: Gehört zu Reise (optional)
     widget: relation
@@ -176,27 +169,39 @@ collections:
       widget: text
       required: false
 
-# === 📖 Stories-Sichtbarkeit (Schalter) ===
-- name: stories_settings
-  label: 📖 Stories-Sichtbarkeit
+# === ⭐ Highlights (zentral, album-übergreifend) ===
+# Eine einzige Bilderliste. Hier werden ALLE hochgeladenen Bilder im Medien-
+# Picker angezeigt – du wählst deine Highlights an einer Stelle aus, ohne jedes
+# Album einzeln durchzuklicken. Diese Fotos erscheinen in den „Momentaufnahmen"
+# auf der Startseite.
+- name: highlights
+  label: ⭐ Highlights
   files:
-  - name: visibility
-    label: Stories anzeigen?
-    file: content/stories-settings.json
-    description: Steuert, ob der Stories-Bereich auf der Webseite sichtbar ist. Wenn aus, ist auch der Reiter ausgeblendet.
+  - name: list
+    label: Highlight-Fotos (Startseite)
+    file: content/highlights.json
+    description: Zentrale Auswahl der Highlight-Fotos für die „Momentaufnahmen" auf der Startseite. Album-übergreifend – einmal auswählen, fertig.
     fields:
-    - name: show_stories
-      label: 📖 Stories-Bereich auf der Webseite anzeigen?
-      widget: boolean
-      default: false
-      hint: Aus = Stories-Reiter und Hero-Button werden auf der Webseite versteckt. Bestehende Stories bleiben hier im CMS erhalten.
+    - name: images
+      label: Highlight-Fotos
+      widget: list
+      required: false
+      hint: '„Bild hinzufügen" klicken → im Medien-Fenster ein bereits hochgeladenes Foto auswählen (oder ein neues hochladen). Reihenfolge per Ziehen änderbar. Diese Bilder erscheinen zufällig in den Momentaufnahmen auf der Startseite.'
+      field:
+        name: image
+        label: Foto
+        widget: image
 
-# === 🖼️ Galerie-Sortierung (Schalter) ===
-- name: gallery_settings
-  label: 🖼️ Galerie-Sortierung
+# === ⚙️ Einstellungen (kleine Schalter, gebündelt) ===
+# Bündelt die selten gebrauchten Schalter in EINEM Menü statt mehrerer:
+# Galerie-Sortier-Knöpfe + Stories-Sichtbarkeit. Die Dateien bleiben dieselben
+# wie bisher (gallery-settings.json / stories-settings.json).
+- name: settings
+  label: ⚙️ Einstellungen
+  description: Kleine Schalter für die Website – selten anzufassen.
   files:
-  - name: sortmodes
-    label: Sortier-Knöpfe der Galerie
+  - name: gallery_sort
+    label: 🖼️ Galerie-Sortierung
     file: content/gallery-settings.json
     description: Steuert, welche Sortier-Knöpfe über der Galerie erscheinen (Alben / Neueste / A–Z). Mindestens einer sollte an sein.
     fields:
@@ -215,6 +220,16 @@ collections:
       widget: boolean
       default: true
       hint: Alle Fotos flach, Alben alphabetisch.
+  - name: stories_visibility
+    label: 📖 Stories-Sichtbarkeit
+    file: content/stories-settings.json
+    description: Steuert, ob der Stories-Bereich auf der Webseite sichtbar ist. Wenn aus, ist auch der Reiter ausgeblendet.
+    fields:
+    - name: show_stories
+      label: 📖 Stories-Bereich auf der Webseite anzeigen?
+      widget: boolean
+      default: false
+      hint: Aus = Stories-Reiter und Hero-Button werden auf der Webseite versteckt. Bestehende Stories bleiben im CMS erhalten.
 
 # === 📖 Stories / Beiträge ===
 - name: stories
