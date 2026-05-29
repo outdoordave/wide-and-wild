@@ -1121,10 +1121,23 @@ function pickHasEN(data) {
   if (data && data.english && typeof data.english.enabled === 'boolean') return data.english.enabled;
   return data && data.has_english === true;
 }
-/* Stations-Koordinaten liegen jetzt unter coords.lat/lon (alt: s.lat/s.lon) */
+/* Stations-Koordinaten: neu aus location (GeoJSON-String von Sveltias
+   Karten-Feld), sonst coords.lat/lon, sonst alt direkt s.lat/s.lon */
 function pickStopCoord(stop, which) {
-  if (stop && stop.coords && typeof stop.coords[which] === 'number') return stop.coords[which];
-  return stop && typeof stop[which] === 'number' ? stop[which] : null;
+  if (!stop) return null;
+  // NEU: Sveltia-Karten-Feld speichert GeoJSON als String:
+  // {"type":"Point","coordinates":[lon,lat]}  (Reihenfolge: lon, lat!)
+  if (typeof stop.location === 'string' && stop.location.indexOf('coordinates') !== -1) {
+    try {
+      var geo = JSON.parse(stop.location);
+      var c = geo && geo.coordinates;
+      if (c && typeof c[0] === 'number' && typeof c[1] === 'number') {
+        return which === 'lat' ? c[1] : c[0];
+      }
+    } catch (e) { /* fehlerhaftes GeoJSON -> auf Fallback ausweichen */ }
+  }
+  if (stop.coords && typeof stop.coords[which] === 'number') return stop.coords[which];
+  return typeof stop[which] === 'number' ? stop[which] : null;
 }
 
 function normalizePath(p) {
