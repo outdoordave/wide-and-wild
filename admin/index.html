@@ -144,6 +144,15 @@
     }
 
     function registerPreviews(){
+      // HINWEIS (Mai 2026): Diese Vorschau-Templates stammen aus der Decap-Zeit.
+      // Sveltia hat 'registerPreviewTemplate' noch NICHT implementiert (laut
+      // offizieller Doku vor v1.0 geplant) und baut auf Svelte statt React, stellt
+      // also kein globales window.h (React.createElement) bereit. Der Guard unten
+      // ('if (!CMSref || !href) return false') bricht deshalb unter Sveltia sofort
+      // sauber ab -> dieser Block ist aktuell INERT (tut nichts, bricht nichts).
+      // BEWUSST drangelassen: Sobald Sveltia das Feature nachruestet, koennen wir
+      // die Templates hier mit kleinen Anpassungen zurueckportieren.
+      //
       // Decap stellt 'h' (React.createElement) und 'CMS' global bereit.
       // In einer strict-IIFE kann window.h verzoegert sein – beide Wege pruefen.
       var CMSref = window.CMS || (typeof CMS !== 'undefined' ? CMS : null);
