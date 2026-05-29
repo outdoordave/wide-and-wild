@@ -6,6 +6,27 @@ backend:
   auth_endpoint: auth
 media_folder: uploads
 public_folder: /uploads
+
+# === 🖼️ Automatische Bild-Optimierung (Sveltia) ===
+# Bilder werden beim Hochladen NOCH IM BROWSER verkleinert und nach WebP
+# umgewandelt, BEVOR sie zu GitHub committet werden. Das loest das
+# Speicher-/Groessen-Problem: aus z.B. 80 MB Originalfotos werden wenige MB.
+# Gilt fuer ALLE Bild-Felder (Galerie, Startseite, Ausruestung ...).
+# quality 85 + max 2400px = sehr gute Qualitaet fuer eine Fotoseite.
+# Hinweis: In Safari dauert die Umwandlung etwas laenger (kein natives WebP),
+# der Upload geht aber durch. max_file_size greift NACH der Umwandlung.
+media_libraries:
+  default:
+    config:
+      max_file_size: 10000000   # 10 MB Sicherheitsnetz NACH der Optimierung
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 2400
+          height: 2400
+        svg:
+          optimize: true
 locale: de
 collections:
 
