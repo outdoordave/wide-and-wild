@@ -21,8 +21,10 @@ const path = require('path');
 const ROOT = __dirname;
 const STORIES_DIR = path.join(ROOT, 'content', 'stories');
 const TRIPS_DIR = path.join(ROOT, 'content', 'trips');
+const ALBUMS_DIR = path.join(ROOT, 'content', 'albums');
 const STORIES_INDEX = path.join(ROOT, 'content', 'stories-index.json');
 const TRIPS_INDEX = path.join(ROOT, 'content', 'trips-index.json');
+const ALBUMS_INDEX = path.join(ROOT, 'content', 'albums-index.json');
 
 // --- Minimaler Frontmatter-Parser (kein YAML-Paket noetig) ------------------
 // Liest nur die einfachen "key: value"-Zeilen aus dem ---...----Block.
@@ -132,10 +134,61 @@ function buildTripsIndex() {
   console.log(`[trips] ${cleaned.length} Reisen -> ${path.relative(ROOT, TRIPS_INDEX)}`);
 }
 
+// --- Albums (Galerie) -------------------------------------------------------
+function buildAlbumsIndex() {
+  if (!fs.existsSync(ALBUMS_DIR)) {
+    console.warn('[albums] Ordner fehlt, ueberspringe:', ALBUMS_DIR);
+    fs.writeFileSync(ALBUMS_INDEX, JSON.stringify({ items: [] }, null, 2) + '\n', 'utf8');
+    return;
+  }
+  const files = fs.readdirSync(ALBUMS_DIR)
+    .filter(f => f.toLowerCase().endsWith('.json'));
+
+  const items = files.map(file => {
+    const slug = file.replace(/\.json$/i, '');
+    let date = '';
+    let highlight = false;
+    let highlightOrder = null;
+    try {
+      const data = JSON.parse(fs.readFileSync(path.join(ALBUMS_DIR, file), 'utf8'));
+      date = data.date || '';
+      const pin = (data && data.pin && typeof data.pin === 'object') ? data.pin : null;
+      highlight = !!(pin && pin.highlight);
+      if (pin && typeof pin.highlight_order === 'number') highlightOrder = pin.highlight_order;
+    } catch (e) {
+      console.warn(`[albums] ${file} ist kein gueltiges JSON, nehme es trotzdem auf.`);
+    }
+    return { slug, date, highlight, highlightOrder };
+  });
+
+  // Gleiche Sortierlogik wie bei trips: angepinnte zuerst, dann nach Datum
+  items.sort((a, b) => {
+    if (a.highlight && !b.highlight) return -1;
+    if (!a.highlight && b.highlight) return 1;
+    if (a.highlight && b.highlight) {
+      const ao = a.highlightOrder != null ? a.highlightOrder : 9999;
+      const bo = b.highlightOrder != null ? b.highlightOrder : 9999;
+      if (ao !== bo) return ao - bo;
+    }
+    return (b.date || '').localeCompare(a.date || '');
+  });
+
+  const cleaned = items.map((it, i) => ({
+    slug: it.slug,
+    order: i + 1,
+    highlight: it.highlight,
+  }));
+
+  const out = { items: cleaned };
+  fs.writeFileSync(ALBUMS_INDEX, JSON.stringify(out, null, 2) + '\n', 'utf8');
+  console.log(`[albums] ${cleaned.length} Alben -> ${path.relative(ROOT, ALBUMS_INDEX)}`);
+}
+
 // --- Los ---------------------------------------------------------------------
 try {
   buildStoriesIndex();
   buildTripsIndex();
+  buildAlbumsIndex();
   console.log('Indizes erfolgreich generiert.');
 } catch (err) {
   console.error('Fehler beim Generieren der Indizes:', err);
