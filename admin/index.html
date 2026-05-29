@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
   <title>Wide &amp; Wild — Verwaltung</title>
-  <!-- Decap CMS uebernimmt das GitHub-OAuth-Popup selbst.
+  <!-- Das CMS uebernimmt das GitHub-OAuth-Popup selbst.
        Login geht ueber den Cloudflare-Worker (siehe admin/config.yml -> backend.base_url). -->
   <style>
     /* Zurück-zur-Website-Knopf oben rechts */
@@ -93,8 +93,15 @@
     <div class="ww-progress-bar"><div class="ww-progress-fill"></div></div>
   </div>
 
-  <!-- Decap CMS -->
-  <script src="https://unpkg.com/decap-cms@3.1.3/dist/decap-cms.js"></script>
+  <!-- Sveltia CMS: aktiv gepflegter, direkter Nachfolger von Decap CMS.
+       Liest dieselbe admin/config.yml und schreibt dieselben JSON/MD-Dateien,
+       kann aber mehrere Bilder auf einmal hochladen (Durchsuchen oder Drag & Drop)
+       und bringt eine eigene, mobiltaugliche Oberflaeche mit. Login laeuft ueber
+       denselben GitHub-OAuth-Worker wie bisher (config.yml -> backend.base_url).
+       RUECKFAHRKARTE: Wenn etwas klemmt, einfach diese eine <script>-Zeile wieder
+       auf das alte Decap-Script zuruecksetzen, dann ist alles wie vorher:
+       <script src="https://unpkg.com/decap-cms@3.1.3/dist/decap-cms.js"></script> -->
+  <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
   <!-- Erweiterungen (Ortssuche, Fortschrittsanzeige, Login-Redirect) -->
   <script>
@@ -288,52 +295,32 @@
       } catch(e){ /* still */ }
     }
 
-    // CMS-Events abfangen
+    // CMS-Events abfangen.
+    // Sveltia kennt nur die Events 'preSave' und 'postSave' (kein login/logout/
+    // prePublish). Wir registrieren BEWUSST nur 'postSave' und KEIN 'preSave':
+    // ein preSave-Handler koennte den zu speichernden Datensatz versehentlich
+    // veraendern. 'postSave' kann das Speichern nicht beeinflussen (Rueckgabewert
+    // wird ignoriert) und zeigt hier nur eine dezente "Gespeichert"-Bestaetigung.
+    // Den Speicher-/Upload-Fortschritt zeigt Sveltia selbst an.
     function hookCMSEvents(){
       try {
-        if (!window.CMS) return false;
-        // Pre-Save → Anzeige starten
-        window.CMS.registerEventListener({
-          name: 'prePublish',
-          handler: function(){ startProgress('Speichern & Veröffentlichen …'); }
-        });
-        window.CMS.registerEventListener({
-          name: 'postPublish',
-          handler: function(){ endProgress(true); }
-        });
-        window.CMS.registerEventListener({
-          name: 'preSave',
-          handler: function(){ startProgress('Speichern …'); }
-        });
-        window.CMS.registerEventListener({
-          name: 'postSave',
-          handler: function(){ endProgress(true); }
-        });
-        // Eigene Admin-Markierung setzen, damit die Hauptseite den Admin-Modus
-        // zuverlaessig erkennt (unabhaengig vom internen Decap-Speicher-Key).
-        window.CMS.registerEventListener({
-          name: 'login',
-          handler: function(){ try { localStorage.setItem('ww-admin-active', '1'); } catch(e){} }
-        });
-        window.CMS.registerEventListener({
-          name: 'logout',
-          handler: function(){
-            try {
-              localStorage.removeItem('ww-admin-active');
-              // alle Decap-User-Keys aufraeumen, damit kein Resttoken bleibt
-              var toDel = [];
-              for (var i = 0; i < localStorage.length; i++) {
-                var k = localStorage.key(i);
-                if (k && /(decap|netlify)-cms-user/i.test(k)) toDel.push(k);
-              }
-              for (var j = 0; j < toDel.length; j++) localStorage.removeItem(toDel[j]);
-              // Signal fuer die Hauptseite, den Admin-Modus zu verlassen
-              localStorage.setItem('ww-just-logged-out', String(Date.now()));
-            } catch(e){}
-            // Nach kurzer Verzoegerung zur Hauptwebsite umleiten
-            setTimeout(function(){ window.location.href = '/'; }, 600);
-          }
-        });
+        if (!window.CMS || typeof window.CMS.registerEventListener !== 'function') return false;
+        try {
+          window.CMS.registerEventListener({
+            name: 'postSave',
+            handler: function(){
+              try {
+                progressEl.style.display = 'block';
+                progressFill.style.width = '100%';
+                progressLbl.textContent = 'Gespeichert ✓';
+                setTimeout(function(){
+                  progressEl.style.display = 'none';
+                  progressFill.style.width = '0%';
+                }, 1200);
+              } catch(e){}
+            }
+          });
+        } catch(e){ /* Event nicht verfuegbar -> still ignorieren */ }
         return true;
       } catch(e){ console.warn('CMS-Hooks nicht möglich:', e); return false; }
     }
@@ -371,59 +358,13 @@
       }, 1500);
     })();
 
-    // Datei-Upload abfangen und mit ECHTEM Prozent-Fortschritt anzeigen.
-    // fetch() kennt keinen Upload-Fortschritt, daher leiten wir Uploads auf
-    // XMLHttpRequest um (das hat upload.onprogress mit echten Bytes).
-    (function(){
-      var origFetch = window.fetch;
-      window.fetch = function(url, opts){
-        try {
-          var isUpload = opts && opts.method && /POST|PUT/i.test(opts.method)
-                         && opts.body && (opts.body instanceof FormData
-                                          || (typeof opts.body === 'string' && opts.body.length > 50000)
-                                          || opts.body instanceof Blob
-                                          || opts.body instanceof ArrayBuffer);
-          if (!isUpload) return origFetch.apply(this, arguments);
+    // HINWEIS: Hier stand frueher ein window.fetch-Override, der Uploads auf
+    // XMLHttpRequest umleitete, um einen echten Prozent-Fortschritt zu zeigen.
+    // Das ist mit Sveltia NICHT vertraeglich -- Sveltia committet ueber eigene
+    // fetch-Aufrufe (auch grosse JSON-Bodies), und ein gekapertes window.fetch
+    // kann das Speichern/Hochladen zerstoeren. Darum entfernt. Sveltia bringt
+    // seine eigene Upload- und Speicheranzeige mit.
 
-          // Upload per XHR mit echtem Fortschritt
-          return new Promise(function(resolve, reject){
-            try {
-              var xhr = new XMLHttpRequest();
-              xhr.open(opts.method, (typeof url === 'string') ? url : url.url, true);
-              // Header uebernehmen
-              if (opts.headers) {
-                var h = opts.headers;
-                if (h.forEach) { h.forEach(function(v,k){ try{ xhr.setRequestHeader(k,v); }catch(e){} }); }
-                else { for (var k in h) { try { xhr.setRequestHeader(k, h[k]); } catch(e){} } }
-              }
-              startProgressPct('Hochladen …');
-              xhr.upload.onprogress = function(e){
-                if (e.lengthComputable) {
-                  var pct = Math.round((e.loaded / e.total) * 100);
-                  setProgressPct(pct);
-                }
-              };
-              xhr.onload = function(){
-                setProgressPct(100);
-                endProgress(xhr.status >= 200 && xhr.status < 300);
-                // fetch-aehnliche Response zurueckgeben
-                var body = xhr.responseText;
-                resolve(new Response(body, {
-                  status: xhr.status,
-                  statusText: xhr.statusText,
-                  headers: { 'Content-Type': xhr.getResponseHeader('Content-Type') || 'application/json' }
-                }));
-              };
-              xhr.onerror = function(){ endProgress(false); reject(new TypeError('Network request failed')); };
-              xhr.send(opts.body);
-            } catch(e){
-              endProgress(false);
-              reject(e);
-            }
-          });
-        } catch(e){ return origFetch.apply(this, arguments); }
-      };
-    })();
 
     // ----------- 2b) Upload-Schutz: Größe + Dateityp prüfen -----------
     // Cloudflare Pages lehnt Dateien über 25 MB ab -> dann scheitert der ganze
