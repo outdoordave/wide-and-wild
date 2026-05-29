@@ -89,23 +89,16 @@ collections:
     hint: 'Optional: ein, zwei Sätze, die unter dem Album-Titel erscheinen.'
   - name: photos
     label: Fotos
-    label_singular: Foto
-    widget: list
-    summary: '{{fields.image | default("(Foto)")}}'
-    hint: Mit + ein neues Foto hinzufügen. Im Datei-Dialog mehrere mit Strg/Cmd+Klick auswählen.
-    fields:
-    - name: image
-      label: Bild
-      widget: image
-      media_library:
-        config:
-          multiple: true
-    - name: highlight
-      label: ⭐ Als Highlight markieren?
-      widget: boolean
-      default: false
-      required: false
-      hint: Highlights erscheinen in den Momentaufnahmen auf der Startseite.
+    widget: image
+    multiple: true
+    required: false
+    hint: 'Mehrere Bilder auf einmal: im Datei-Dialog mit Strg/Cmd mehrere markieren – oder per Drag & Drop in die Ablage ziehen. Reihenfolge danach per Ziehen änderbar.'
+  - name: highlight_photos
+    label: ⭐ Highlights (Startseite)
+    widget: image
+    multiple: true
+    required: false
+    hint: 'Optional. Wähle hier die Fotos, die in den „Momentaufnahmen" auf der Startseite erscheinen sollen. Tipp: dieselben Bilder einfach aus der Medien-Ablage anklicken – kein erneuter Upload nötig.'
   - name: linked_trip
     label: Gehört zu Reise (optional)
     widget: relation
