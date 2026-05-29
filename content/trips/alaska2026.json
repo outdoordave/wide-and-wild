@@ -15,7 +15,8 @@
       "title_en": "San Francisco",
       "text_de": "Der Start unserer Best-of-Runde: zwei Tage in San Francisco, bevor es die Küste hinunter geht.",
       "text_en": "The start of our best-of loop: two days in San Francisco before heading down the coast.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-122.42,37.77]}"
     },
     {
       "name": "Morro Bay",
@@ -27,7 +28,8 @@
       "title_en": "Morro Bay",
       "text_de": "Wieder die Ottern beim Spielen beobachten und ein Stück Highway 1 genießen.",
       "text_en": "Watching the otters play again and enjoying a stretch of Highway 1.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-120.85,35.37]}"
     },
     {
       "name": "Los Angeles",
@@ -39,7 +41,8 @@
       "title_en": "Los Angeles",
       "text_de": "Ein Wiedersehen mit der Stadt der Engel, bevor wir ins Yosemite-Hochland aufbrechen.",
       "text_en": "A reunion with the City of Angels before we set off for the Yosemite highlands.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-118.24,34.05]}"
     },
     {
       "name": "Yosemite",
@@ -51,7 +54,8 @@
       "title_en": "Yosemite",
       "text_de": "Zurück zu unserem Lieblings-Nationalpark, diesmal mit mehr Zeit.",
       "text_en": "Back to our favorite national park, this time with more time.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-119.54,37.87]}"
     },
     {
       "name": "Lake Tahoe",
@@ -63,7 +67,8 @@
       "title_en": "Lake Tahoe",
       "text_de": "Ein paar ruhige Tage am Bergsee, bevor der Flug in den hohen Norden geht.",
       "text_en": "A few quiet days at the mountain lake before flying up to the far north.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-120.03,39.1]}"
     },
     {
       "name": "Anchorage",
@@ -75,7 +80,8 @@
       "title_en": "Anchorage",
       "text_de": "Ankunft in Alaska. Anchorage als Basislager für die großen Wildnis-Etappen.",
       "text_en": "Arrival in Alaska. Anchorage as a base camp for the great wilderness legs.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-149.9,61.22]}"
     },
     {
       "name": "Denali",
@@ -87,7 +93,8 @@
       "title_en": "Denali",
       "text_de": "Der höchste Berg Nordamerikas — Wildnis, Weite und hoffentlich klare Sicht.",
       "text_en": "The highest mountain in North America — wilderness, vastness and hopefully a clear view.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-151.0,63.07]}"
     },
     {
       "name": "Fairbanks",
@@ -99,7 +106,8 @@
       "title_en": "Fairbanks",
       "text_de": "Tor zur Arktis und Basis für die Polarlichter.",
       "text_en": "Gateway to the Arctic and base for the northern lights.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-147.72,64.84]}"
     },
     {
       "name": "Coldfoot",
@@ -111,7 +119,8 @@
       "title_en": "Coldfoot",
       "text_de": "Der nördlichste Punkt jenseits des Polarkreises am Dalton Highway — das große Ziel.",
       "text_en": "The northernmost point beyond the Arctic Circle on the Dalton Highway — the grand goal.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-150.18,67.25]}"
     },
     {
       "name": "Tok",
@@ -123,7 +132,8 @@
       "title_en": "Tok",
       "text_de": "Letzter Halt im Landesinneren auf dem Rückweg nach Anchorage.",
       "text_en": "Last stop inland on the way back to Anchorage.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-142.99,63.34]}"
     }
   ],
   "has_english": true,

@@ -15,7 +15,8 @@
       "title_en": "Atlanta",
       "text_de": "Start im Süden mit dem ersten Buc-ee's-Stopp.",
       "text_en": "Start in the South with the first Buc-ee's stop.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-84.39,33.75]}"
     },
     {
       "name": "Savannah",
@@ -27,7 +28,8 @@
       "title_en": "Savannah",
       "text_de": "Die historische Altstadt unter spanischem Moos.",
       "text_en": "The historic old town beneath Spanish moss.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-81.09,32.08]}"
     },
     {
       "name": "Miami",
@@ -39,7 +41,8 @@
       "title_en": "Miami",
       "text_de": "Art-déco, Strände und das pulsierende South Beach.",
       "text_en": "Art deco, beaches and vibrant South Beach.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-80.19,25.76]}"
     },
     {
       "name": "Key West",
@@ -51,7 +54,8 @@
       "title_en": "Key West",
       "text_de": "Der südlichste Punkt der USA über den Overseas Highway.",
       "text_en": "The southernmost point of the USA via the Overseas Highway.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-81.78,24.56]}"
     },
     {
       "name": "Everglades",
@@ -63,7 +67,8 @@
       "title_en": "Everglades",
       "text_de": "Alligatoren und Airboats im subtropischen Sumpf.",
       "text_en": "Alligators and airboats in the subtropical swamp.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-80.9,25.29]}"
     },
     {
       "name": "Tampa",
@@ -75,7 +80,8 @@
       "title_en": "Tampa",
       "text_de": "Golfküste und die Dolphin Research Center.",
       "text_en": "Gulf coast and the Dolphin Research Center.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-82.46,27.95]}"
     },
     {
       "name": "Destin",
@@ -87,7 +93,8 @@
       "title_en": "Destin",
       "text_de": "Türkisblaues Wasser am Golf von Mexiko.",
       "text_en": "Turquoise water on the Gulf of Mexico.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-86.5,30.39]}"
     },
     {
       "name": "New Orleans",
@@ -99,7 +106,8 @@
       "title_en": "New Orleans",
       "text_de": "Jazz, French Quarter und kreolische Küche.",
       "text_en": "Jazz, the French Quarter and Creole cuisine.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-90.07,29.95]}"
     },
     {
       "name": "Austin",
@@ -111,7 +119,8 @@
       "title_en": "Austin",
       "text_de": "Endstation Texas mit Livemusik und dem YETI-Flagshipstore.",
       "text_en": "Final stop Texas with live music and the YETI flagship store.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-97.74,30.27]}"
     }
   ],
   "has_english": true,

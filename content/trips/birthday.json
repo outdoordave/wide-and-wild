@@ -15,7 +15,8 @@
       "title_en": "San Francisco",
       "text_de": "Anreise am Nachmittag, dann drei Tage Stadt: Alcatraz, die Golden Gate Bridge, Straßenbahnen und Fisherman's Wharf. Der perfekte Auftakt für die große Runde.",
       "text_en": "Afternoon arrival, then three days in the city: Alcatraz, the Golden Gate Bridge, cable cars and Fisherman's Wharf. The perfect start to the grand loop.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-122.42,37.77]}"
     },
     {
       "name": "Yosemite",
@@ -27,7 +28,8 @@
       "title_en": "Yosemite",
       "text_de": "Über den Big Sur Ocean Drive ging es zum Yosemite. Half Dome, Wasserfälle und ausgiebiges Wandern — der erste große Nationalpark der Reise und gleich ein Höhepunkt.",
       "text_en": "Via the Big Sur Ocean Drive to Yosemite. Half Dome, waterfalls and plenty of hiking — the first big national park of the trip and an immediate highlight.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-119.54,37.87]}"
     },
     {
       "name": "Sequoia",
@@ -39,7 +41,8 @@
       "title_en": "Sequoia",
       "text_de": "Früh aufgebrochen zu den größten Bäumen der Welt. General Sherman und die Mammutbäume — man fühlt sich winzig zwischen diesen Giganten.",
       "text_en": "An early start to see the largest trees in the world. General Sherman and the giant sequoias — you feel tiny among these giants.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-118.57,36.49]}"
     },
     {
       "name": "Los Angeles",
@@ -51,7 +54,8 @@
       "title_en": "Los Angeles",
       "text_de": "Über Oxnard und Neptune's Net (das Restaurant aus Fast & Furious) nach LA. Universal Studios mit Harry-Potter-Tour, das Hollywood Sign, der Walk of Fame, Griffith Observatorium und das Paul Walker Memorial.",
       "text_en": "Via Oxnard and Neptune's Net (the restaurant from Fast & Furious) to LA. Universal Studios with the Harry Potter tour, the Hollywood Sign, the Walk of Fame, Griffith Observatory and the Paul Walker Memorial.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-118.24,34.05]}"
     },
     {
       "name": "Las Vegas",
@@ -63,7 +67,8 @@
       "title_en": "Las Vegas",
       "text_de": "Über Joshua Tree und die Mojave-Wüste Richtung Vegas. Area 51, der Hoover-Damm und die glitzernde Stadt selbst. Ein Schießstand durfte natürlich auch nicht fehlen.",
       "text_en": "Via Joshua Tree and the Mojave Desert toward Vegas. Area 51, the Hoover Dam and the glittering city itself. A shooting range was a must, of course.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-115.14,36.17]}"
     },
     {
       "name": "Grand Canyon",
@@ -75,7 +80,8 @@
       "title_en": "Grand Canyon & more",
       "text_de": "Der Grand Canyon, Horseshoe Bend und der Antelope Canyon an einem Tag — die wohl spektakulärste Etappe der ganzen Reise.",
       "text_en": "The Grand Canyon, Horseshoe Bend and Antelope Canyon in one day — probably the most spectacular leg of the entire trip.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-112.14,36.06]}"
     },
     {
       "name": "Albuquerque",
@@ -87,7 +93,8 @@
       "title_en": "Albuquerque",
       "text_de": "Über Monument Valley nach Albuquerque. Eine Breaking-Bad-Drehort-Tour in Eigenregie und die Stadt erkunden, bevor es am 15. Oktober zurück in die Heimat ging.",
       "text_en": "Via Monument Valley to Albuquerque. A self-guided Breaking Bad film location tour and exploring the city before heading home on October 15.",
-      "photo": ""
+      "photo": "",
+      "location": "{\"type\":\"Point\",\"coordinates\":[-106.65,35.08]}"
     }
   ],
   "has_english": true,
