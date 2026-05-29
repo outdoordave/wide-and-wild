@@ -251,10 +251,16 @@
   .album-slide-arrow:hover { background: var(--c-accent); }
   .album-slide-arrow.prev { left: 12px; }
   .album-slide-arrow.next { right: 12px; }
+  /* 2 Alben nebeneinander (zugeklappt). Ein AUFGEKLAPPTES Album geht voll breit,
+     damit das Fotogitter Platz hat. Abstand kommt aus gap statt margin. */
+  #galleryGrid.album-mode { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px 28px; align-items: start; }
+  #galleryGrid.album-mode .album-section { margin-bottom: 0; }
+  #galleryGrid.album-mode .album-section.open { grid-column: 1 / -1; }
   @media (max-width: 640px) {
     .album-head { flex-direction: column; gap: 8px; }
     .album-slideshow { aspect-ratio: 4/3; }
     .album-slide-arrow { width: 34px; height: 34px; font-size: 22px; }
+    #galleryGrid.album-mode { grid-template-columns: 1fr; gap: 40px; }
   }
   /* Link zum Album auf der Reise-Detailseite */
   .trip-album-link { margin: 24px 0; padding: 16px 20px; background: var(--c-bg-alt); border-left: 3px solid var(--c-accent); border-radius: 4px; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; transition: background .15s; }
@@ -1538,6 +1544,8 @@ function makeAlbumSlideshow(alb) {
       auto = setInterval(function(){ show(idx + 1); }, 4000);
       // Timer registrieren, damit clearAlbumSlideTimers ihn stoppen kann
       albumSlideTimers.push(auto);
+      // ...und zusaetzlich an der Box, damit setAlbumOpen GENAU dieses Album stoppen kann
+      box._wwSlideTimer = auto;
     }
     prev.addEventListener('click', function(e){ e.stopPropagation(); show(idx - 1); restartAuto(); });
     next.addEventListener('click', function(e){ e.stopPropagation(); show(idx + 1); restartAuto(); });
@@ -1551,6 +1559,46 @@ function makeAlbumSlideshow(alb) {
   return box;
 }
 
+/* Baut den Inhaltsbereich EINES Albums: aufgeklappt = alle Fotos als Grid,
+   zugeklappt = automatische Diashow. Wird beim ersten Zeichnen UND beim
+   In-Place-Umschalten benutzt, damit beide Wege identisch aussehen. */
+function buildAlbumBody(alb, isOpen) {
+  var body = document.createElement('div');
+  body.className = 'album-body';
+  if (isOpen) {
+    var sub = document.createElement('div');
+    sub.className = 'gallery';
+    for (var p = 0; p < alb.photos.length; p++) sub.appendChild(makeGalleryTile(alb, alb.photos[p]));
+    body.appendChild(sub);
+  } else {
+    body.appendChild(makeAlbumSlideshow(alb));
+  }
+  return body;
+}
+
+/* Schaltet GENAU EIN Album auf/zu, ohne die ganze Galerie neu zu zeichnen.
+   So springt der Scroll nicht und die Diashows der ANDEREN Alben laufen weiter. */
+function setAlbumOpen(section, alb, open) {
+  albumOpenState[alb.slug] = open;
+  // alten Body entfernen; falls dort eine Diashow lief, NUR deren Timer stoppen
+  var oldBody = section.querySelector('.album-body');
+  if (oldBody) {
+    var ss = oldBody.querySelector('.album-slideshow');
+    if (ss && ss._wwSlideTimer) clearInterval(ss._wwSlideTimer);
+    oldBody.parentNode.removeChild(oldBody);
+  }
+  section.appendChild(buildAlbumBody(alb, open));
+  section.classList.toggle('open', open);   // CSS: offenes Album geht voll breit
+  var btn = section.querySelector('.album-toggle');
+  if (btn) {
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    var lbl = btn.querySelector('.album-toggle-label');
+    if (lbl) lbl.textContent = open
+      ? (currentLang === 'en' ? 'Collapse' : 'Zuklappen')
+      : (currentLang === 'en' ? 'Show all' : 'Alle anzeigen');
+  }
+}
+
 function renderGallery() {
   // Laufende Diashow-Timer stoppen, bevor neu gezeichnet wird
   clearAlbumSlideTimers();
@@ -1560,6 +1608,7 @@ function renderGallery() {
   if (!albums || !albums.length) return;
 
   if (galleryMode === 'album') {
+    grid.className = 'album-mode';   // 2 Alben nebeneinander (CSS)
     // Alben in vorbestimmter Reihenfolge. Jedes Album startet ZUGEKLAPPT:
     // Karte mit Titel + Diashow + kleinen Pfeilen. Aufklappen zeigt alle Fotos.
     for (var a = 0; a < albums.length; a++) {
@@ -1569,6 +1618,7 @@ function renderGallery() {
       var name = (currentLang === 'en' && alb.hasEN) ? alb.name_en : alb.name_de;
       var note = (currentLang === 'en' && alb.hasEN) ? alb.note_en : alb.note_de;
       var isOpen = !!albumOpenState[alb.slug];
+      if (isOpen) section.classList.add('open');   // CSS: voll breit
 
       // Kopfzeile mit Aufklapp-Schalter
       var head = document.createElement('div');
@@ -1588,31 +1638,21 @@ function renderGallery() {
       tb.innerHTML = wwFileToolbar('portfolio', alb.slug);
       if (tb.firstChild) section.appendChild(tb.firstChild);
 
-      if (isOpen) {
-        // AUFGEKLAPPT: alle Fotos als Grid (wie bisher)
-        var sub = document.createElement('div');
-        sub.className = 'gallery';
-        for (var p = 0; p < alb.photos.length; p++) {
-          sub.appendChild(makeGalleryTile(alb, alb.photos[p]));
-        }
-        section.appendChild(sub);
-      } else {
-        // ZUGEKLAPPT: Diashow
-        section.appendChild(makeAlbumSlideshow(alb));
-      }
+      section.appendChild(buildAlbumBody(alb, isOpen));
 
-      // Klick auf Kopfzeile/Toggle klappt um
-      (function(slug, sectionEl){
-        var toggleBtn = head.querySelector('.album-toggle');
-        var textEl = head.querySelector('.album-head-text');
-        function flip(){ albumOpenState[slug] = !albumOpenState[slug]; renderGallery(); }
+      // Klick auf Kopfzeile/Toggle klappt NUR dieses Album um (kein Voll-Re-Render)
+      (function(albObj, sectionEl){
+        var toggleBtn = sectionEl.querySelector('.album-toggle');
+        var textEl = sectionEl.querySelector('.album-head-text');
+        function flip(){ setAlbumOpen(sectionEl, albObj, !albumOpenState[albObj.slug]); }
         toggleBtn.addEventListener('click', function(e){ e.stopPropagation(); flip(); });
         textEl.addEventListener('click', flip);
-      })(alb.slug, section);
+      })(alb, section);
 
       grid.appendChild(section);
     }
   } else {
+    grid.className = '';   // Flach-Modus: kein 2-Spalten-Album-Grid
     // Flach: alle Fotos in einer Reihe
     var flat = [];
     for (var aa = 0; aa < albums.length; aa++) {
@@ -3002,13 +3042,13 @@ function loadSiteTexts() {
 
 /* Blendet die Galerie-Sortier-Knoepfe gemaess CMS-Einstellung ein/aus und
    sorgt dafuer, dass der aktive Modus immer ein erlaubter ist.
-   Fallback: ist alles aus (versehentlich), bleibt 'album' als Standard an. */
+   Fallback: ist alles aus, wird chronologisch sortiert (neueste oben), Leiste aus. */
 function applyGalleryModes() {
   var modes = (WW_SITE && WW_SITE.gallery_modes) || { album:true, chronological:true, alphabetical:true };
   var bar = document.getElementById('galleryModes');
   if (!bar) return;
   var anyOn = modes.album || modes.chronological || modes.alphabetical;
-  if (!anyOn) modes = { album:true, chronological:false, alphabetical:false };
+  if (!anyOn) modes = { album:false, chronological:true, alphabetical:false };
   var btns = bar.querySelectorAll('button');
   var firstVisible = null;
   for (var i = 0; i < btns.length; i++) {
