@@ -3,11 +3,26 @@
   "date": "2023-09-28",
   "note_de": "",
   "photos": [
-    "/uploads/IMG_5904.webp",
-    "/uploads/IMG_5936.webp",
-    "/uploads/IMG_6001.webp",
-    "/uploads/IMG_6502-2.webp",
-    "/uploads/IMG_6654-2.webp"
+    {
+      "image": "/uploads/IMG_5904.webp",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/IMG_5936.webp",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/IMG_6001.webp",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/IMG_6502-2.webp",
+      "highlight": false
+    },
+    {
+      "image": "/uploads/IMG_6654-2.webp",
+      "highlight": false
+    }
   ],
   "linked_trip": "",
   "pin": null,
