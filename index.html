@@ -631,9 +631,9 @@
         <p data-site="pagetitles.portfolio_intro" data-de="Alle Bilder, geordnet nach Alben. Oben rechts kannst du die Sortierung umschalten." data-en="All photos, organized in albums. Switch the sorting at the top right.">Alle Bilder, geordnet nach Alben. Oben rechts kannst du die Sortierung umschalten.</p>
       </div>
       <div class="filter-bar" id="galleryModes">
-        <button class="active" data-mode="album" data-de="Nach Alben" data-en="By album">Nach Alben</button>
-        <button data-mode="chronological" data-de="Chronologisch" data-en="Chronological">Chronologisch</button>
-        <button data-mode="alphabetical" data-de="Alphabetisch" data-en="Alphabetical">Alphabetisch</button>
+        <button class="active" data-mode="album" data-de="Alben" data-en="Albums">Alben</button>
+        <button data-mode="chronological" data-de="Neueste" data-en="Newest">Neueste</button>
+        <button data-mode="alphabetical" data-de="A–Z" data-en="A–Z">A–Z</button>
       </div>
       <div id="galleryGrid"></div>
     </div>
@@ -1216,16 +1216,37 @@ function buildAlbumFromData(slug, data) {
   var order = (typeof pin.highlight_order === 'number') ? pin.highlight_order : 9999;
 
   var photos = [];
+  // Highlight-Lookup aus dem NEUEN Feld highlight_photos (flaches Pfad-Array).
+  // Pfade ueber normalizePath vereinheitlichen, damit "/uploads/x" == "uploads/x".
+  var hlSet = {};
+  if (Array.isArray(data.highlight_photos)) {
+    for (var hi = 0; hi < data.highlight_photos.length; hi++) {
+      var hp = data.highlight_photos[hi];
+      if (typeof hp === 'string' && hp) hlSet[normalizePath(hp)] = true;
+    }
+  }
   if (Array.isArray(data.photos)) {
     for (var i = 0; i < data.photos.length; i++) {
       var ph = data.photos[i];
-      if (!ph || !ph.image) continue;
+      var imgPath = null, isHi = false;
+      if (typeof ph === 'string') {
+        // NEUES Format: photos ist ein flaches Array von Bildpfaden.
+        if (!ph) continue;
+        imgPath = ph;
+        isHi = !!hlSet[normalizePath(ph)];
+      } else if (ph && ph.image) {
+        // ALTES Format: photos ist eine Liste von Objekten { image, highlight }.
+        imgPath = ph.image;
+        isHi = (ph.highlight === true) || !!hlSet[normalizePath(ph.image)];
+      } else {
+        continue;
+      }
       // Farbpalette pseudo-zufaellig anhand des Foto-Pfads,
       // damit ohne Bild-Ladung ein Platzhalter erscheint
-      var pal = paletteFromString(ph.image);
+      var pal = paletteFromString(imgPath);
       photos.push({
-        image: ph.image,
-        highlight: ph.highlight === true,
+        image: imgPath,
+        highlight: isHi,
         c1: pal.c1, c2: pal.c2, img: pal.img,
         idx: i
       });
