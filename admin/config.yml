@@ -55,59 +55,71 @@ collections:
 
 # === 🖼️ Portfolio ===
 - name: portfolio
-  label: 🖼️ Portfolio
+  label: 🖼️ Galerie
   files:
   - name: photos
-    label: Portfolio-Fotos
+    label: Galerie-Fotos
     file: content/portfolio.json
-    description: Eure Galerie-Bilder. Mit + ein neues Foto hinzufügen, Kategorie wählen.
+    description: Alle Galerie-Bilder. Mit + ein neues Foto hinzufügen (oder mehrere auf einmal). Anlass eintippen, vorhandene werden vorgeschlagen.
     fields:
     - name: items
       label: Fotos
       label_singular: Foto
       widget: list
-      summary: '{{fields.title_de}}'
+      summary: '{{fields.title_de}} — {{fields.occasion}}'
       fields:
       - name: image
         label: Foto
         widget: image
-        hint: 'Bild hochladen. Empfohlen: JPG/PNG bis ca. 10 MB.'
+        hint: 'Bild hochladen. Empfohlen: JPG/PNG bis ca. 10 MB. Mehrere Bilder auf einmal: im Datei-Dialog Strg/Cmd+Klick.'
+        media_library:
+          config:
+            multiple: true
       - name: title_de
         label: Titel
         widget: string
-      - name: category
-        label: Kategorie
-        widget: select
-        options:
-        - label: Landschaft
-          value: landscape
-        - label: Wildlife
-          value: wildlife
-        - label: Aerials
-          value: aerial
-        - label: Lifestyle
-          value: lifestyle
-        - label: Autos
-          value: cars
-        - label: Architektur
-          value: architecture
-        - label: Portrait
-          value: portrait
-        - label: Street
-          value: street
-        - label: Nacht/Sterne
-          value: night
-        - label: Makro
-          value: macro
-        - label: Reise
-          value: travel
-        - label: Schwarz-Weiß
-          value: bw
+        required: false
+      - name: occasion
+        label: Anlass
+        widget: relation
+        collection: portfolio
+        file: photos
+        search_fields:
+        - 'items.*.occasion'
+        value_field: 'items.*.occasion'
+        display_fields:
+        - 'items.*.occasion'
+        required: false
+        multiple: false
+        hint: 'Frei eingeben oder vorhandenen auswählen. Beispiele: "USA-Roadtrip 2024", "2024", "Iceland 2025". Leer = Sonstiges.'
       - name: wide
         label: Breites Bild (2 Spalten)
         widget: boolean
         default: false
         required: false
+      - name: upload_date
+        label: Upload-Datum
+        widget: hidden
+        default: ''
+      - name: pin
+        label: 📌 Anpinnen & Sortierung
+        widget: object
+        collapsed: true
+        required: false
+        fields:
+        - name: highlight
+          label: Anpinnen
+          widget: boolean
+          default: false
+          required: false
+          hint: Angepinnte Fotos erscheinen oben in der Galerie.
+        - name: highlight_order
+          label: Pin-Reihenfolge
+          widget: number
+          value_type: int
+          default: 1
+          required: false
+          hint: Kleine Zahl = weiter oben.
       - name: english
         label: 🌐 Englische Version
         widget: object
@@ -470,6 +482,12 @@ collections:
     file: content/home-texts.json
     description: Großer Kopfbereich und die Abschnitte der Startseite.
     fields:
+    - name: show_stories
+      label: 📖 Stories-Bereich anzeigen?
+      widget: boolean
+      default: false
+      required: false
+      hint: Aus = Stories-Reiter und -Teaser auf der Website komplett versteckt (im CMS bleibt Stories aber pflegbar).
     - name: hero
       label: Großer Kopfbereich
       widget: object
