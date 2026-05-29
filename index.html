@@ -2830,8 +2830,9 @@ function wwLogoutAdmin() {
   document.body.classList.remove('ww-is-admin');
 }
 
-/* Vollstaendige Abmeldung direkt von der Website: loescht den Decap-Login.
-   Danach muss man sich neu einloggen, um wieder in den Admin-Modus zu kommen. */
+/* Vollstaendige Abmeldung direkt von der Website: entfernt die Admin-Markierung
+   und ggf. alte CMS-User-Keys, danach Umleitung zur Startseite. Den eigentlichen
+   CMS-Token verwaltet Sveltia selbst (Abmelden im CMS unter /admin/). */
 function wwFullLogout() {
   try {
     var toDel = [];
