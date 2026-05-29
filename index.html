@@ -1624,7 +1624,12 @@ function renderLatest() {
     var slugs = Object.keys(trips);
     for (var t = 0; t < slugs.length; t++) {
       var tr = trips[slugs[t]];
-      if (tr && tr.upcoming) continue; // kommende Reisen ueberspringen
+      if (!tr) continue;
+      if (tr.upcoming) continue; // kommende Reisen ueberspringen
+      // Default-Trips (im Code fest verdrahtet) haben kein title-Objekt.
+      // Erst wenn das JSON nachgeladen wurde, bekommt der Eintrag title.de/.en.
+      // Solange das fehlt, gehoert der Trip nicht in "Aktuelles".
+      if (!tr.title || typeof tr.title !== 'object') continue;
       combined.push({ type: 'trip', dateKey: tr.dateKey || 0, slug: slugs[t], data: tr });
     }
   }
@@ -1663,7 +1668,9 @@ function renderLatest() {
         card.addEventListener('click', function(){ openStory(item.idx); });
       } else if (item.type === 'trip') {
         var tr2 = item.data;
-        var dt = tr2[currentLang];
+        var dt = (tr2 && tr2[currentLang]) || {};
+        var titleObj = (tr2 && tr2.title) || {};
+        var titleText = titleObj[currentLang] || titleObj.de || '';
         // Erstes Stop-Foto als Bild fuer die Karte verwenden, falls vorhanden
         var firstPhoto = '';
         if (tr2.stops && tr2.stops.length) {
@@ -1674,7 +1681,7 @@ function renderLatest() {
         card.innerHTML =
           wwMediaBox('#b08a4f', '#6e4a1c', 'desert', firstPhoto) +
           '<div class="body"><div class="tag">' + tag + '</div>' +
-          '<h3>' + (tr2.title[currentLang] || tr2.title.de) + '</h3>' +
+          '<h3>' + titleText + '</h3>' +
           '<div class="meta">' + (dt.meta || '') + '</div></div>' +
           wwFileToolbar('trips', item.slug);
         card.addEventListener('click', function(){
