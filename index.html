@@ -426,6 +426,16 @@
   .map-stop.sel text { fill: #f0c9a8; }
   .trip-detail { background: var(--c-bg-alt); border: 1px solid var(--c-line); border-radius: var(--radius); padding: 28px; min-height: 320px; }
   .trip-detail .step { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--c-accent); font-weight: 700; margin-bottom: 8px; }
+  /* Pfeil-Navigation durch die Stationen */
+  .trip-detail .stop-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .trip-detail .stop-nav .step { margin-bottom: 0; }
+  .stop-arrow {
+    flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+    border: 1.5px solid var(--c-line); background: transparent; color: var(--c-ink-soft);
+    font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center;
+    padding-bottom: 3px; transition: border-color .2s, color .2s, background .2s;
+  }
+  .stop-arrow:hover { border-color: var(--c-accent); color: var(--c-accent); }
   .trip-detail h3 { font-family: var(--font-display); font-size: 28px; font-weight: 500; margin-bottom: 8px; }
   .trip-detail .date { font-size: 13px; color: var(--c-ink-soft); margin-bottom: 16px; }
   .trip-detail .ph { aspect-ratio: 16/10; border-radius: 8px; margin-bottom: 16px; }
@@ -708,7 +718,7 @@
           <div class="kicker" data-site="sections.discover_kicker" data-de="Entdecken" data-en="Explore">Entdecken</div>
           <h2 data-site="sections.discover_title" data-de="Wonach uns gerade ist" data-en="What we're drawn to">Wonach uns gerade ist</h2>
         <div class="ww-edit-toolbar"><button class="ww-edit-btn" title="Texte ändern" onclick="event.stopPropagation(); window.open('/admin/#/collections/sitetexts/entries/home','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div></div>
-        <div class="teaser-grid">
+        <div class="teaser-grid" id="discoverGrid">
           <div class="teaser" data-filter="landscape" data-nav="portfolio">
             <div class="ph" data-ph="PLATZHALTER" data-illus="mountains" style="--ph-c1:#8a9a7e; --ph-c2:#3a4a38;"></div>
             <div class="ov"><div class="cat" data-de="Landschaft" data-en="Landscape">Landschaft</div><div class="ttl" data-de="Weite &amp; Stille" data-en="Vast &amp; still">Weite &amp; Stille</div></div>
@@ -1160,6 +1170,7 @@ function applyLang() {
   renderStories();
   renderGear();
   renderLatest();
+  renderDiscover();
   var tp = document.getElementById('page-trips');
   if (tp && tp.classList.contains('active')) renderTrip();
   // Kartenbeschriftung an die neue Sprache anpassen (falls Karte schon da)
@@ -1438,7 +1449,7 @@ function loadAlbums() {
       if (!items.length) {
         albums = []; albumsBySlug = {};
         rebuildPortfolioFromAlbums();
-        renderGallery(); renderRandomMoments(); renderLatest();
+        renderGallery(); renderRandomMoments(); renderLatest(); renderDiscover();
         return;
       }
       return Promise.all(items.map(function(it, i){
@@ -1461,6 +1472,7 @@ function loadAlbums() {
         renderGallery();
         renderRandomMoments();
         renderLatest();
+        renderDiscover();
         // Trip-View aktualisieren, damit Album-Link erscheint falls aktiv
         if (typeof renderTrip === 'function') renderTrip();
       });
@@ -1732,6 +1744,7 @@ function renderRandomMoments() {
     }
   }
   var take = Math.min(6, pool.length);
+  var shownPhotos = pool.slice(0, take).map(function(x){ return x.photo; });
   for (var k = 0; k < take; k++) {
     (function(p){
       var alb = p.album;
@@ -1741,12 +1754,8 @@ function renderRandomMoments() {
       item.innerHTML =
         wwMediaBox(p.c1, p.c2, p.img, p.photo) +
         '<div class="label"><div class="ttl">' + escapeHtml(name) + '</div></div>';
-      item.addEventListener('click', function() {
-        openLightbox({
-          photo: p.photo, c1: p.c1, c2: p.c2, img: p.img,
-          de: { t: alb ? alb.name_de : '' }, en: { t: alb ? alb.name_en : '' }
-        });
-      });
+      // Blätter-/wischbar: alle gezeigten Momentaufnahmen als Gruppe öffnen
+      item.addEventListener('click', function() { wwOpenImage(p.photo, shownPhotos, name); });
       box.appendChild(item);
     })(pool[k]);
   }
@@ -1860,6 +1869,26 @@ function attachSwipe(el, onLeft, onRight) {
     if (dx < 0) { if (onLeft) onLeft(); }
     else { if (onRight) onRight(); }
   }, { passive: true });
+
+  // --- Trackpad / Magic Mouse: horizontale Wheel-Geste ---
+  // Zwei-Finger-Wisch / Magic-Mouse-Wisch erzeugen wheel-Events mit deltaX.
+  // Vertikales Scrollen (deltaY dominant) lassen wir in Ruhe.
+  var accX = 0, wheelLock = false, wheelReset = null;
+  el.addEventListener('wheel', function(e){
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // eher vertikal -> ignorieren
+    e.preventDefault(); // verhindert Seiten-Horizontalscroll / Zurueck-Geste
+    if (wheelLock) return;
+    accX += e.deltaX;
+    clearTimeout(wheelReset);
+    if (Math.abs(accX) >= 60) {
+      if (accX > 0) { if (onLeft) onLeft(); } else { if (onRight) onRight(); }
+      accX = 0;
+      wheelLock = true; // eine Geste = ein Blaettern (Abklingzeit)
+      setTimeout(function(){ wheelLock = false; }, 500);
+    } else {
+      wheelReset = setTimeout(function(){ accX = 0; }, 200); // Gestenende -> Zaehler leeren
+    }
+  }, { passive: false });
 }
 
 function updateLbNav() {
@@ -2111,6 +2140,73 @@ function renderStories() {
         wwToolbar({ edit: { coll: 'stories', slug: s.slug } });
       grid.appendChild(card);
     })(i);
+  }
+}
+
+/* ---------- "Entdecken" - 3 zufällige Inhalte auf der Startseite ---------- */
+/* Mischt Highlight-Fotos, Alben und (vergangene) Reisen und zeigt 3 zufällige
+   als Teaser. Klick führt zum jeweiligen Inhalt. Fällt der Pool leer aus,
+   bleiben die statischen Platzhalter aus dem HTML stehen. */
+function renderDiscover() {
+  var grid = document.getElementById('discoverGrid');
+  if (!grid) return;
+  var pool = [];
+  // 1) Highlight-Fotos (sonst beliebige Fotos)
+  if (portfolio && portfolio.length) {
+    var hl = portfolio.filter(function(p){ return p.highlight; });
+    var photoList = hl.length ? hl : portfolio;
+    var allPhotos = photoList.map(function(x){ return x.photo; });
+    photoList.forEach(function(p){
+      var alb = p.album;
+      var pname = alb ? ((currentLang === 'en' && alb.hasEN) ? alb.name_en : alb.name_de) : '';
+      pool.push({
+        c1: p.c1, c2: p.c2, ill: p.img, photo: p.photo,
+        cat: (currentLang === 'en' ? 'Photo' : 'Foto'), title: pname,
+        go: function(){ wwOpenImage(p.photo, allPhotos, pname); }
+      });
+    });
+  }
+  // 2) Alben
+  if (albums && albums.length) {
+    albums.forEach(function(a){
+      var cover = (a.photos && a.photos.length) ? a.photos[0] : null;
+      pool.push({
+        c1: cover ? cover.c1 : '#8a9a7e', c2: cover ? cover.c2 : '#3a4a38',
+        ill: cover ? cover.img : 'mountains', photo: cover ? cover.image : '',
+        cat: 'Album', title: (currentLang === 'en' && a.hasEN) ? a.name_en : a.name_de,
+        go: function(){ navigate('portfolio'); }
+      });
+    });
+  }
+  // 3) Reisen (keine kommenden, nur mit geladenem Titel)
+  if (trips && typeof trips === 'object') {
+    Object.keys(trips).forEach(function(slug){
+      var tr = trips[slug];
+      if (!tr || tr.upcoming || !tr.title || typeof tr.title !== 'object') return;
+      var firstPhoto = '';
+      if (tr.stops) { for (var i = 0; i < tr.stops.length; i++) { if (tr.stops[i].photo) { firstPhoto = tr.stops[i].photo; break; } } }
+      pool.push({
+        c1: '#b08a4f', c2: '#6e4a1c', ill: 'desert', photo: firstPhoto,
+        cat: (currentLang === 'en' ? 'Trip' : 'Reise'), title: (tr.title[currentLang] || tr.title.de || ''),
+        go: function(){ currentTrip = slug; currentStop = 0; renderTrip(); navigate('trips'); }
+      });
+    });
+  }
+  if (!pool.length) return; // leer -> statische Platzhalter aus dem HTML stehen lassen
+  // mischen (Fisher-Yates)
+  for (var s = pool.length - 1; s > 0; s--) { var j = Math.floor(Math.random() * (s + 1)); var t = pool[s]; pool[s] = pool[j]; pool[j] = t; }
+  var take = Math.min(3, pool.length);
+  grid.innerHTML = '';
+  for (var k = 0; k < take; k++) {
+    (function(it){
+      var el = document.createElement('div');
+      el.className = 'teaser';
+      el.innerHTML = wwMediaBox(it.c1, it.c2, it.ill, it.photo) +
+        '<div class="ov"><div class="cat">' + escapeHtml(it.cat) + '</div>' +
+        '<div class="ttl">' + escapeHtml(it.title || '') + '</div></div>';
+      el.addEventListener('click', it.go);
+      grid.appendChild(el);
+    })(pool[k]);
   }
 }
 
@@ -2654,6 +2750,25 @@ function renderTrip() {
       wwSetMapLanguage(currentLang);
       wwDrawTrip();
     });
+    // OpenFreeMap ist gratis und ohne Verfuegbarkeitsgarantie. Aussetzer leise
+    // abfangen, damit die Konsole nicht voller harter Fehler ist.
+    window._mlMap.on('error', function(){ /* Tile-/Style-Aussetzer nicht hart werfen */ });
+    // Notfall-Rueckfall: laedt der gewaehlte Stil binnen 8 s nicht (Aussetzer),
+    // auf 'liberty' wechseln (der aktiv gepflegte, stabilste Stil) -> es erscheint
+    // wenigstens IMMER eine Karte. Bei gesunder Verbindung (load < 8 s) passiert nichts.
+    setTimeout(function(){
+      if (window._mlMap && !window._mlReady) {
+        try {
+          window._mlMap.setStyle('https://tiles.openfreemap.org/styles/liberty');
+          window._mlMap.once('idle', function(){
+            if (window._mlReady) return;
+            window._mlReady = true;
+            wwSetMapLanguage(currentLang);
+            wwDrawTrip();
+          });
+        } catch(e){}
+      }
+    }, 8000);
   }
 
   if (!stops || stops.length === 0) return;
@@ -2780,6 +2895,13 @@ function renderTripGallery() {
   }
 }
 
+/* Blättert relativ durch die Stationen der aktuellen Reise (mit Umlauf). */
+function stepStop(delta) {
+  var st = trips[currentTrip] && trips[currentTrip].stops;
+  if (!st || !st.length) return;
+  selectStop((currentStop + delta + st.length) % st.length);
+}
+
 function selectStop(i) {
   currentStop = i;
   // Marker neu zeichnen (markiert den aktiven Stop) + auf ihn zentrieren
@@ -2811,7 +2933,13 @@ function renderStopDetail() {
   }
   document.getElementById('tripDetail').innerHTML =
     '<div class="ww-editable" style="position:relative">' +
-    '<div class="step">' + stepLabel + '</div>' +
+    (trips[currentTrip].stops.length > 1
+      ? '<div class="stop-nav">' +
+          '<button class="stop-arrow" type="button" data-step="-1" aria-label="' + (currentLang==='en'?'Previous stop':'Vorherige Station') + '">‹</button>' +
+          '<div class="step">' + stepLabel + '</div>' +
+          '<button class="stop-arrow" type="button" data-step="1" aria-label="' + (currentLang==='en'?'Next stop':'Nächste Station') + '">›</button>' +
+        '</div>'
+      : '<div class="step">' + stepLabel + '</div>') +
     '<h3>' + d.t + '</h3>' +
     '<div class="date">' + d.date + '</div>' +
     wwMediaBox(s.c1, s.c2, s.img, s.photo) +
@@ -2819,6 +2947,13 @@ function renderStopDetail() {
     photosHtml +
     wwToolbar({ edit: { coll: 'trips', slug: currentTrip } }) +
     '</div>';
+  // Pfeile zum Blättern durch die Stationen
+  var navBtns = document.getElementById('tripDetail').querySelectorAll('.stop-arrow');
+  for (var nb = 0; nb < navBtns.length; nb++) {
+    (function(btn){
+      btn.addEventListener('click', function(e){ e.stopPropagation(); stepStop(parseInt(btn.getAttribute('data-step'), 10)); });
+    })(navBtns[nb]);
+  }
   // Station-Fotos blätterbar machen (eigene Gruppe)
   if (s.photos && s.photos.length) {
     var slist = s.photos.slice();
@@ -2944,6 +3079,12 @@ function initSite() {
     function(){ if (lbGallery) lbStep(1); },
     function(){ if (lbGallery) lbStep(-1); });
 
+  // Wischen/Trackpad auf der Stations-Box: links = nächste Station, rechts = vorherige.
+  // Einmalig gebunden (tripDetail-Element bleibt bestehen, nur sein Inhalt wird neu gezeichnet).
+  attachSwipe(document.getElementById('tripDetail'),
+    function(){ stepStop(1); },
+    function(){ stepStop(-1); });
+
   // Kontakt
   document.getElementById('cSend').addEventListener('click', handleSend);
 
@@ -3042,13 +3183,13 @@ function loadSiteTexts() {
 
 /* Blendet die Galerie-Sortier-Knoepfe gemaess CMS-Einstellung ein/aus und
    sorgt dafuer, dass der aktive Modus immer ein erlaubter ist.
-   Fallback: ist alles aus, wird chronologisch sortiert (neueste oben), Leiste aus. */
+   Fallback: ist alles aus, bleibt die Album-Ansicht als Standard (Leiste versteckt). */
 function applyGalleryModes() {
   var modes = (WW_SITE && WW_SITE.gallery_modes) || { album:true, chronological:true, alphabetical:true };
   var bar = document.getElementById('galleryModes');
   if (!bar) return;
   var anyOn = modes.album || modes.chronological || modes.alphabetical;
-  if (!anyOn) modes = { album:false, chronological:true, alphabetical:false };
+  if (!anyOn) modes = { album:true, chronological:false, alphabetical:false };
   var btns = bar.querySelectorAll('button');
   var firstVisible = null;
   for (var i = 0; i < btns.length; i++) {
