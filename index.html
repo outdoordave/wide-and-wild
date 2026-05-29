@@ -253,9 +253,14 @@
   .album-slide-arrow.next { right: 12px; }
   /* 2 Alben nebeneinander (zugeklappt). Ein AUFGEKLAPPTES Album geht voll breit,
      damit das Fotogitter Platz hat. Abstand kommt aus gap statt margin. */
-  #galleryGrid.album-mode { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px 28px; align-items: start; }
-  #galleryGrid.album-mode .album-section { margin-bottom: 0; }
+  #galleryGrid.album-mode { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px 28px; align-items: stretch; }
+  #galleryGrid.album-mode .album-section { margin-bottom: 0; display: flex; flex-direction: column; }
   #galleryGrid.album-mode .album-section.open { grid-column: 1 / -1; }
+  /* Karten einer Reihe gleich hoch (stretch); der Inhalt wird nach unten gedrückt,
+     so dass zugeklappte Diashows trotz unterschiedlich hoher Köpfe fluchten.
+     Aufgeklappt sitzt das Fotogitter direkt unter dem Kopf. */
+  #galleryGrid.album-mode .album-body { margin-top: auto; }
+  #galleryGrid.album-mode .album-section.open .album-body { margin-top: 0; }
   @media (max-width: 640px) {
     .album-head { flex-direction: column; gap: 8px; }
     .album-slideshow { aspect-ratio: 4/3; }
@@ -1592,15 +1597,13 @@ function buildAlbumBody(alb, isOpen) {
    So springt der Scroll nicht und die Diashows der ANDEREN Alben laufen weiter. */
 function setAlbumOpen(section, alb, open) {
   albumOpenState[alb.slug] = open;
-  // alten Body entfernen; falls dort eine Diashow lief, NUR deren Timer stoppen
+
+  // Aktuelle (sichtbare) Höhe des alten Inhalts messen, BEVOR sich die Breite ändert
   var oldBody = section.querySelector('.album-body');
-  if (oldBody) {
-    var ss = oldBody.querySelector('.album-slideshow');
-    if (ss && ss._wwSlideTimer) clearInterval(ss._wwSlideTimer);
-    oldBody.parentNode.removeChild(oldBody);
-  }
-  section.appendChild(buildAlbumBody(alb, open));
-  section.classList.toggle('open', open);   // CSS: offenes Album geht voll breit
+  var startH = oldBody ? oldBody.offsetHeight : 0;
+
+  // Knopf-Beschriftung + Breite/Spalte umschalten
+  section.classList.toggle('open', open);
   var btn = section.querySelector('.album-toggle');
   if (btn) {
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -1609,6 +1612,41 @@ function setAlbumOpen(section, alb, open) {
       ? (currentLang === 'en' ? 'Collapse' : 'Zuklappen')
       : (currentLang === 'en' ? 'Show all' : 'Alle anzeigen');
   }
+
+  // alten Inhalt (inkl. evtl. laufender Diashow dieses Albums) entfernen
+  if (oldBody) {
+    var ss = oldBody.querySelector('.album-slideshow');
+    if (ss && ss._wwSlideTimer) clearInterval(ss._wwSlideTimer);
+    oldBody.parentNode.removeChild(oldBody);
+  }
+  var newBody = buildAlbumBody(alb, open);
+  section.appendChild(newBody);
+
+  // laufende Aufräumung stoppen (schnelles Mehrfach-Klicken)
+  if (section._wwAnimTimer) { clearTimeout(section._wwAnimTimer); section._wwAnimTimer = null; }
+
+  // "Bewegung reduzieren" respektieren -> sofort, ohne Animation
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+
+  // Von der alten Höhe weich auf die neue (gemessene) Zielhöhe gleiten + leichter Crossfade
+  var endH = newBody.offsetHeight;
+  if (!endH || startH === endH) return;
+  newBody.style.overflow = 'hidden';
+  newBody.style.height = startH + 'px';
+  newBody.style.opacity = '0.4';
+  newBody.getBoundingClientRect(); // Reflow erzwingen, damit startH "ankommt"
+  newBody.style.transition = 'height .42s cubic-bezier(.22,1,.36,1), opacity .42s ease';
+  newBody.style.height = endH + 'px';
+  newBody.style.opacity = '1';
+  section._wwAnimTimer = setTimeout(function(){
+    // Inline-Stile lösen -> natürliche Höhe/Layout (margin-top:auto) übernimmt wieder
+    newBody.style.height = '';
+    newBody.style.overflow = '';
+    newBody.style.transition = '';
+    newBody.style.opacity = '';
+    section._wwAnimTimer = null;
+  }, 460);
 }
 
 function renderGallery() {
