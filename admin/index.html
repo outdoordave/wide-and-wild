@@ -306,27 +306,41 @@
       } catch(e){ console.warn('CMS-Hooks nicht möglich:', e); return false; }
     }
 
-    // Login-Erkennung per DOM: Wenn das CMS eingeloggt ist, rendert es die
-    // Verwaltungsoberflaeche (App-Header, Collections). Ist es ausgeloggt,
-    // zeigt es nur den Login-Bildschirm mit "Login"-Button.
-    // Das ist zuverlaessiger als die Token-Suche (Decap 3.x speichert den
-    // Token nicht zwingend im localStorage).
+    // Login-Erkennung per DOM/URL: Ist das CMS eingeloggt, rendert es die
+    // Verwaltungsoberflaeche und navigiert per Hash-Route (#/collections/...).
+    // Ausgeloggt zeigt es nur einen Login-/Anmelden-Knopf.
+    // WICHTIG: Wir verlassen uns NICHT auf interne CSS-Klassennamen (die sich
+    // zwischen Decap und Sveltia und zwischen Versionen unterscheiden), sondern
+    // auf stabile Signale: die Hash-Route und das Vorhandensein eines
+    // Login-Knopfes. Diese vom CMS gepflegte Markierung liest die Website, um
+    // die Bearbeiten-Stifte zu zeigen.
     (function(){
+      function hasLoginButton(){
+        var btns = document.querySelectorAll('button, a');
+        for (var i = 0; i < btns.length; i++) {
+          var t = (btns[i].textContent || '').trim().toLowerCase();
+          // exakte/kurze Login-Beschriftung des Anmeldebildschirms
+          if (t === 'login' || t === 'anmelden' || t === 'sign in' ||
+              t.indexOf('mit github anmelden') !== -1 ||
+              t.indexOf('sign in with github') !== -1 ||
+              t.indexOf('login with github') !== -1) return true;
+        }
+        return false;
+      }
       function isLoggedIn(){
         try {
-          // Der Login-Screen hat einen Button mit "Login"-Text und KEINE
-          // Collection-Navigation. Die eingeloggte App hat eine Sidebar/Nav.
-          var loginBtns = document.querySelectorAll('button');
-          var hasLoginScreen = false;
-          for (var i = 0; i < loginBtns.length; i++) {
-            var t = (loginBtns[i].textContent || '').toLowerCase();
-            if (t.indexOf('login') !== -1 || t.indexOf('anmeld') !== -1) hasLoginScreen = true;
+          var hash = location.hash || '';
+          // Eingeloggt: das CMS arbeitet mit Routen wie #/collections/... ,
+          // #/workflow, #/media usw. Der Login-Screen hat keine solche Route.
+          var onAppRoute = /#\/(collections|workflow|media|search|settings|entries)/i.test(hash);
+          if (onAppRoute) return true;
+          // Kein Login-Knopf sichtbar UND die App hat nennenswerten Inhalt
+          // gerendert -> als eingeloggt werten.
+          if (!hasLoginButton() && document.body && document.body.childElementCount > 1) {
+            // zusaetzliche Absicherung: Anmeldescreen ist meist sehr „leer".
+            if (document.body.innerText && document.body.innerText.length > 400) return true;
           }
-          // Eingeloggte App: es gibt einen "Quick add"/"New"-Bereich oder die
-          // Collection-Links im Seitenmenue.
-          var hasApp = !!document.querySelector('[class*="SidebarHeading"], [class*="Card"], [class*="ListCard"], nav a[href*="/collections/"]');
-          if (hasApp) return true;
-          if (hasLoginScreen) return false;
+          if (hasLoginButton()) return false;
           // Unklar -> letzten bekannten Zustand beibehalten
           return localStorage.getItem('ww-admin-active') === '1';
         } catch(e){ return false; }
