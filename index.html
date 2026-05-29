@@ -189,10 +189,29 @@
   .gallery .item .label, .random-box .item .label { position: absolute; bottom: 0; left: 0; right: 0; z-index: 3; padding: 26px 20px 16px; background: linear-gradient(to top, rgba(28,24,18,0.85), transparent); color: #fff; }
   .gallery .item .label .cat, .random-box .item .label .cat { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #f0c9a8; font-weight: 700; }
   .gallery .item .label .ttl, .random-box .item .label .ttl { font-family: var(--font-display); font-size: 19px; font-weight: 500; }
+  /* Dezenter Hover-Streifen mit Albumname (ersetzt das alte Dauer-Label).
+     Standardmaessig unsichtbar, beim Mouseover sanft eingeblendet. */
+  .gallery .item .tile-hover {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
+    padding: 16px 14px 10px;
+    background: linear-gradient(to top, rgba(28,24,18,0.55), transparent);
+    color: #fff;
+    font-family: var(--font-display); font-size: 14px; font-weight: 500;
+    letter-spacing: .3px;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .25s ease, transform .25s ease;
+    pointer-events: none;
+  }
+  .gallery .item:hover .tile-hover { opacity: 1; transform: translateY(0); }
+  /* Auf Touch-Geraeten (kein echtes Hover) den Streifen dauerhaft, aber sehr
+     dezent zeigen, damit man die Zuordnung trotzdem sieht. */
+  @media (hover: none) {
+    .gallery .item .tile-hover { opacity: .9; transform: none; }
+  }
   /* ALBUM-Sektionen (Galerie nach Alben gruppiert) */
   .album-section { position: relative; margin-bottom: 56px; }
   .album-section:last-child { margin-bottom: 0; }
-  .gallery-group-title { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--c-dark-ink); margin-bottom: 6px; padding-top: 4px; }
+  .gallery-group-title { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--c-ink); margin-bottom: 6px; padding-top: 4px; }
   .album-note { font-size: 15px; color: var(--c-ink-soft); margin-bottom: 18px; max-width: 720px; line-height: 1.5; }
   /* Link zum Album auf der Reise-Detailseite */
   .trip-album-link { margin: 24px 0; padding: 16px 20px; background: var(--c-bg-alt); border-left: 3px solid var(--c-accent); border-radius: 4px; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; transition: background .15s; }
@@ -207,7 +226,43 @@
   .lightbox .ph { width: 100%; aspect-ratio: 3/2; border-radius: var(--radius); position: relative; }
   .lightbox .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
   .lightbox .cap { color: var(--c-dark-ink); margin-top: 18px; font-family: var(--font-display); font-size: 20px; }
-  .lb-close { position: fixed; top: 22px; right: 24px; width: 46px; height: 46px; border-radius: 50%; background: rgba(240,229,212,0.16); color: #fff; border: none; font-size: 22px; cursor: pointer; }
+  .lb-close { position: fixed; top: 22px; right: 24px; width: 46px; height: 46px; border-radius: 50%; background: rgba(240,229,212,0.16); color: #fff; border: none; font-size: 22px; cursor: pointer; z-index: 1102; }
+  /* Blätter-Pfeile links/rechts außen */
+  .lb-nav {
+    position: fixed; top: 50%; transform: translateY(-50%);
+    width: 54px; height: 54px; border-radius: 50%;
+    background: rgba(240,229,212,0.14); color: #fff; border: none;
+    font-size: 34px; line-height: 1; cursor: pointer; z-index: 1102;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s, opacity .2s; padding-bottom: 4px;
+  }
+  .lb-nav:hover { background: var(--c-accent); }
+  .lb-prev { left: 20px; }
+  .lb-next { right: 20px; }
+  .lb-nav.lb-hidden { opacity: 0; pointer-events: none; }
+  /* Filmstreifen unten: aktuelles Bild wird per JS mittig gescrollt */
+  .lb-filmstrip {
+    position: fixed; left: 0; right: 0; bottom: 18px; z-index: 1101;
+    display: flex; gap: 8px; padding: 10px 50vw; /* 50vw Polster => erstes/letztes Bild kann mittig */
+    overflow-x: auto; scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .lb-filmstrip::-webkit-scrollbar { display: none; }
+  .lb-filmstrip .lb-thumb {
+    flex: 0 0 auto; width: 64px; height: 64px; border-radius: 6px;
+    overflow: hidden; cursor: pointer; opacity: .5;
+    border: 2px solid transparent; transition: opacity .2s, border-color .2s, transform .2s;
+    background-size: cover; background-position: center; background-color: #2a241c;
+  }
+  .lb-filmstrip .lb-thumb:hover { opacity: .85; }
+  .lb-filmstrip .lb-thumb.active { opacity: 1; border-color: var(--c-accent); transform: translateY(-3px); }
+  @media (max-width: 640px) {
+    .lb-nav { width: 44px; height: 44px; font-size: 28px; }
+    .lb-prev { left: 8px; } .lb-next { right: 8px; }
+    .lb-filmstrip .lb-thumb { width: 50px; height: 50px; }
+    .lightbox { padding: 20px 12px 96px; }
+  }
 
   /* ============ STORIES LIST ============ */
   .stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
@@ -811,10 +866,13 @@
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <button class="lb-close" id="lbClose">✕</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Vorheriges Bild">‹</button>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Nächstes Bild">›</button>
   <div class="lb-inner">
     <div class="ph" id="lbImg" data-ph="PLATZHALTER"><img id="lbImgPhoto" alt="" style="display:none"></div>
     <div class="cap" id="lbCap"></div>
   </div>
+  <div class="lb-filmstrip" id="lbFilmstrip"></div>
 </div>
 
 <script>
@@ -1436,19 +1494,24 @@ function renderGallery() {
   }
 }
 
-/* Erstellt eine Galerie-Kachel fuer ein einzelnes Foto eines Albums */
+/* Erstellt eine Galerie-Kachel fuer ein einzelnes Foto eines Albums.
+   Kein Dauer-Label mehr: der Albumname erscheint nur dezent beim Mouseover
+   als kleiner, leicht durchscheinender Streifen unten am Bild. */
 function makeGalleryTile(alb, ph) {
   var item = document.createElement('div');
   item.className = 'item';
+  var albName = (currentLang === 'en' && alb.hasEN) ? alb.name_en : alb.name_de;
   item.innerHTML =
     wwMediaBox(ph.c1, ph.c2, ph.img, ph.image) +
-    '<div class="label"><div class="ttl">' + escapeHtml((currentLang === 'en' && alb.hasEN) ? alb.name_en : alb.name_de) + '</div></div>';
+    '<div class="tile-hover">' + escapeHtml(albName) + '</div>';
   item.addEventListener('click', function() {
-    openLightbox({
-      photo: ph.image,
-      c1: ph.c1, c2: ph.c2, img: ph.img,
-      de: { t: alb.name_de }, en: { t: alb.name_en }
+    // Ganzes Album als blätterbare Liste öffnen, beim geklickten Foto starten
+    var list = alb.photos.map(function(x){
+      return { photo: x.image, c1: x.c1, c2: x.c2, img: x.img };
     });
+    var startIdx = 0;
+    for (var i = 0; i < alb.photos.length; i++) { if (alb.photos[i] === ph) { startIdx = i; break; } }
+    openLightboxGallery(list, startIdx, albName);
   });
   return item;
 }
@@ -1499,7 +1562,102 @@ function renderRandomMoments() {
     })(pool[k]);
   }
 }
+/* ---- Galerie-Lightbox mit Blättern + Filmstreifen ----
+   Kennt eine Liste von Fotos {photo,c1,c2,img} + aktuellen Index + Albumname.
+   Blättert nur innerhalb DIESES Albums. Der alte openLightbox (Einzelbild aus
+   Beitragstexten) bleibt unverändert daneben bestehen. */
+var lbGallery = null;   // Array von Foto-Objekten oder null (= Einzelbild-Modus)
+var lbIndex = 0;
+var lbAlbumName = '';
+
+function openLightboxGallery(photos, startIndex, albumName) {
+  lbGallery = (photos && photos.length) ? photos : null;
+  lbIndex = startIndex || 0;
+  lbAlbumName = albumName || '';
+  if (!lbGallery) return;
+  buildFilmstrip();
+  showLbIndex(lbIndex);
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  updateLbNav();
+}
+
+function buildFilmstrip() {
+  var strip = document.getElementById('lbFilmstrip');
+  if (!strip) return;
+  strip.innerHTML = '';
+  if (!lbGallery) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+  for (var i = 0; i < lbGallery.length; i++) {
+    var t = document.createElement('div');
+    t.className = 'lb-thumb';
+    var src = normalizePath(lbGallery[i].photo);
+    if (src) t.style.backgroundImage = "url('" + src + "')";
+    (function(idx){ t.addEventListener('click', function(e){ e.stopPropagation(); showLbIndex(idx); }); })(i);
+    strip.appendChild(t);
+  }
+}
+
+function centerFilmstripThumb(idx) {
+  var strip = document.getElementById('lbFilmstrip');
+  if (!strip) return;
+  var thumbs = strip.querySelectorAll('.lb-thumb');
+  for (var i = 0; i < thumbs.length; i++) thumbs[i].classList.toggle('active', i === idx);
+  var active = thumbs[idx];
+  if (active) {
+    // Aktuelles Thumbnail mittig scrollen
+    var target = active.offsetLeft - (strip.clientWidth / 2) + (active.clientWidth / 2);
+    strip.scrollTo({ left: target, behavior: 'smooth' });
+  }
+}
+
+function showLbIndex(idx) {
+  if (!lbGallery) return;
+  if (idx < 0) idx = 0;
+  if (idx > lbGallery.length - 1) idx = lbGallery.length - 1;
+  lbIndex = idx;
+  var p = lbGallery[idx];
+  var img = document.getElementById('lbImg');
+  var lbPhoto = document.getElementById('lbImgPhoto');
+  img.style.setProperty('--ph-c1', p.c1 || '#2a241c');
+  img.style.setProperty('--ph-c2', p.c2 || '#1c1812');
+  if (p.photo) {
+    img.classList.remove('has-illus'); img.classList.add('has-photo');
+    if (lbPhoto) { lbPhoto.src = normalizePath(p.photo); lbPhoto.style.display = 'block'; lbPhoto.style.objectFit = 'contain'; }
+    img.style.backgroundImage = '';
+  } else {
+    if (lbPhoto) { lbPhoto.style.display = 'none'; lbPhoto.src = ''; }
+    img.classList.remove('has-photo');
+  }
+  // Bildunterschrift: Albumname + Position
+  var cap = document.getElementById('lbCap');
+  if (cap) cap.textContent = lbAlbumName ? (lbAlbumName + ' · ' + (idx + 1) + ' / ' + lbGallery.length) : '';
+  centerFilmstripThumb(idx);
+  updateLbNav();
+}
+
+function lbStep(dir) {
+  if (!lbGallery) return;
+  showLbIndex(lbIndex + dir);
+}
+
+function updateLbNav() {
+  var prev = document.getElementById('lbPrev');
+  var next = document.getElementById('lbNext');
+  var strip = document.getElementById('lbFilmstrip');
+  var multi = !!(lbGallery && lbGallery.length > 1);
+  // Im Einzelbild-Modus (kein lbGallery) Pfeile + Streifen verstecken
+  if (prev) prev.classList.toggle('lb-hidden', !multi);
+  if (next) next.classList.toggle('lb-hidden', !multi);
+  if (strip) strip.style.display = lbGallery ? 'flex' : 'none';
+  if (prev && multi) prev.classList.toggle('lb-hidden', lbIndex <= 0);
+  if (next && multi) next.classList.toggle('lb-hidden', lbIndex >= lbGallery.length - 1);
+}
+
 function openLightbox(p) {
+  // Einzelbild-Modus: Galerie-Blättern deaktivieren
+  lbGallery = null;
+  updateLbNav();
   // Wenn p ein String ist, ist es eine reine Bild-URL (z.B. aus Beitrags-Text)
   if (typeof p === 'string') {
     var fixed = (/^(https?:|data:)/i.test(p) || p.charAt(0) === '/') ? p : '/' + p;
@@ -1542,6 +1700,7 @@ function openLightbox(p) {
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
+  lbGallery = null;
 }
 
 /* ---------- Stories Liste ---------- */
@@ -2524,12 +2683,21 @@ function initSite() {
   // Lightbox schliessen
   document.getElementById('lbClose').addEventListener('click', closeLightbox);
   document.getElementById('lightbox').addEventListener('click', function(e) { if (e.target.id === 'lightbox') closeLightbox(); });
+  // Blätter-Pfeile
+  document.getElementById('lbPrev').addEventListener('click', function(e){ e.stopPropagation(); lbStep(-1); });
+  document.getElementById('lbNext').addEventListener('click', function(e){ e.stopPropagation(); lbStep(1); });
 
   // Kontakt
   document.getElementById('cSend').addEventListener('click', handleSend);
 
-  // ESC
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+  // ESC schließt, Pfeiltasten blättern (nur wenn Lightbox offen + Galerie-Modus)
+  document.addEventListener('keydown', function(e) {
+    var open = document.getElementById('lightbox').classList.contains('open');
+    if (e.key === 'Escape') { closeLightbox(); return; }
+    if (!open || !lbGallery) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); lbStep(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); lbStep(1); }
+  });
 
   // statische Platzhalter mit data-illus befuellen (Home-Teaser, About)
   var illusEls = document.querySelectorAll('[data-illus]');
