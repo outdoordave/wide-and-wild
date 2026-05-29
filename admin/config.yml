@@ -320,11 +320,13 @@ collections:
     summary: '{{fields.name}}'
     hint: Ort suchen eingeben, aus Dropdown wählen, Koordinaten werden automatisch gefüllt.
     fields:
-    - name: place_search
-      label: Ort suchen (Autocomplete)
-      widget: string
+    - name: location
+      label: 📍 Ort (Karte mit Suche)
+      widget: map
+      type: Point
+      decimals: 6
       required: false
-      hint: z.B. Austin, Texas eingeben und aus Liste wählen.
+      hint: Ort oben im Suchfeld eingeben und auswählen ODER direkt auf die Karte klicken. Der Punkt wird automatisch gespeichert. Bestehende Reisen zeigen ihren Ort bereits an.
     - name: name
       label: Ort (Anzeigename)
       widget: string
@@ -355,22 +357,6 @@ collections:
         name: image
         label: Bild
         widget: image
-    - name: coords
-      label: 📍 Koordinaten (werden automatisch gefüllt)
-      widget: object
-      collapsed: true
-      required: false
-      fields:
-      - name: lat
-        label: Breitengrad (lat)
-        widget: number
-        value_type: float
-        required: false
-      - name: lon
-        label: Längengrad (lon)
-        widget: number
-        value_type: float
-        required: false
     - name: english
       label: 🌐 Englische Version (dieser Station)
       widget: object

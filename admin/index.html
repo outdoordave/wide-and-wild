@@ -62,29 +62,6 @@
       transition: width .3s;
       border-radius: 3px;
     }
-
-    /* Ortssuche-Dropdown */
-    .ww-place-results {
-      position: absolute;
-      z-index: 99999;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.12);
-      max-height: 240px;
-      overflow-y: auto;
-      font-family: -apple-system, system-ui, sans-serif;
-      font-size: 13px;
-      min-width: 280px;
-    }
-    .ww-place-results .ww-place-item {
-      padding: 8px 12px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-    }
-    .ww-place-results .ww-place-item:last-child { border-bottom: none; }
-    .ww-place-results .ww-place-item:hover { background: #f4ede1; }
-    .ww-place-results .ww-place-empty { padding: 8px 12px; color: #888; }
   </style>
 </head>
 <body>
@@ -428,137 +405,12 @@
       }, true);
     })();
 
-    // ----------- 3) Ortssuche via OpenStreetMap Nominatim -----------
-    // Sucht in jedem `place_search`-Feld und schreibt Ergebnis in name/lat/lon
-    var placeDebounce = null;
-
-    function findStopFields(searchInput){
-      // Strategie: Vom place_search-Input ausgehend nach den naechsten 3 Inputs
-      // im DOM suchen. In der Stop-Liste folgen direkt: name (string), lat (number), lon (number).
-      var container = searchInput.closest('[class*="ListItem"], [class*="list-item"], fieldset');
-      if (!container) {
-        // Fallback: 5 Ebenen hoch um sicher das List-Item zu erwischen
-        container = searchInput.parentNode;
-        for (var k = 0; k < 5 && container && container.parentNode; k++) container = container.parentNode;
-      }
-      if (!container) return { name: null, lat: null, lon: null };
-
-      var allInputs = container.querySelectorAll('input, textarea');
-      var result = { name: null, lat: null, lon: null };
-
-      // PRIMAER: nimm die 3 sichtbaren Inputs/Textareas direkt NACH dem searchInput
-      var seenSearch = false;
-      var picked = [];
-      for (var j = 0; j < allInputs.length; j++) {
-        if (allInputs[j] === searchInput) { seenSearch = true; continue; }
-        if (!seenSearch) continue;
-        if (allInputs[j].type === 'hidden') continue;
-        picked.push(allInputs[j]);
-        if (picked.length === 3) break;
-      }
-      if (picked[0]) result.name = picked[0];
-      if (picked[1]) result.lat  = picked[1];
-      if (picked[2]) result.lon  = picked[2];
-
-      // SEKUNDAER: Label-Match als Korrektur (falls Reihenfolge mal anders ist)
-      var labels = container.querySelectorAll('label, [class*="FieldLabel"]');
-      for (var i = 0; i < labels.length; i++){
-        var t = (labels[i].textContent || '').toLowerCase();
-        var input = labels[i].parentNode.querySelector('input, textarea');
-        if (!input || input === searchInput) continue;
-        if (t.indexOf('anzeigename') !== -1 || t.indexOf('ort (') !== -1) result.name = input;
-        else if (t.indexOf('breitengrad') !== -1 || t.indexOf('(lat)') !== -1) result.lat = input;
-        else if (t.indexOf('aengengrad') !== -1 || t.indexOf('ngengrad') !== -1 || t.indexOf('(lon)') !== -1) result.lon = input;
-      }
-
-      return result;
-    }
-
-    function setReactInputValue(input, value){
-      // React-kontrollierte Inputs brauchen native Setter + input-Event
-      try {
-        var proto = Object.getPrototypeOf(input);
-        var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
-        setter.call(input, value);
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-      } catch(e){
-        input.value = value;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-    }
-
-    function attachPlaceSearch(searchInput){
-      if (searchInput.dataset.wwPlaceAttached) return;
-      searchInput.dataset.wwPlaceAttached = '1';
-
-      var dropdown;
-      function closeDropdown(){ if (dropdown && dropdown.parentNode) dropdown.parentNode.removeChild(dropdown); dropdown = null; }
-      function openDropdown(items){
-        closeDropdown();
-        dropdown = document.createElement('div');
-        dropdown.className = 'ww-place-results';
-        var rect = searchInput.getBoundingClientRect();
-        dropdown.style.top  = (window.scrollY + rect.bottom + 4) + 'px';
-        dropdown.style.left = (window.scrollX + rect.left) + 'px';
-        dropdown.style.width = rect.width + 'px';
-        if (!items || !items.length) {
-          var empty = document.createElement('div');
-          empty.className = 'ww-place-empty';
-          empty.textContent = 'Keine Treffer.';
-          dropdown.appendChild(empty);
-        } else {
-          items.slice(0, 8).forEach(function(it){
-            var d = document.createElement('div');
-            d.className = 'ww-place-item';
-            d.textContent = it.display_name;
-            d.addEventListener('mousedown', function(ev){
-              ev.preventDefault();
-              // Felder befuellen
-              var fields = findStopFields(searchInput);
-              // Kurzer Name: erstes Komma-Segment
-              var shortName = (it.display_name || '').split(',')[0].trim();
-              if (fields.name) setReactInputValue(fields.name, shortName);
-              if (fields.lat)  setReactInputValue(fields.lat,  String(it.lat));
-              if (fields.lon)  setReactInputValue(fields.lon,  String(it.lon));
-              // Suchfeld zeigt jetzt den Volltreffer (zur Bestaetigung)
-              setReactInputValue(searchInput, it.display_name);
-              closeDropdown();
-            });
-            dropdown.appendChild(d);
-          });
-        }
-        document.body.appendChild(dropdown);
-      }
-
-      searchInput.addEventListener('input', function(){
-        if (placeDebounce) clearTimeout(placeDebounce);
-        var q = searchInput.value.trim();
-        if (q.length < 3) { closeDropdown(); return; }
-        placeDebounce = setTimeout(function(){
-          var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=0&q=' + encodeURIComponent(q);
-          fetch(url, { headers: { 'Accept': 'application/json' } })
-            .then(function(r){ return r.ok ? r.json() : []; })
-            .then(function(items){ openDropdown(items); })
-            .catch(function(){ openDropdown([]); });
-        }, 350);
-      });
-      searchInput.addEventListener('blur', function(){ setTimeout(closeDropdown, 200); });
-    }
-
-    // Beobachte das CMS-DOM: sobald ein Eingabefeld mit Label "Ort suchen" auftaucht, anhängen
-    function scanForPlaceFields(){
-      var labels = document.querySelectorAll('label, [class*="FieldLabel"]');
-      for (var i = 0; i < labels.length; i++){
-        var t = (labels[i].textContent || '').toLowerCase();
-        if (t.indexOf('ort suchen') !== -1 || t.indexOf('🔍') !== -1) {
-          var input = labels[i].parentNode.querySelector('input[type="text"], input:not([type])');
-          if (input) attachPlaceSearch(input);
-        }
-      }
-    }
-
-    var domObserver = new MutationObserver(function(){ scanForPlaceFields(); });
+    // ----------- 3) (Ortssuche entfernt) -----------
+    // Frueher hing hier eine selbstgebaute Nominatim-Ortssuche, die per DOM in
+    // Decaps Reise-Editor eingehaengt wurde. Sveltia hat dafuer ein EINGEBAUTES
+    // Karten-Feld (widget: map in config.yml) -- mit Suche, Klick-auf-Karte und
+    // derselben Nominatim-Quelle, aber stabil von Sveltia gepflegt. Der alte
+    // DOM-Code ist damit ueberfluessig und wurde entfernt.
 
     // ----------- 4) Initialisierung -----------
     function init(){
@@ -568,15 +420,10 @@
         if (hookCMSEvents()) {
           clearInterval(iv);
           registerPreviews();
-          domObserver.observe(document.body, { childList: true, subtree: true });
-          scanForPlaceFields();
           console.log('[Wide & Wild] Admin-Erweiterungen aktiv.');
         } else if (attempts > 50) {
           clearInterval(iv);
           registerPreviews();
-          // Trotzdem Ortssuche aktivieren, auch ohne CMS-Hooks
-          domObserver.observe(document.body, { childList: true, subtree: true });
-          scanForPlaceFields();
         }
       }, 200);
     }
