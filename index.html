@@ -3004,6 +3004,7 @@ function renderTrip() {
       container: 'mlMap',
       style: wwMapStyleUrl(),
       center: [-110, 40], zoom: 3,
+      cooperativeGestures: true,   // Touch: 2 Finger bewegen/zoomen die Karte; 1 Finger scrollt die Seite
       attributionControl: { compact: true }
     });
     window._mlMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
