@@ -3498,8 +3498,8 @@ function wwSocialUrl(platform, username) {
 /* Rendert die Social-Links im Hero (Alexandra, David) aus home-texts.json */
 function renderHeroSocial() {
   var box = document.getElementById('heroSocialRow');
-  if (!box || !WW_SITE || !WW_SITE.hero) return;
-  var people = [WW_SITE.hero.social_alexandra, WW_SITE.hero.social_david];
+  if (!box || !WW_SITE || !WW_SITE.home_intro) return;
+  var people = [WW_SITE.home_intro.social_alexandra, WW_SITE.home_intro.social_david];
   var html = '';
   for (var i = 0; i < people.length; i++) {
     var p = people[i];
