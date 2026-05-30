@@ -2117,20 +2117,38 @@ function attachSwipe(el, onLeft, onRight) {
   // --- Trackpad / Magic Mouse: horizontale Wheel-Geste ---
   // Zwei-Finger-Wisch / Magic-Mouse-Wisch erzeugen wheel-Events mit deltaX.
   // Vertikales Scrollen (deltaY dominant) lassen wir in Ruhe.
-  var accX = 0, wheelLock = false, wheelReset = null;
+  //
+  // Frueher: fester 500ms-Lock nach einem Schritt. Das Traegheits-Momentum eines
+  // kraeftigen Wischs laeuft aber LAENGER nach -> nach Ablauf des Locks summierte
+  // sich das Rest-Delta erneut ueber die Schwelle und loeste 2-3 Schritte aus EINER
+  // Geste aus. Loesung: Gesten-Ende-Entprellung statt fester Zeit. Nach einem Schritt
+  // bleibt gesperrt, solange ueberhaupt noch Wheel-Events eintreffen; der Idle-Timer
+  // wird bei JEDEM Event neu nach hinten geschoben. Erst wenn WHEEL_IDLE_MS lang KEIN
+  // Event mehr kam (Momentum abgeklungen), ist der naechste Schritt wieder frei.
+  // Waehrend der Sperre wird das Delta VERWORFEN (nicht aufsummiert), damit nach dem
+  // Abklingen kein Rest sofort den naechsten Schritt triggert.
+  var WHEEL_IDLE_MS = 300; // so lange muss es ruhig sein, bevor wieder geblaettert wird
+  var WHEEL_THRESH = 60;   // Mindest-Akkumulation fuer einen Schritt (unveraendert)
+  var accX = 0, wheelLock = false, wheelIdle = null;
   el.addEventListener('wheel', function(e){
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // eher vertikal -> ignorieren
     e.preventDefault(); // verhindert Seiten-Horizontalscroll / Zurueck-Geste
-    if (wheelLock) return;
+    clearTimeout(wheelIdle);
+    if (wheelLock) {
+      // Geste laeuft noch nach (Momentum): Delta verwerfen, nur das Gesten-Ende
+      // weiter nach hinten schieben. Erst nach WHEEL_IDLE_MS Ruhe wieder freigeben.
+      wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
+      return;
+    }
     accX += e.deltaX;
-    clearTimeout(wheelReset);
-    if (Math.abs(accX) >= 60) {
+    if (Math.abs(accX) >= WHEEL_THRESH) {
       if (accX > 0) { if (onLeft) onLeft(); } else { if (onRight) onRight(); }
       accX = 0;
-      wheelLock = true; // eine Geste = ein Blaettern (Abklingzeit)
-      setTimeout(function(){ wheelLock = false; }, 500);
+      wheelLock = true; // eine durchgehende Geste = genau ein Blaettern
+      wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
     } else {
-      wheelReset = setTimeout(function(){ accX = 0; }, 200); // Gestenende -> Zaehler leeren
+      // Schwelle noch nicht erreicht: bei Gestenende den Zaehler leeren
+      wheelIdle = setTimeout(function(){ accX = 0; }, WHEEL_IDLE_MS);
     }
   }, { passive: false });
 }
