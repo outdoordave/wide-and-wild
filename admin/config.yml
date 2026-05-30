@@ -230,6 +230,26 @@ collections:
       widget: boolean
       default: false
       hint: Aus = Stories-Reiter und Hero-Button werden auf der Webseite versteckt. Bestehende Stories bleiben im CMS erhalten.
+  - name: appearance
+    label: 🎨 Darstellung & Logo
+    file: content/appearance-settings.json
+    description: Logo der Website und einzelne Anzeige-Schalter für die Startseite.
+    fields:
+    - name: logo
+      label: Logo (für Navigation & Titelbild)
+      widget: image
+      required: false
+      hint: Wird oben in der Navigation und – falls aktiviert – groß über dem Titelbild (Hero) angezeigt. Beide nutzen dasselbe Logo. Leer lassen, um das fest eingebaute Logo zu behalten.
+    - name: show_hero_logo
+      label: Logo über dem Titelbild anzeigen?
+      widget: boolean
+      default: true
+      hint: Aus = das große Logo über dem Hero-Bild auf der Startseite wird ausgeblendet. Das Logo in der Navigation bleibt davon unberührt.
+    - name: show_discover
+      label: „Entdecken“-Bereich auf der Startseite anzeigen?
+      widget: boolean
+      default: true
+      hint: Der Bereich „Wonach uns gerade ist“ direkt unter „Aktuell“. Aus = wird auf der Startseite ausgeblendet.
 
 # === 📖 Stories / Beiträge ===
 - name: stories
