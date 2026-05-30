@@ -2127,23 +2127,43 @@ function attachSwipe(el, onLeft, onRight) {
   // Event mehr kam (Momentum abgeklungen), ist der naechste Schritt wieder frei.
   // Waehrend der Sperre wird das Delta VERWORFEN (nicht aufsummiert), damit nach dem
   // Abklingen kein Rest sofort den naechsten Schritt triggert.
-  var WHEEL_IDLE_MS = 300; // so lange muss es ruhig sein, bevor wieder geblaettert wird
-  var WHEEL_THRESH = 60;   // Mindest-Akkumulation fuer einen Schritt (unveraendert)
-  var accX = 0, wheelLock = false, wheelIdle = null;
+  // Nachjustierung: Die reine Idle-Entprellung schluckte auch einen bewusst neuen
+  // Wisch, weil JEDES Event (auch das des zweiten Wischs) die Sperre verlaengerte.
+  // Loesung: waehrend der Sperre ueber die Event-STAERKE unterscheiden.
+  //  - Momentum-Nachlauf der alten Geste = Folge SCHWACHER, abklingender |deltaX| ->
+  //    wird geschluckt, verlaengert nur die Sperre.
+  //  - Ein bewusst NEUER Wisch startet mit einem deutlich KRAEFTIGEREN |deltaX|-
+  //    Ausschlag. Kommt so ein Ausschlag (>= WHEEL_NEWGESTURE_DELTA) UND ist seit dem
+  //    letzten Schritt schon >= WHEEL_NEWGESTURE_MIN_MS vergangen (nicht derselbe
+  //    Geschwindigkeitspeak), wird die Sperre sofort geloest und der Wisch normal
+  //    gezaehlt -> schnelles bewusstes Einzeln-Hintereinander-Wischen geht wieder.
+  var WHEEL_IDLE_MS = 300;          // so lange muss es ruhig sein, bevor wieder geblaettert wird
+  var WHEEL_THRESH = 60;            // Mindest-Akkumulation fuer einen Schritt (unveraendert)
+  var WHEEL_NEWGESTURE_DELTA = 40;  // |deltaX| ab hier kann ein bewusst neuer Wisch sein
+  var WHEEL_NEWGESTURE_MIN_MS = 140;// ...aber nur, wenn so lange seit dem letzten Schritt vergangen
+  var accX = 0, wheelLock = false, wheelIdle = null, lastStepAt = 0;
   el.addEventListener('wheel', function(e){
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // eher vertikal -> ignorieren
     e.preventDefault(); // verhindert Seiten-Horizontalscroll / Zurueck-Geste
     clearTimeout(wheelIdle);
+    var now = Date.now();
     if (wheelLock) {
-      // Geste laeuft noch nach (Momentum): Delta verwerfen, nur das Gesten-Ende
-      // weiter nach hinten schieben. Erst nach WHEEL_IDLE_MS Ruhe wieder freigeben.
-      wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
-      return;
+      var newGesture = Math.abs(e.deltaX) >= WHEEL_NEWGESTURE_DELTA &&
+                       (now - lastStepAt) >= WHEEL_NEWGESTURE_MIN_MS;
+      if (!newGesture) {
+        // Momentum-Nachlauf: Delta verwerfen, nur das Gesten-Ende nach hinten schieben.
+        wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
+        return;
+      }
+      // Bewusst neuer Wisch -> Sperre sofort loesen und neu zaehlen.
+      wheelLock = false;
+      accX = 0;
     }
     accX += e.deltaX;
     if (Math.abs(accX) >= WHEEL_THRESH) {
       if (accX > 0) { if (onLeft) onLeft(); } else { if (onRight) onRight(); }
       accX = 0;
+      lastStepAt = now;
       wheelLock = true; // eine durchgehende Geste = genau ein Blaettern
       wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
     } else {
