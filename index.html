@@ -131,7 +131,7 @@
   .map-box .maplibregl-map { z-index: 1; }
   .map-box .maplibregl-canvas-container { z-index: 1; }
   .map-box .maplibregl-control-container { z-index: 3; }
-  .nav { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--space-5); height: 88px; display: flex; align-items: center; justify-content: space-between; }
+  .nav { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; height: 88px; display: flex; align-items: center; justify-content: space-between; }
   .nav-logo { display: flex; align-items: center; cursor: pointer; height: 100%; }
   .nav-logo img { height: 62px; width: auto; }
   /* Stift am Logo: globales Logo direkt aus dem Admin-Modus tauschen.
@@ -142,10 +142,10 @@
     display: inline-flex; position: absolute; right: -10px; bottom: -8px;
     width: 26px; height: 26px; z-index: 60;
   }
-  .nav-links { display: flex; align-items: center; gap: var(--space-6); }
+  .nav-links { display: flex; align-items: center; gap: 30px; }
   .nav-links a {
     font-size: var(--fs-label); font-weight: var(--fw-bold); letter-spacing: var(--tracking-slight); text-transform: uppercase;
-    color: var(--c-ink-soft); transition: color var(--dur-base) var(--ease); cursor: pointer; position: relative; padding: var(--space-1) 0;
+    color: var(--c-ink-soft); transition: color var(--dur-base) var(--ease); cursor: pointer; position: relative; padding: 4px 0;
   }
   .nav-links a:hover { color: var(--c-accent); }
   .nav-links a.active { color: var(--c-accent); }
@@ -153,9 +153,9 @@
     content: ""; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--c-accent);
   }
   .lang-toggle { display: flex; border: 1px solid var(--c-line); border-radius: var(--radius-lg); overflow: hidden; font-size: var(--fs-label); font-weight: var(--fw-bold); }
-  .lang-toggle button { border: none; background: transparent; padding: var(--space-1) var(--space-3); cursor: pointer; color: var(--c-ink-soft); font-weight: var(--fw-bold); transition: all var(--dur-base) var(--ease); }
+  .lang-toggle button { border: none; background: transparent; padding: 5px 12px; cursor: pointer; color: var(--c-ink-soft); font-weight: var(--fw-bold); transition: all var(--dur-base) var(--ease); }
   .lang-toggle button.active { background: var(--c-accent); color: #fff; }
-  .burger { display: none; flex-direction: column; gap: var(--space-1); background: none; border: none; cursor: pointer; padding: var(--space-2); }
+  .burger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
   .burger span { width: 24px; height: 2px; background: var(--c-ink); transition: var(--dur-base) var(--ease); }
 
   /* ============ PAGE SYSTEM ============ */
@@ -685,11 +685,11 @@
   @media (max-width: 860px) {
     .nav { height: 72px; }
     .nav-logo img { height: 48px; }
-    .nav-links { position: fixed; top: 72px; right: 0; width: 78%; max-width: 320px; height: calc(100vh - 72px); background: var(--c-bg); flex-direction: column; align-items: flex-start; padding: var(--space-6) var(--space-6); gap: var(--space-2); border-left: 1px solid var(--c-line); transform: translateX(100%); transition: transform var(--dur-base) var(--ease); overflow-y: auto; }
+    .nav-links { position: fixed; top: 72px; right: 0; width: 78%; max-width: 320px; height: calc(100vh - 72px); background: var(--c-bg); flex-direction: column; align-items: flex-start; padding: 32px 30px; gap: 8px; border-left: 1px solid var(--c-line); transform: translateX(100%); transition: transform var(--dur-base) var(--ease); overflow-y: auto; }
     .nav-links.open { transform: translateX(0); }
-    .nav-links a { font-size: var(--fs-ui); padding: var(--space-3) 0; width: 100%; border-bottom: 1px solid var(--c-line); }
+    .nav-links a { font-size: var(--fs-ui); padding: 12px 0; width: 100%; border-bottom: 1px solid var(--c-line); }
     .nav-links a.active::after { display: none; }
-    .nav-links .lang-toggle { margin-top: var(--space-4); }
+    .nav-links .lang-toggle { margin-top: 16px; }
     .burger { display: flex; }
     .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .burger.open span:nth-child(2) { opacity: 0; }
@@ -705,7 +705,7 @@
   @media (max-width: 480px) {
     .gallery, .random-box { grid-template-columns: 1fr; }
     .gallery .item, .gallery .item.wide, .random-box .item, .random-box .item.wide { aspect-ratio: 4/3; grid-column: span 1; }
-    .nav { padding: 0 var(--space-4); }
+    .nav { padding: 0 18px; }
     .wrap { padding: 0 18px; }
   }
   /* Mobile-Feintuning fuer Admin-Elemente + neue Bausteine */
