@@ -3342,7 +3342,7 @@ function loadSiteTexts() {
   }
   return Promise.all([
     getJson('content/home-texts.json'),
-    getJson('content/page-titles.json'),
+    Promise.resolve({}),   // page-titles.json entfernt – Seitentexte kommen aus text-*.json (parts[8..11])
     getJson('content/about.json'),
     getJson('content/contact.json'),
     getJson('content/stories-settings.json'),
@@ -3363,9 +3363,9 @@ function loadSiteTexts() {
       hero: home.hero || {},
       home_intro: homeIntro,
       sections: home.sections || {},
-      // page-titles.json (parts[1]) bleibt Fallback; die Pro-Bereich-Dateien
-      // (parts[8..11]) gewinnen. Keys identisch -> data-site-Pfade unveraendert.
-      pagetitles: Object.assign({}, parts[1] || {}, parts[8] || {}, parts[9] || {}, parts[10] || {}, parts[11] || {}),
+      // Seitentexte kommen aus den Pro-Bereich-Dateien (parts[8..11]). Keys
+      // identisch zu frueher -> data-site="pagetitles.*"-Pfade unveraendert.
+      pagetitles: Object.assign({}, parts[8] || {}, parts[9] || {}, parts[10] || {}, parts[11] || {}),
       about: parts[2] || {},
       contact: parts[3] || {},
       // Stories-Schalter: liegt jetzt in stories-settings.json.
