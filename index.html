@@ -758,7 +758,7 @@
   <!-- ============ PORTFOLIO ============ -->
   <div class="page" id="page-portfolio">
     <div class="wrap">
-      <div class="page-title" data-collection="portfolio">
+      <div class="page-title" data-collection="portfolio" data-text-edit="sitetexts/entries/pagetitles">
         <div class="kicker" data-de="Galerie" data-en="Gallery">Galerie</div>
         <h1 data-site="pagetitles.portfolio_title" data-de="Ausgewählte Aufnahmen" data-en="Selected work">Ausgewählte Aufnahmen</h1>
         <p data-site="pagetitles.portfolio_intro" data-de="Alle Bilder, geordnet nach Alben. Oben rechts kannst du die Sortierung umschalten." data-en="All photos, organized in albums. Switch the sorting at the top right.">Alle Bilder, geordnet nach Alben. Oben rechts kannst du die Sortierung umschalten.</p>
@@ -776,7 +776,7 @@
   <!-- ============ STORIES LIST ============ -->
   <div class="page" id="page-stories">
     <div class="wrap">
-      <div class="page-title" data-collection="stories">
+      <div class="page-title" data-collection="stories" data-text-edit="sitetexts/entries/pagetitles">
         <div class="kicker" data-de="Reiseberichte" data-en="Travel stories">Reiseberichte</div>
         <h1 data-site="pagetitles.stories_title" data-de="Geschichten von unterwegs" data-en="Stories from the road">Geschichten von unterwegs</h1>
         <p data-site="pagetitles.stories_intro" data-de="Was zwischen den Bildern passiert ist — die guten, die anstrengenden und die ziemlich lustigen Momente." data-en="What happened between the photos — the good, the exhausting, and the pretty funny moments.">Was zwischen den Bildern passiert ist — die guten, die anstrengenden und die ziemlich lustigen Momente.</p>
@@ -804,7 +804,7 @@
   <!-- ============ TRIPS ============ -->
   <div class="page" id="page-trips">
     <div class="wrap">
-      <div class="page-title" data-collection="trips">
+      <div class="page-title" data-collection="trips" data-text-edit="sitetexts/entries/pagetitles">
         <div class="kicker" data-de="Reisen" data-en="Trips">Reisen</div>
         <h1 data-site="pagetitles.trips_title" data-de="Unsere Roadtrips" data-en="Our road trips">Unsere Roadtrips</h1>
         <p data-site="pagetitles.trips_intro" data-de="Tausende Kilometer, unzählige Stopps. Tippe auf eine Station, um zu sehen, was wir dort erlebt haben." data-en="Thousands of miles, countless stops. Tap a station to see what we got up to there.">Tausende Kilometer, unzählige Stopps. Tippe auf eine Station, um zu sehen, was wir dort erlebt haben.</p>
@@ -832,7 +832,7 @@
   <!-- ============ GEAR ============ -->
   <div class="page" id="page-gear">
     <div class="wrap">
-      <div class="page-title" data-collection="equipment">
+      <div class="page-title" data-collection="equipment" data-text-edit="sitetexts/entries/pagetitles">
         <div class="kicker" data-de="Equipment" data-en="Gear">Equipment</div>
         <h1 data-site="pagetitles.gear_title" data-de="Womit wir fotografieren" data-en="What we shoot with">Womit wir fotografieren</h1>
         <p data-site="pagetitles.gear_intro" data-de="Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben." data-en="Our gear at a glance — sorted by category. What we actually carry out there.">Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben.</p>
@@ -3679,10 +3679,19 @@ function wwInjectToolbars() {
     if (titles[i].querySelector('.ww-edit-toolbar')) continue; // schon da
     var coll = titles[i].getAttribute('data-collection');
     var file = titles[i].getAttribute('data-collection-file'); // bei Datei-Collections
+    var textEdit = titles[i].getAttribute('data-text-edit');    // z.B. "sitetexts/entries/pagetitles"
     titles[i].style.position = 'relative';
     titles[i].classList.add('ww-editable');
     var opts;
-    if (file) {
+    if (textEdit) {
+      // Seitenkopf einer Ordner-Collection, dessen Ueberschrift-TEXT aber in
+      // einem separaten Datei-Eintrag liegt (z.B. page-titles.json):
+      // Stift -> Text-Eintrag, Plus -> weiterhin neuer Eintrag in der Collection.
+      var te = textEdit.split('/entries/');
+      var editOpt = (te.length === 2) ? { coll: te[0], file: te[1] } : { coll: textEdit, slug: null };
+      opts = { edit: editOpt };
+      if (coll && !file) opts.add = coll;
+    } else if (file) {
       // Datei-Collection (z.B. sitetexts/site): nur bearbeiten, kein "neu"
       opts = { edit: { coll: coll, file: file } };
     } else {
