@@ -154,6 +154,8 @@
   }
   .hero-media .hero-slide.is-active { opacity: 1; }
   .hero-logo { position: relative; z-index: 2; width: min(440px, 80vw); margin-bottom: 28px; opacity: 0; animation: fadeUp 0.9s 0.2s forwards; filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4)); }
+  /* Hero-Logo flackerfrei verstecken (Zustand kommt sofort aus localStorage, siehe Early-Script im <head>). */
+  html.ww-hide-hero-logo .hero-logo { display: none !important; }
   .hero-logo img { width: 100%; }
   .hero-tag { position: relative; z-index: 2; color: #f0d9bf; font-size: clamp(15px, 2vw, 19px); max-width: 540px; font-weight: 300; opacity: 0; animation: fadeUp 0.9s 0.45s forwards; }
   .hero-cta { position: relative; z-index: 2; margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; opacity: 0; animation: fadeUp 0.9s 0.6s forwards; }
@@ -682,6 +684,19 @@
     .trip-stoplist button { flex: 0 0 auto; white-space: nowrap; }
   }
 </style>
+  <!-- FOUC-Schutz: letzten Sichtbarkeits-Zustand SOFORT (vor dem ersten Paint)
+       aus localStorage anwenden, damit Stories-Nav und Hero-Logo nicht
+       aufblitzen. Der echte Wert aus den Settings-Dateien wird nach dem Laden
+       gesetzt und aktualisiert den Cache (loadSiteTexts). -->
+  <script>
+  (function(){
+    try {
+      var d = document.documentElement;
+      if (localStorage.getItem('ww-cache-show-stories') === '1') d.classList.add('ww-stories-on');
+      if (localStorage.getItem('ww-cache-show-hero-logo') === '0') d.classList.add('ww-hide-hero-logo');
+    } catch (e) {}
+  })();
+  </script>
 </head>
 <body>
 
@@ -3415,6 +3430,7 @@ function applyStoriesVisibility() {
   // display-Wert jedes Elements (Nav-Link, Button, Menue-Eintrag) bleibt
   // erhalten – wir muessen ihn nicht pro Element raten.
   document.documentElement.classList.toggle('ww-stories-on', show);
+  try { localStorage.setItem('ww-cache-show-stories', show ? '1' : '0'); } catch (e) {}
   // "Aktuelles" neu rendern, damit Stories entsprechend rein/raus
   if (typeof renderLatest === 'function') renderLatest();
 }
@@ -3431,10 +3447,13 @@ function applyBranding() {
     if (navImg) navImg.src = src;
     if (heroImg) heroImg.src = src;
   }
-  // Hero-Logo: standardmaessig sichtbar (sofort, kein Nachladen ueber dem Falz).
-  // Nur ausblenden, wenn der CMS-Schalter ausdruecklich aus ist.
-  var heroWrap = document.querySelector('.hero-logo');
-  if (heroWrap) heroWrap.style.display = (WW_SITE && WW_SITE.show_hero_logo === false) ? 'none' : '';
+  // Hero-Logo: Sichtbarkeit ueber die Klasse .ww-hide-hero-logo auf <html>
+  // (siehe CSS + Early-Script im <head>). Dadurch wird der zuletzt bekannte
+  // Zustand schon vor dem ersten Paint angewandt -> kein Aufblitzen. Hier
+  // setzen wir den ECHTEN Wert und aktualisieren den Cache fuer naechstes Mal.
+  var hideHero = !!(WW_SITE && WW_SITE.show_hero_logo === false);
+  document.documentElement.classList.toggle('ww-hide-hero-logo', hideHero);
+  try { localStorage.setItem('ww-cache-show-hero-logo', hideHero ? '0' : '1'); } catch (e) {}
 }
 
 /* Blendet den "Entdecken"-Bereich der Startseite ein/aus (appearance-settings.json).
