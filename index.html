@@ -466,7 +466,7 @@
     font-family: var(--font-body); font-size: 15px; background: #fff; color: var(--c-ink); transition: border var(--dur-base) var(--ease);
   }
   .form-field input:focus, .form-field textarea:focus { outline: none; border-color: var(--c-accent); }
-  .form-field textarea { resize: vertical; min-height: 120px; }
+  .form-field textarea { resize: none; min-height: 120px; max-height: 300px; overflow-y: auto; }
   .form-note { font-size: 13px; color: var(--c-ink-soft); margin-top: 14px; }
   .form-success { display: none; background: #e6efd9; border: 1px solid #b8d089; color: #3b5510; padding: 16px 18px; border-radius: var(--radius-sm); margin-bottom: 18px; font-size: 15px; }
   .form-success.show { display: block; }
@@ -3248,6 +3248,7 @@ function handleSend() {
   document.getElementById('cName').value = '';
   document.getElementById('cEmail').value = '';
   document.getElementById('cMsg').value = '';
+  wwGrowMsg();
 }
 
 /* ---------- Initialisierung ---------- */
@@ -3821,6 +3822,21 @@ function wwInjectToolbars() {
     titles[i].insertAdjacentHTML('beforeend', wwToolbar(opts));
   }
 }
+
+/* Nachrichten-Textfeld waechst mit dem Inhalt mit -- bis zur max-height aus
+   dem CSS (.form-field textarea, 300px), danach wird intern gescrollt.
+   min-height (120px) bleibt durch das CSS erhalten. */
+function wwGrowMsg() {
+  var ta = document.getElementById('cMsg');
+  if (!ta) return;
+  ta.style.height = 'auto';
+  var max = parseInt(getComputedStyle(ta).maxHeight, 10) || 300;
+  ta.style.height = Math.min(ta.scrollHeight, max) + 'px';
+}
+(function(){
+  var ta = document.getElementById('cMsg');
+  if (ta) { ta.addEventListener('input', wwGrowMsg); wwGrowMsg(); }
+})();
 
 /* Robust starten */
 if (document.readyState === 'loading') {
