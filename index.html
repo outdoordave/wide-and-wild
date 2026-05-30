@@ -2137,21 +2137,36 @@ function attachSwipe(el, onLeft, onRight) {
   //    letzten Schritt schon >= WHEEL_NEWGESTURE_MIN_MS vergangen (nicht derselbe
   //    Geschwindigkeitspeak), wird die Sperre sofort geloest und der Wisch normal
   //    gezaehlt -> schnelles bewusstes Einzeln-Hintereinander-Wischen geht wieder.
+  // Feinjustage: schnelles bewusstes Durchblaettern (3-4 Gesten/Sek.) wurde von der
+  // vorigen Bremse (MIN_MS 140) verschluckt. Zwei Aenderungen:
+  //  a) WHEEL_NEWGESTURE_MIN_MS deutlich gesenkt (90) -> bis ~11 Gesten/Sek. moeglich.
+  //  b) Damit das kurze Zeitfenster nicht starkes Momentum faelschlich als neue Geste
+  //     zaehlt, kommt eine WIEDER-BESCHLEUNIGUNGS-Pruefung dazu: abklingendes Momentum
+  //     faellt monoton (jedes |deltaX| <= vorheriges), ein bewusster Neu-Wisch ist ein
+  //     kraeftiger Wieder-Ausschlag. Ein neuer Schritt waehrend der Sperre verlangt
+  //     daher: genug Zeit (MIN_MS) UND absolut kraeftig (DELTA) UND |deltaX| >= das
+  //     zuletzt gesehene Momentum * RISE_FACTOR. Monoton fallendes Momentum erfuellt
+  //     die Rise-Bedingung nie -> kein 2-3-Springen aus EINER Geste.
   var WHEEL_IDLE_MS = 300;          // so lange muss es ruhig sein, bevor wieder geblaettert wird
   var WHEEL_THRESH = 60;            // Mindest-Akkumulation fuer einen Schritt (unveraendert)
-  var WHEEL_NEWGESTURE_DELTA = 40;  // |deltaX| ab hier kann ein bewusst neuer Wisch sein
-  var WHEEL_NEWGESTURE_MIN_MS = 140;// ...aber nur, wenn so lange seit dem letzten Schritt vergangen
-  var accX = 0, wheelLock = false, wheelIdle = null, lastStepAt = 0;
+  var WHEEL_NEWGESTURE_DELTA = 50;  // absolute Mindest-|deltaX| fuer einen NEUEN Wisch
+  var WHEEL_NEWGESTURE_MIN_MS = 90; // Mindestabstand zum letzten Schritt (war 140) -> schnelle Folge
+  var WHEEL_RISE_FACTOR = 1.6;      // NEU: Wieder-Ausschlag muss zuletzt gesehenes Momentum * Faktor uebersteigen
+  var accX = 0, wheelLock = false, wheelIdle = null, lastStepAt = 0, lastMag = 0;
   el.addEventListener('wheel', function(e){
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // eher vertikal -> ignorieren
     e.preventDefault(); // verhindert Seiten-Horizontalscroll / Zurueck-Geste
     clearTimeout(wheelIdle);
     var now = Date.now();
+    var mag = Math.abs(e.deltaX);
     if (wheelLock) {
-      var newGesture = Math.abs(e.deltaX) >= WHEEL_NEWGESTURE_DELTA &&
-                       (now - lastStepAt) >= WHEEL_NEWGESTURE_MIN_MS;
+      // Bewusst neuer Wisch nur, wenn ALLE drei zutreffen (sonst = Momentum-Nachlauf):
+      var newGesture = (now - lastStepAt) >= WHEEL_NEWGESTURE_MIN_MS && // genug Zeit
+                       mag >= WHEEL_NEWGESTURE_DELTA &&                 // absolut kraeftig
+                       mag >= lastMag * WHEEL_RISE_FACTOR;              // wieder beschleunigt
       if (!newGesture) {
         // Momentum-Nachlauf: Delta verwerfen, nur das Gesten-Ende nach hinten schieben.
+        lastMag = mag;
         wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
         return;
       }
@@ -2160,6 +2175,7 @@ function attachSwipe(el, onLeft, onRight) {
       accX = 0;
     }
     accX += e.deltaX;
+    lastMag = mag;
     if (Math.abs(accX) >= WHEEL_THRESH) {
       if (accX > 0) { if (onLeft) onLeft(); } else { if (onRight) onRight(); }
       accX = 0;
