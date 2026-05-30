@@ -92,9 +92,10 @@
   .nav-logo { display: flex; align-items: center; cursor: pointer; height: 100%; }
   .nav-logo img { height: 62px; width: auto; }
   /* Stift am Logo: globales Logo direkt aus dem Admin-Modus tauschen.
-     Nur sichtbar, wenn body.ww-is-admin gesetzt ist. */
-  .ww-logo-edit { display: none; }
-  body.ww-is-admin .ww-logo-edit {
+     NUR im Admin-Modus sichtbar. Hoehere Spezifitaet als .ww-edit-btn (das
+     display:inline-flex setzt und sonst gewinnen wuerde, weil es spaeter steht). */
+  .nav-logo .ww-logo-edit { display: none; }
+  body.ww-is-admin .nav-logo .ww-logo-edit {
     display: inline-flex; position: absolute; right: -10px; bottom: -8px;
     width: 26px; height: 26px; z-index: 60;
   }
