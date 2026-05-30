@@ -572,7 +572,14 @@
   }
   .ww-edit-btn:hover { transform: scale(1.12); background: var(--c-accent-dk, #834e1f); }
   .ww-edit-btn svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .ww-edit-btn.ww-add { background: #2d6a4f; }
+  /* Plus klar als eigene Aktion absetzen: extra Abstand + dezenter Trenner
+     zum Stift, damit es nicht am Text/Stift "klebt". */
+  .ww-edit-btn.ww-add { background: #2d6a4f; margin-left: 12px; position: relative; }
+  .ww-edit-btn.ww-add::before {
+    content: ""; position: absolute; left: -7px; top: 50%;
+    transform: translateY(-50%); width: 1px; height: 20px;
+    background: rgba(255,255,255,.45);
+  }
   .ww-edit-btn.ww-add:hover { background: #1f4d39; }
   .ww-editable { position: relative; }
   /* Masonry-Galerie: jedes Bild im Originalformat, nichts abgeschnitten */
@@ -3582,10 +3589,19 @@ function wwEditBtn(coll, slug, file) {
     WW_PENCIL_SVG + '</button>';
 }
 
-/* Plus-Button: legt einen neuen Eintrag in einer Collection an. */
+/* Plus-Button: legt einen neuen Eintrag in einer Collection an.
+   Sprechender Titel pro Bereich, damit klar ist, dass hier ein NEUER
+   Eintrag (Album/Reise/...) entsteht -- nicht der danebenstehende Text. */
 function wwAddBtn(coll) {
   var target = '/admin/#/collections/' + coll + '/new';
-  return '<button class="ww-edit-btn ww-add" title="Neu erstellen" ' +
+  var labels = {
+    portfolio: 'Neues Album anlegen',
+    trips:     'Neue Reise anlegen',
+    equipment: 'Neuen Ausrüstungs-Eintrag anlegen',
+    stories:   'Neue Story anlegen'
+  };
+  var title = labels[coll] || 'Neuen Eintrag anlegen';
+  return '<button class="ww-edit-btn ww-add" title="' + title + '" aria-label="' + title + '" ' +
     'onclick="event.stopPropagation(); window.open(\'' + target + '\',\'_blank\')">' +
     WW_PLUS_SVG + '</button>';
 }
