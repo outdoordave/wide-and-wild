@@ -594,6 +594,11 @@
     font-family: var(--font-body); font-size: 13px; font-weight: 700; color: #fff;
   }
   .ww-edit-btn.ww-add:hover { background: #1f4d39; }
+  /* Add-Button in eigener Zeile (z.B. Gear: unter Beschreibung, ueber Liste).
+     Nur im Admin-Modus sichtbar. */
+  .ww-add-row { display: none; }
+  body.ww-is-admin .ww-add-row { display: flex; justify-content: center; margin: 4px 0 26px; }
+  .ww-add-row .ww-edit-btn.ww-add { margin-left: 0; }
   .ww-editable { position: relative; }
   /* Masonry-Galerie: jedes Bild im Originalformat, nichts abgeschnitten */
   .ww-masonry { column-count: 3; column-gap: 10px; margin-top: 16px; }
@@ -852,7 +857,7 @@
   <!-- ============ GEAR ============ -->
   <div class="page" id="page-gear">
     <div class="wrap">
-      <div class="page-title" data-collection="equipment" data-text-edit="sitetexts/entries/pagetitles">
+      <div class="page-title" data-collection="equipment" data-text-edit="sitetexts/entries/pagetitles" data-no-add>
         <div class="kicker" data-de="Equipment" data-en="Gear">Equipment</div>
         <h1 data-site="pagetitles.gear_title" data-de="Womit wir fotografieren" data-en="What we shoot with">Womit wir fotografieren</h1>
         <p data-site="pagetitles.gear_intro" data-de="Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben." data-en="Our gear at a glance — sorted by category. What we actually carry out there.">Unsere Ausrüstung auf einen Blick — sortiert nach Kategorie. Was wir draußen wirklich dabeihaben.</p>
@@ -2516,7 +2521,17 @@ function renderGear() {
       '<div class="gear-cat"><h3>' + d.name + '</h3>' + itemsHtml + '</div>';
   }
   html += '</div>';
-  wrap.innerHTML = '<div class="ww-editable" style="position:relative">' + html + wwFileToolbar('equipment', 'gear') + '</div>';
+  // "Neuer Ausruestungs-Eintrag" sitzt direkt ueber der Liste (unter der
+  // Beschreibung), nicht mehr am Seitenkopf. Oeffnet den Gear-Datei-Editor,
+  // wo die Eintraege als Liste gepflegt werden (equipment ist eine Datei-
+  // Collection -> /new gaebe es nicht). Nur im Admin-Modus sichtbar.
+  var gearAddRow =
+    '<div class="ww-add-row">' +
+      '<button class="ww-edit-btn ww-add" title="+ Neuer Ausrüstungs-Eintrag" aria-label="+ Neuer Ausrüstungs-Eintrag" ' +
+      'onclick="event.stopPropagation(); window.open(\'/admin/#/collections/equipment/entries/gear\',\'_blank\')">' +
+      WW_PLUS_SVG + '<span class="ww-add-txt">Neuer Ausrüstungs-Eintrag</span></button>' +
+    '</div>';
+  wrap.innerHTML = gearAddRow + '<div class="ww-editable" style="position:relative">' + html + wwFileToolbar('equipment', 'gear') + '</div>';
 }
 
 /* ---------- Einzelne Story ---------- */
@@ -3721,7 +3736,9 @@ function wwInjectToolbars() {
       var te = textEdit.split('/entries/');
       var editOpt = (te.length === 2) ? { coll: te[0], file: te[1] } : { coll: textEdit, slug: null };
       opts = { edit: editOpt };
-      if (coll && !file) opts.add = coll;
+      // data-no-add unterdrueckt den Plus am Seitenkopf (z.B. Gear: der
+      // "Neuer Eintrag"-Knopf sitzt stattdessen direkt ueber der Liste).
+      if (coll && !file && !titles[i].hasAttribute('data-no-add')) opts.add = coll;
     } else if (file) {
       // Datei-Collection (z.B. sitetexts/site): nur bearbeiten, kein "neu"
       opts = { edit: { coll: coll, file: file } };
