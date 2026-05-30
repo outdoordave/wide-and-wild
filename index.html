@@ -499,9 +499,9 @@
      Besucher nie sichtbar (display:none) und gar nicht erst injiziert. */
   .ww-mapstyle-panel { display: none; }
   body.ww-is-admin .ww-mapstyle-panel {
-    display: block; position: absolute; top: 10px; left: 10px; z-index: 5;
+    display: block; margin: 0 0 16px; max-width: 520px;
     background: rgba(28,24,18,0.88); color: #f4ede1; border-radius: var(--radius-sm);
-    padding: 8px 10px; font-size: var(--fs-label); max-width: 240px;
+    padding: 10px 12px; font-size: var(--fs-label);
     box-shadow: 0 2px 10px rgba(0,0,0,.35);
   }
   .ww-mapstyle-panel .ww-msp-title { font-weight: var(--fw-bold); margin-bottom: 6px; opacity: .85; }
@@ -2838,12 +2838,18 @@ function wwMapStyleUrl() {
    gesetzten Stil. Panel wird nur im Admin-Modus injiziert + nur einmal. */
 function wwAdminMapPanel(mapBox) {
   if (!mapBox || !document.body.classList.contains('ww-is-admin')) return;
-  if (mapBox.querySelector('.ww-mapstyle-panel')) return;
+  if (document.getElementById('ww-mapstyle-panel')) return;
+  // Panel als regulaerer Block VOR .map-layout (Geschwister, nicht im Grid).
+  // Fehlt der Layout-Wrapper, lieber gar kein Panel als ein JS-Fehler, der die
+  // Kartenfunktion mitreisst.
+  var layout = mapBox.closest('.map-layout');
+  if (!layout || !layout.parentNode) return;
   var styles = ['liberty', 'positron', 'bright', 'fiord', 'dark']; // nur verfuegbare (3d = 404)
   var base = 'https://tiles.openfreemap.org/styles/';
   var cur = window._wwMapStyle || 'liberty';
   var panel = document.createElement('div');
   panel.className = 'ww-mapstyle-panel';
+  panel.id = 'ww-mapstyle-panel';
   var btns = '';
   for (var i = 0; i < styles.length; i++) {
     var s = styles[i];
@@ -2872,7 +2878,7 @@ function wwAdminMapPanel(mapBox) {
       });
     })(bs[j]);
   }
-  mapBox.appendChild(panel);
+  layout.parentNode.insertBefore(panel, layout);
 }
 
 function renderHero(home) {
