@@ -480,5 +480,79 @@
     else init();
   })();
   </script>
+
+  <!-- ===========================================================
+       Unsaved-Changes-Warnung
+       Warnt beim Schliessen/Neuladen des Tabs, wenn im Editor
+       ungespeicherte Aenderungen vorliegen. Bewusst eigenstaendig und
+       UNABHAENGIG von Sveltias internen Stores:
+         - Dirty-Flag wird durch gebubbelte input/change-Events im
+           Editor gesetzt (Capture-Phase, faengt auch dynamisch
+           nachgeladene Felder),
+         - bei jedem Routenwechsel (hashchange -- von Sveltia selbst
+           dispatcht) UND nach erfolgreichem Speichern (postSave)
+           wieder zurueckgesetzt,
+         - beforeunload zeigt die Browser-Standardwarnung.
+       Sveltia nutzt selbst KEIN beforeunload -> kein Konflikt. Lieber
+       im Zweifel einmal zu viel warnen als Sveltias Interna bekaempfen.
+       =========================================================== -->
+  <script>
+  (function(){
+    'use strict';
+
+    var dirty = false;
+
+    // Sind wir im Eintrags-Editor? Stabiles, von Sveltia gepflegtes
+    // Signal: die Hash-Route #/collections/<name>/entries/<slug> bzw. /new
+    function inEditor(){
+      try {
+        return /#\/collections\/[^/]+\/(entries\/|new)/i.test(location.hash || '');
+      } catch (e) { return false; }
+    }
+
+    // 1) Eingabe/Auswahl im Editor markiert den Entwurf als "geaendert".
+    //    Capture-Phase + Gate auf inEditor() -> robust gegen alles ausser-
+    //    halb des Editors. Im Zweifel lieber setzen.
+    function onEdit(){ if (inEditor()) dirty = true; }
+    document.addEventListener('input',  onEdit, true);
+    document.addEventListener('change', onEdit, true);
+
+    // 2) Jeder Routenwechsel setzt das Flag zurueck. Editor verlassen/
+    //    wechseln = nicht mehr relevant; beforeunload feuert nur beim
+    //    echten Schliessen/Reload, nicht bei In-App-Navigation.
+    window.addEventListener('hashchange', function(){ dirty = false; });
+
+    // 3) Erfolgreiches Speichern setzt das Flag zurueck. window.CMS kann
+    //    beim Laden noch fehlen -> kurz pollen (wie die Erweiterungen oben).
+    //    Klappt der Hook nicht, greift weiterhin das hashchange-Reset nach
+    //    dem (per Default) automatischen Schliessen des Editors.
+    (function hookPostSave(){
+      var tries = 0;
+      var iv = setInterval(function(){
+        tries++;
+        try {
+          if (window.CMS && typeof window.CMS.registerEventListener === 'function') {
+            clearInterval(iv);
+            try {
+              window.CMS.registerEventListener({
+                name: 'postSave',
+                handler: function(){ dirty = false; /* bewusst kein return */ }
+              });
+            } catch (e) { /* Event nicht verfuegbar -> still ignorieren */ }
+          } else if (tries > 50) {
+            clearInterval(iv);
+          }
+        } catch (e) { clearInterval(iv); }
+      }, 200);
+    })();
+
+    // 4) Browserwarnung beim Schliessen/Neuladen, solange ungespeichert.
+    window.addEventListener('beforeunload', function(e){
+      if (!dirty) return;
+      e.preventDefault();
+      e.returnValue = '';   // fuer Chrome/Firefox noetig; zeigt Standardtext
+    });
+  })();
+  </script>
 </body>
 </html>
