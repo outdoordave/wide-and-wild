@@ -2873,7 +2873,7 @@ function renderTrip() {
     '<div class="ww-editable" style="position:relative">' +
     '<div class="meta">' + td.meta + '</div><p>' + td.summary + '</p>' +
     albumLinkHtml +
-    wwToolbar({ edit: { coll: 'trips', slug: currentTrip }, add: 'trips' }) +
+    wwToolbar({ edit: { coll: 'trips', slug: currentTrip } }) +
     '</div>';
   // Klick auf Album-Link -> zur Galerie navigieren
   var lk = document.querySelector('#tripSummary .trip-album-link');
