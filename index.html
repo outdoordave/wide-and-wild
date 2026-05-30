@@ -3883,6 +3883,11 @@ function wwApplyAdminMode() {
   if (wwIsAdmin()) {
     document.body.classList.add('ww-is-admin');
     wwInjectToolbars();
+    // Kartenstil-Panel auch nachziehen, wenn der Admin-Modus erst NACH dem
+    // ersten renderTrip() aktiv wird (Polling/Storage/wwEnterAdmin). Sonst bliebe
+    // das Panel unsichtbar, weil renderTrip nicht erneut laeuft. Idempotent + gated.
+    var mb = document.getElementById('mapBox');
+    if (mb) wwAdminMapPanel(mb);
     // Inhalte laden asynchron nach – nochmal nachziehen
     setTimeout(wwInjectToolbars, 800);
     setTimeout(wwInjectToolbars, 2000);
