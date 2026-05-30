@@ -1199,5 +1199,3 @@ collections:
         value: fiord
       - label: Dark (dunkel)
         value: dark
-      - label: 3D (mit Gebäuden)
-        value: 3d

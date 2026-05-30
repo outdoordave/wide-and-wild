@@ -2827,7 +2827,7 @@ function loadTripSettings() {
 /* Liefert die OpenFreeMap-Style-URL zum gewählten Stil-Namen */
 function wwMapStyleUrl() {
   var name = window._wwMapStyle || 'liberty';
-  var valid = { liberty:1, positron:1, bright:1, fiord:1, dark:1, '3d':1 };
+  var valid = { liberty:1, positron:1, bright:1, fiord:1, dark:1 };
   if (!valid[name]) name = 'liberty';
   return 'https://tiles.openfreemap.org/styles/' + name;
 }
