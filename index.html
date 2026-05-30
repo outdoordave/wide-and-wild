@@ -204,7 +204,16 @@
   .hero-tag { position: relative; z-index: 2; color: #f0d9bf; font-size: var(--fs-lead); max-width: 540px; font-weight: var(--fw-light); letter-spacing: var(--tracking-slight); opacity: 0; animation: fadeUp 0.9s 0.45s forwards; }
   .hero-cta { position: relative; z-index: 2; margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; opacity: 0; animation: fadeUp 0.9s 0.6s forwards; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-  .scroll-hint { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 2; color: #f0d9bf; font-size: var(--fs-title); animation: bob 2s ease-in-out infinite; }
+  .scroll-hint { position: absolute; bottom: 84px; left: 50%; transform: translateX(-50%); z-index: 3; color: #f0d9bf; font-size: var(--fs-title); animation: bob 2s ease-in-out infinite; }
+  /* Trockenpinsel-/Riss-Uebergang am Hero-Unterrand (Inline-SVG, currentColor = --c-bg) */
+  .hero-rip{
+    position:absolute; left:0; right:0; bottom:-1px;
+    width:100%; height:72px;
+    z-index:2;                 /* ueber hero-media (0) und ::before (1) */
+    color:var(--c-bg);         /* speist currentColor -> Riss = Seitenfarbe */
+    display:block; pointer-events:none;
+  }
+  @media (max-width:640px){ .hero-rip{ height:52px; } .scroll-hint{ bottom:64px; } }
   @keyframes bob { 0%,100% { transform: translateX(-50%) translateY(0);} 50% { transform: translateX(-50%) translateY(8px);} }
 
   /* ============ BUTTONS ============ */
@@ -788,6 +797,25 @@
         <button class="btn ghost" data-nav="stories" data-site="hero.cta_stories" data-stories-only data-de="Reiseberichte lesen" data-en="Read our stories">Reiseberichte lesen</button>
       </div>
       <div class="scroll-hint">↓</div>
+      <svg class="hero-rip" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="heroRipRamp" x1="0" y1="66" x2="0" y2="92" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="currentColor" stop-opacity="0"/>
+            <stop offset="1" stop-color="currentColor" stop-opacity="1"/>
+          </linearGradient>
+          <filter id="heroRipDry" x="-3%" y="-70%" width="106%" height="240%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.009 0.30" numOctaves="3" seed="7" stitchTiles="stitch" result="n"/>
+            <feColorMatrix in="n" type="luminanceToAlpha" result="na"/>
+            <feComposite in="SourceGraphic" in2="na" operator="arithmetic" k1="0" k2="1" k3="1" k4="-0.55" result="sum"/>
+            <feComponentTransfer in="sum" result="mask"><feFuncA type="linear" slope="7" intercept="-2.2"/></feComponentTransfer>
+            <feFlood flood-color="currentColor" result="cream"/>
+            <feComposite in="cream" in2="mask" operator="in" result="col"/>
+            <feDisplacementMap in="col" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+        </defs>
+        <rect x="0" y="89" width="1200" height="31" fill="currentColor"/>
+        <rect x="-20" y="62" width="1240" height="36" fill="url(#heroRipRamp)" filter="url(#heroRipDry)"/>
+      </svg>
     </div>
 
     <section>
