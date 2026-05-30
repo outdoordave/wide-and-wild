@@ -804,9 +804,9 @@
             <stop offset="1" stop-color="currentColor" stop-opacity="1"/>
           </linearGradient>
           <filter id="heroRipDry" x="-3%" y="-70%" width="106%" height="240%" color-interpolation-filters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="0.009 0.30" numOctaves="3" seed="7" stitchTiles="stitch" result="n"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.016 0.18" numOctaves="3" seed="7" stitchTiles="stitch" result="n"/>
             <feColorMatrix in="n" type="luminanceToAlpha" result="na"/>
-            <feComposite in="SourceGraphic" in2="na" operator="arithmetic" k1="0" k2="1" k3="1" k4="-0.55" result="sum"/>
+            <feComposite in="SourceGraphic" in2="na" operator="arithmetic" k1="0" k2="1" k3="1" k4="-0.42" result="sum"/>
             <feComponentTransfer in="sum" result="mask"><feFuncA type="linear" slope="7" intercept="-2.2"/></feComponentTransfer>
             <feFlood flood-color="currentColor" result="cream"/>
             <feComposite in="cream" in2="mask" operator="in" result="col"/>
