@@ -45,6 +45,39 @@
     --font-body:    'Mulish', -apple-system, BlinkMacSystemFont, sans-serif;
     --maxw: 1180px;
     --radius: 10px;
+
+    /* ===== Design-System-Tokens (zentrale Quelle) =====
+       Eingefuehrt in Commit 0 -- werden in den Folge-Commits schrittweise
+       verwendet. Solange ungenutzt: keine visuelle Wirkung. */
+    /* Typo-Skala (Basis 16px, Ratio ~1.2-1.25) */
+    --fs-label:    .75rem;    /* 12 */
+    --fs-ui:       .875rem;   /* 14 */
+    --fs-body:     1rem;      /* 16 */
+    --fs-lead:     1.125rem;  /* 18 */
+    --fs-title-sm: 1.25rem;   /* 20 */
+    --fs-title:    1.5rem;    /* 24 */
+    --fs-title-lg: 1.875rem;  /* 30 */
+    --fs-heading:  clamp(1.75rem, 4vw, 2.75rem); /* 28-44 */
+    --fs-display:  clamp(2rem, 5vw, 3.75rem);    /* 32-60 */
+    /* Eckenradien */
+    --radius-sm:   8px;
+    --radius-lg:   16px;
+    --radius-pill: 999px;
+    --radius-full: 50%;
+    /* Animation: eine gemeinsame Ease-out-Kurve + drei Dauern */
+    --ease:        cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast:    150ms;
+    --dur-base:    250ms;
+    --dur-slow:    500ms;
+    /* Laufweiten (em -> skaliert mit der Schriftgroesse) */
+    --tracking-normal: 0;
+    --tracking-slight: 0.03em;
+    --tracking-wide:   0.08em;
+    /* Schrift-Gewichte */
+    --fw-regular:  400;
+    --fw-medium:   500;
+    --fw-semibold: 600;
+    --fw-bold:     700;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
