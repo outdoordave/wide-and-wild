@@ -2114,78 +2114,45 @@ function attachSwipe(el, onLeft, onRight) {
     else { if (onRight) onRight(); }
   }, { passive: true });
 
-  // --- Trackpad / Magic Mouse: horizontale Wheel-Geste ---
+  // --- Trackpad / Magic Mouse: horizontale Wheel-Geste (Schwall/Pausen-Modell) ---
   // Zwei-Finger-Wisch / Magic-Mouse-Wisch erzeugen wheel-Events mit deltaX.
   // Vertikales Scrollen (deltaY dominant) lassen wir in Ruhe.
   //
-  // Frueher: fester 500ms-Lock nach einem Schritt. Das Traegheits-Momentum eines
-  // kraeftigen Wischs laeuft aber LAENGER nach -> nach Ablauf des Locks summierte
-  // sich das Rest-Delta erneut ueber die Schwelle und loeste 2-3 Schritte aus EINER
-  // Geste aus. Loesung: Gesten-Ende-Entprellung statt fester Zeit. Nach einem Schritt
-  // bleibt gesperrt, solange ueberhaupt noch Wheel-Events eintreffen; der Idle-Timer
-  // wird bei JEDEM Event neu nach hinten geschoben. Erst wenn WHEEL_IDLE_MS lang KEIN
-  // Event mehr kam (Momentum abgeklungen), ist der naechste Schritt wieder frei.
-  // Waehrend der Sperre wird das Delta VERWORFEN (nicht aufsummiert), damit nach dem
-  // Abklingen kein Rest sofort den naechsten Schritt triggert.
-  // Nachjustierung: Die reine Idle-Entprellung schluckte auch einen bewusst neuen
-  // Wisch, weil JEDES Event (auch das des zweiten Wischs) die Sperre verlaengerte.
-  // Loesung: waehrend der Sperre ueber die Event-STAERKE unterscheiden.
-  //  - Momentum-Nachlauf der alten Geste = Folge SCHWACHER, abklingender |deltaX| ->
-  //    wird geschluckt, verlaengert nur die Sperre.
-  //  - Ein bewusst NEUER Wisch startet mit einem deutlich KRAEFTIGEREN |deltaX|-
-  //    Ausschlag. Kommt so ein Ausschlag (>= WHEEL_NEWGESTURE_DELTA) UND ist seit dem
-  //    letzten Schritt schon >= WHEEL_NEWGESTURE_MIN_MS vergangen (nicht derselbe
-  //    Geschwindigkeitspeak), wird die Sperre sofort geloest und der Wisch normal
-  //    gezaehlt -> schnelles bewusstes Einzeln-Hintereinander-Wischen geht wieder.
-  // Feinjustage: schnelles bewusstes Durchblaettern (3-4 Gesten/Sek.) wurde von der
-  // vorigen Bremse (MIN_MS 140) verschluckt. Zwei Aenderungen:
-  //  a) WHEEL_NEWGESTURE_MIN_MS deutlich gesenkt (90) -> bis ~11 Gesten/Sek. moeglich.
-  //  b) Damit das kurze Zeitfenster nicht starkes Momentum faelschlich als neue Geste
-  //     zaehlt, kommt eine WIEDER-BESCHLEUNIGUNGS-Pruefung dazu: abklingendes Momentum
-  //     faellt monoton (jedes |deltaX| <= vorheriges), ein bewusster Neu-Wisch ist ein
-  //     kraeftiger Wieder-Ausschlag. Ein neuer Schritt waehrend der Sperre verlangt
-  //     daher: genug Zeit (MIN_MS) UND absolut kraeftig (DELTA) UND |deltaX| >= das
-  //     zuletzt gesehene Momentum * RISE_FACTOR. Monoton fallendes Momentum erfuellt
-  //     die Rise-Bedingung nie -> kein 2-3-Springen aus EINER Geste.
-  var WHEEL_IDLE_MS = 300;          // so lange muss es ruhig sein, bevor wieder geblaettert wird
-  var WHEEL_THRESH = 60;            // Mindest-Akkumulation fuer einen Schritt (unveraendert)
-  var WHEEL_NEWGESTURE_DELTA = 50;  // absolute Mindest-|deltaX| fuer einen NEUEN Wisch
-  var WHEEL_NEWGESTURE_MIN_MS = 90; // Mindestabstand zum letzten Schritt (war 140) -> schnelle Folge
-  var WHEEL_RISE_FACTOR = 1.6;      // NEU: Wieder-Ausschlag muss zuletzt gesehenes Momentum * Faktor uebersteigen
-  var accX = 0, wheelLock = false, wheelIdle = null, lastStepAt = 0, lastMag = 0;
+  // Modell statt Schwellwert-Raten: Eine physische Geste ist ein ZUSAMMENHAENGENDER
+  // Strom von wheel-Events ohne Pause. Der Traegheits-/Momentum-Nachlauf gehoert zum
+  // SELBEN Strom (macOS feuert ihn im Display-Takt ~16ms, ProMotion ~8ms, weiter).
+  // Zwei bewusste Wische haben dazwischen IMMER eine kurze Pause (Finger kurz runter)
+  // -> echte Event-Stille. Daraus die Regel:
+  //   * Pro Strom GENAU EIN Schritt, ausgeloest beim ersten Event, das die Distanz-
+  //     schwelle WHEEL_THRESH ueberschreitet. Der Rest des Stroms (inkl. Momentum)
+  //     wird ignoriert -> kein 2-3-Springen aus EINER Geste.
+  //   * Der Strom gilt erst als beendet, wenn WHEEL_GAP_MS lang GAR KEIN wheel-Event
+  //     mehr kam. Erst dann ist der naechste Strom (= bewusst neue Geste) zugelassen.
+  // Damit faellt das fragile Magnituden-Raten (Staerke/Rise/Mindestzeit) weg, das je
+  // nach Anlauf des Fingers mal schluckte, mal durchliess. WHEEL_GAP_MS (~80ms) liegt
+  // klar ueber dem Intra-Gesten-Takt (~16ms, Strom wird nie faelschlich gespalten) und
+  // unter der typischen bewussten Hebe-Pause (schnelles Paging geht durch). Leichte
+  // Paging-Wische erzeugen kaum Momentum -> echte Stille-Luecke; ein kraeftiger Flick
+  // erzeugt langen lueckenlosen Momentum-Strom -> bleibt ein Schritt.
+  var WHEEL_GAP_MS = 80;   // Stille, die einen Event-Strom (Geste) beendet — einzige Stellschraube
+  var WHEEL_THRESH = 30;   // Mindeststrecke (Summe |deltaX|) fuer den einen Schritt im Strom
+  var accX = 0, streamActive = false, stepFired = false, gapTimer = null;
   el.addEventListener('wheel', function(e){
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // eher vertikal -> ignorieren
     e.preventDefault(); // verhindert Seiten-Horizontalscroll / Zurueck-Geste
-    clearTimeout(wheelIdle);
-    var now = Date.now();
-    var mag = Math.abs(e.deltaX);
-    if (wheelLock) {
-      // Bewusst neuer Wisch nur, wenn ALLE drei zutreffen (sonst = Momentum-Nachlauf):
-      var newGesture = (now - lastStepAt) >= WHEEL_NEWGESTURE_MIN_MS && // genug Zeit
-                       mag >= WHEEL_NEWGESTURE_DELTA &&                 // absolut kraeftig
-                       mag >= lastMag * WHEEL_RISE_FACTOR;              // wieder beschleunigt
-      if (!newGesture) {
-        // Momentum-Nachlauf: Delta verwerfen, nur das Gesten-Ende nach hinten schieben.
-        lastMag = mag;
-        wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
-        return;
+    clearTimeout(gapTimer);
+    if (!streamActive) {           // erstes Event nach einer Pause = neuer Strom = neue Geste
+      streamActive = true; stepFired = false; accX = 0;
+    }
+    if (!stepFired) {
+      accX += e.deltaX;
+      if (Math.abs(accX) >= WHEEL_THRESH) {
+        if (accX > 0) { if (onLeft) onLeft(); } else { if (onRight) onRight(); }
+        stepFired = true;          // dieser Strom hat sein eines Blaettern -> Rest (Momentum) ignorieren
       }
-      // Bewusst neuer Wisch -> Sperre sofort loesen und neu zaehlen.
-      wheelLock = false;
-      accX = 0;
     }
-    accX += e.deltaX;
-    lastMag = mag;
-    if (Math.abs(accX) >= WHEEL_THRESH) {
-      if (accX > 0) { if (onLeft) onLeft(); } else { if (onRight) onRight(); }
-      accX = 0;
-      lastStepAt = now;
-      wheelLock = true; // eine durchgehende Geste = genau ein Blaettern
-      wheelIdle = setTimeout(function(){ wheelLock = false; accX = 0; }, WHEEL_IDLE_MS);
-    } else {
-      // Schwelle noch nicht erreicht: bei Gestenende den Zaehler leeren
-      wheelIdle = setTimeout(function(){ accX = 0; }, WHEEL_IDLE_MS);
-    }
+    // Strom endet erst, wenn WHEEL_GAP_MS lang gar kein Event mehr kam.
+    gapTimer = setTimeout(function(){ streamActive = false; stepFired = false; accX = 0; }, WHEEL_GAP_MS);
   }, { passive: false });
 }
 
