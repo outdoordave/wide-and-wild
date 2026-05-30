@@ -650,6 +650,52 @@ collections:
         - name: en
           label: Englisch
           widget: string
+      - name: social_alexandra
+        label: Social Media - Alexandra
+        widget: object
+        fields:
+        - name: platform
+          label: Plattform
+          widget: select
+          default: instagram
+          options:
+          - label: Instagram
+            value: instagram
+          - label: TikTok
+            value: tiktok
+          - label: YouTube
+            value: youtube
+          - label: Facebook
+            value: facebook
+          - label: X / Twitter
+            value: x
+        - name: username
+          label: Benutzername
+          widget: string
+          hint: Ohne @, z.B. a3_flow
+      - name: social_david
+        label: Social Media - David
+        widget: object
+        fields:
+        - name: platform
+          label: Plattform
+          widget: select
+          default: instagram
+          options:
+          - label: Instagram
+            value: instagram
+          - label: TikTok
+            value: tiktok
+          - label: YouTube
+            value: youtube
+          - label: Facebook
+            value: facebook
+          - label: X / Twitter
+            value: x
+        - name: username
+          label: Benutzername
+          widget: string
+          hint: Ohne @, z.B. davidbastisch
     - name: sections
       label: Abschnitte
       widget: object
