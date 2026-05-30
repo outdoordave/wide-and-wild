@@ -572,13 +572,15 @@
   }
   .ww-edit-btn:hover { transform: scale(1.12); background: var(--c-accent-dk, #834e1f); }
   .ww-edit-btn svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  /* Plus klar als eigene Aktion absetzen: extra Abstand + dezenter Trenner
-     zum Stift, damit es nicht am Text/Stift "klebt". */
-  .ww-edit-btn.ww-add { background: #2d6a4f; margin-left: 12px; position: relative; }
-  .ww-edit-btn.ww-add::before {
-    content: ""; position: absolute; left: -7px; top: 50%;
-    transform: translateY(-50%); width: 1px; height: 20px;
-    background: rgba(255,255,255,.45);
+  /* Plus ist ein eigener, BREITER Button mit Text-Label -> eindeutig als
+     separate Aktion erkennbar und klar vom Stift/Ueberschrift abgesetzt. */
+  .ww-edit-btn.ww-add {
+    width: auto; height: 34px; border-radius: 17px;
+    padding: 0 14px 0 10px; gap: 6px; margin-left: 16px;
+    background: #2d6a4f; white-space: nowrap;
+  }
+  .ww-edit-btn.ww-add .ww-add-txt {
+    font-family: var(--font-body); font-size: 13px; font-weight: 700; color: #fff;
   }
   .ww-edit-btn.ww-add:hover { background: #1f4d39; }
   .ww-editable { position: relative; }
@@ -3589,21 +3591,21 @@ function wwEditBtn(coll, slug, file) {
     WW_PENCIL_SVG + '</button>';
 }
 
-/* Plus-Button: legt einen neuen Eintrag in einer Collection an.
-   Sprechender Titel pro Bereich, damit klar ist, dass hier ein NEUER
-   Eintrag (Album/Reise/...) entsteht -- nicht der danebenstehende Text. */
+/* Plus-Button: eigener, breiter Button mit sichtbarem Text-Label, damit klar
+   ist, dass hier ein NEUER Eintrag (Album/Reise/...) entsteht -- nicht der
+   danebenstehende Ueberschriftstext. Icon (+) + Label pro Bereich. */
 function wwAddBtn(coll) {
   var target = '/admin/#/collections/' + coll + '/new';
   var labels = {
-    portfolio: 'Neues Album anlegen',
-    trips:     'Neue Reise anlegen',
-    equipment: 'Neuen Ausrüstungs-Eintrag anlegen',
-    stories:   'Neue Story anlegen'
+    portfolio: 'Neues Album',
+    trips:     'Neue Reise',
+    equipment: 'Neuer Ausrüstungs-Eintrag',
+    stories:   'Neue Story'
   };
-  var title = labels[coll] || 'Neuen Eintrag anlegen';
-  return '<button class="ww-edit-btn ww-add" title="' + title + '" aria-label="' + title + '" ' +
+  var label = labels[coll] || 'Neuer Eintrag';
+  return '<button class="ww-edit-btn ww-add" title="+ ' + label + '" aria-label="+ ' + label + '" ' +
     'onclick="event.stopPropagation(); window.open(\'' + target + '\',\'_blank\')">' +
-    WW_PLUS_SVG + '</button>';
+    WW_PLUS_SVG + '<span class="ww-add-txt">' + label + '</span></button>';
 }
 
 /* Toolbar mit mehreren Buttons zusammenbauen.
