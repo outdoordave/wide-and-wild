@@ -231,8 +231,19 @@
   /* Kopfzeile mit Aufklapp-Schalter */
   .album-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
   .album-head-text { cursor: pointer; flex: 1; }
-  .album-head-text .gallery-group-title { margin-bottom: 4px; }
+  .album-head-text .gallery-group-title { margin-bottom: 4px; transition: color .2s; }
   .album-head-text .album-note { margin-bottom: 0; }
+  /* Klickbare Album-Ueberschrift: Pfeil als visueller Hinweis + Foto-Zaehler. */
+  .album-go-arrow { color: var(--c-accent); font-weight: 700; display: inline-block; transition: transform .2s; }
+  .album-go-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; padding: 0 6px; margin-left: 8px;
+    border-radius: 999px; background: rgba(0,0,0,0.08);
+    font-size: 11px; font-weight: 700; color: var(--c-ink-soft); vertical-align: middle;
+  }
+  .album-head-text:hover .gallery-group-title { color: var(--c-accent); }
+  .album-head-text:hover .album-go-arrow { transform: translateX(4px); }
+  .album-head-text:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 3px; border-radius: 6px; }
   .album-toggle {
     flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
     background: transparent; border: 1.5px solid var(--c-line); color: var(--c-ink-soft);
@@ -1735,14 +1746,13 @@ function renderGallery() {
       var head = document.createElement('div');
       head.className = 'album-head';
       head.innerHTML =
-        '<div class="album-head-text">' +
-          '<h3 class="gallery-group-title">' + escapeHtml(name) + '</h3>' +
+        '<div class="album-head-text" role="link" tabindex="0">' +
+          '<h3 class="gallery-group-title">' + escapeHtml(name) +
+            ' <span class="album-go-arrow" aria-hidden="true">→</span>' +
+            '<span class="album-go-count">' + alb.photos.length + '</span>' +
+          '</h3>' +
           (note ? '<p class="album-note">' + escapeHtml(note) + '</p>' : '') +
-        '</div>' +
-        '<button class="album-toggle" type="button" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
-          '<span class="album-toggle-label">' + (currentLang==='en'?'View album':'Album ansehen') + '</span>' +
-          '<span class="album-toggle-count">' + alb.photos.length + '</span>' +
-        '</button>';
+        '</div>';
       section.appendChild(head);
       // Bearbeiten-Toolbar (Stift) wie gehabt
       var tb = document.createElement('div');
@@ -1751,13 +1761,16 @@ function renderGallery() {
 
       section.appendChild(buildAlbumBody(alb, isOpen));
 
-      // Klick auf Kopfzeile/Toggle oeffnet die eigene Album-Unterseite
+      // Klick (oder Enter/Leertaste) auf die Album-Ueberschrift oeffnet die
+      // eigene Album-Unterseite. Der fruehere "Album ansehen"-Knopf entfaellt;
+      // der Pfeil an der Ueberschrift ist der visuelle Hinweis.
       (function(albObj, sectionEl){
-        var toggleBtn = sectionEl.querySelector('.album-toggle');
         var textEl = sectionEl.querySelector('.album-head-text');
         function go(){ openAlbum(albObj.slug); }
-        toggleBtn.addEventListener('click', function(e){ e.stopPropagation(); go(); });
         textEl.addEventListener('click', go);
+        textEl.addEventListener('keydown', function(e){
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+        });
       })(alb, section);
 
       grid.appendChild(section);
