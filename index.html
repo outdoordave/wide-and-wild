@@ -495,6 +495,21 @@
   .trip-tabs button.active { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
   .map-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start; }
   .map-box { border-radius: var(--radius-sm); overflow: hidden; position: relative; height: 420px; }
+  /* Admin-only Kartenstil-Vorschau (fluechtig, kein Writeback). Fuer normale
+     Besucher nie sichtbar (display:none) und gar nicht erst injiziert. */
+  .ww-mapstyle-panel { display: none; }
+  body.ww-is-admin .ww-mapstyle-panel {
+    display: block; position: absolute; top: 10px; left: 10px; z-index: 5;
+    background: rgba(28,24,18,0.88); color: #f4ede1; border-radius: var(--radius-sm);
+    padding: 8px 10px; font-size: var(--fs-label); max-width: 240px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.35);
+  }
+  .ww-mapstyle-panel .ww-msp-title { font-weight: var(--fw-bold); margin-bottom: 6px; opacity: .85; }
+  .ww-mapstyle-panel .ww-msp-btns { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .ww-mapstyle-panel button { font: inherit; cursor: pointer; border: 1px solid rgba(244,237,225,.3); background: transparent; color: inherit; border-radius: var(--radius-sm); padding: 4px 8px; }
+  .ww-mapstyle-panel button.active, .ww-mapstyle-panel button:hover { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
+  .ww-mapstyle-panel .ww-msp-current { opacity: .8; word-break: break-all; line-height: 1.4; }
+  .ww-mapstyle-panel .ww-msp-current code { color: #f0c9a8; }
   .map-box .maplibregl-map { height: 100%; border-radius: var(--radius-sm); }
   /* MapLibre-Popup im Website-Stil */
   .maplibregl-popup-content { background: var(--c-dark); color: var(--c-dark-ink); border-radius: var(--radius-sm); box-shadow: 0 4px 16px rgba(0,0,0,.4); border: none; padding: 10px 14px; font-family: var(--font-body); }
@@ -2817,6 +2832,49 @@ function wwMapStyleUrl() {
   return 'https://tiles.openfreemap.org/styles/' + name;
 }
 
+/* Admin-only Kartenstil-Umschalter: live verschiedene OpenFreeMap-Stile
+   ausprobieren (map.setStyle), OHNE CMS-Deploy. Rein fluechtig (kein
+   localStorage, kein Writeback) -> normale Besucher sehen weiter den im CMS
+   gesetzten Stil. Panel wird nur im Admin-Modus injiziert + nur einmal. */
+function wwAdminMapPanel(mapBox) {
+  if (!mapBox || !document.body.classList.contains('ww-is-admin')) return;
+  if (mapBox.querySelector('.ww-mapstyle-panel')) return;
+  var styles = ['liberty', 'positron', 'bright', 'fiord', 'dark']; // nur verfuegbare (3d = 404)
+  var base = 'https://tiles.openfreemap.org/styles/';
+  var cur = window._wwMapStyle || 'liberty';
+  var panel = document.createElement('div');
+  panel.className = 'ww-mapstyle-panel';
+  var btns = '';
+  for (var i = 0; i < styles.length; i++) {
+    var s = styles[i];
+    btns += '<button type="button" data-style="' + s + '"' + (s === cur ? ' class="active"' : '') +
+            '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</button>';
+  }
+  panel.innerHTML =
+    '<div class="ww-msp-title">Kartenstil · nur Vorschau (Admin)</div>' +
+    '<div class="ww-msp-btns">' + btns + '</div>' +
+    '<div class="ww-msp-current">aktuell: <code class="ww-msp-name">' + cur + '</code><br>' +
+      '<span class="ww-msp-url">' + base + cur + '</span></div>';
+  panel.addEventListener('click', function(e){ e.stopPropagation(); }); // Klicks nicht an die Karte
+  var bs = panel.querySelectorAll('button[data-style]');
+  for (var j = 0; j < bs.length; j++) {
+    (function(b){
+      b.addEventListener('click', function(){
+        var nm = b.getAttribute('data-style');
+        try {
+          window._mlMap.setStyle(base + nm);
+          // setStyle loescht Custom-Layer/Marker -> nach dem Laden neu zeichnen
+          window._mlMap.once('idle', function(){ wwSetMapLanguage(currentLang); wwDrawTrip(); });
+        } catch (e) {}
+        for (var k = 0; k < bs.length; k++) bs[k].classList.toggle('active', bs[k] === b);
+        var cn = panel.querySelector('.ww-msp-name'); if (cn) cn.textContent = nm;
+        var cu = panel.querySelector('.ww-msp-url'); if (cu) cu.textContent = base + nm;
+      });
+    })(bs[j]);
+  }
+  mapBox.appendChild(panel);
+}
+
 function renderHero(home) {
   var media = document.getElementById('heroMedia');
   var hero = media ? media.parentNode : null;
@@ -3048,6 +3106,9 @@ function renderTrip() {
     // Container war evtl. unsichtbar -> Groesse neu berechnen
     setTimeout(function(){ if (window._mlMap) window._mlMap.resize(); }, 100);
   }
+
+  // Admin-only Kartenstil-Vorschau (idempotent; nur im Admin-Modus)
+  wwAdminMapPanel(mapBox);
 
   // Stop-Liste als Buttons
   var list = document.getElementById('tripStoplist');
