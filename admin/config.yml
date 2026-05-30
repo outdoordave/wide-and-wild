@@ -32,7 +32,7 @@ collections:
 
 # === 🏞️ Startseite (Hero-Bild/Video) ===
 - name: homepage
-  label: 🏞️ Startseite
+  label: 🏞️ Titelbild & Video
   files:
   - name: hero
     label: Großes Bild / Video oben
@@ -76,7 +76,7 @@ collections:
 
 # === 🖼️ Portfolio ===
 - name: portfolio
-  label: 🖼️ Portfolio
+  label: 🖼️ Portfolio – Alben
   label_singular: Album
   description: Alle Portfolio-Alben. Ein Album = ein Ordner mit Fotos. Mehrere Fotos auf einmal hochladen mit Strg/Cmd+Klick im Datei-Dialog.
   folder: content/albums
@@ -253,7 +253,7 @@ collections:
 
 # === 📖 Stories / Beiträge ===
 - name: stories
-  label: 📖 Stories
+  label: 📖 Stories – Beiträge
   label_singular: Beitrag
   description: Reise-Geschichten. Werden automatisch nach Datum sortiert (neueste zuerst).
   folder: content/stories
@@ -358,7 +358,7 @@ collections:
 
 # === 🗺️ Reisen ===
 - name: trips
-  label: 🗺️ Reisen
+  label: 🗺️ Reisen – Berichte
   label_singular: Reise
   description: Reisen mit Stationen auf der Karte. Angepinnte zuerst, sonst nach Datum (neueste zuerst).
   folder: content/trips
@@ -542,7 +542,7 @@ collections:
 
 # === 🎒 Equipment ===
 - name: equipment
-  label: 🎒 Equipment
+  label: 🎒 Equipment – Liste
   files:
   - name: gear
     label: Gear-Liste
@@ -586,13 +586,15 @@ collections:
         required: false
 
 # === 📝 Website-Texte (5 Bereiche, jetzt inkl. Karten-Stil) ===
-- name: sitetexts
-  label: 📝 Website-Texte
-  description: Die festen Texte der Website, übersichtlich nach Seite getrennt.
+# =================  SEITENTEXTE — ein Eintrag je Seite  =================
+- divider: true
+- name: start
+  label: 🏠 Startseite
+  description: Texte der Startseite — großer Kopfbereich (Hero) und Intro-Block.
   files:
 
   - name: home
-    label: 🏠 Startseite
+    label: Hero & Sektionen
     file: content/home-texts.json
     description: Großer Kopfbereich und die Abschnitte der Startseite.
     fields:
@@ -696,7 +698,7 @@ collections:
           widget: string
 
   - name: home_intro
-    label: 🏠 Startseite – Intro-Text
+    label: Intro-Block
     file: content/home-intro.json
     description: Der Textblock unter dem Titelbild („Zwei Blickwinkel …" mit Beschreibung). Getrennt vom großen Kopfbereich.
     fields:
@@ -767,6 +769,118 @@ collections:
         widget: string
         hint: Ohne @, z.B. davidbastisch
 
+- name: portfolio_text
+  label: 🖼️ Portfolio
+  files:
+  - name: text
+    label: Portfolio – Seitentext
+    file: content/text-portfolio.json
+    description: Überschrift und Beschreibung der Portfolio-Seite.
+    fields:
+    - name: portfolio_kicker
+      label: Mini-Titel (Kicker)
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: portfolio_title
+      label: Titel
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: portfolio_intro
+      label: Beschreibung
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: text }
+      - { name: en, label: Englisch, widget: text }
+
+- name: reisen_text
+  label: 🚐 Reisen
+  files:
+  - name: text
+    label: Reisen – Seitentext
+    file: content/text-reisen.json
+    description: Überschrift und Beschreibung der Reisen-Seite.
+    fields:
+    - name: trips_kicker
+      label: Mini-Titel (Kicker)
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: trips_title
+      label: Titel
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: trips_intro
+      label: Beschreibung
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: text }
+      - { name: en, label: Englisch, widget: text }
+
+- name: stories_text
+  label: 📖 Stories
+  files:
+  - name: text
+    label: Stories – Seitentext
+    file: content/text-stories.json
+    description: Überschrift und Beschreibung der Stories-Seite.
+    fields:
+    - name: stories_kicker
+      label: Mini-Titel (Kicker)
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: stories_title
+      label: Titel
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: stories_intro
+      label: Beschreibung
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: text }
+      - { name: en, label: Englisch, widget: text }
+
+- name: gear_text
+  label: 🎒 Gear
+  files:
+  - name: text
+    label: Gear – Seitentext
+    file: content/text-gear.json
+    description: Überschrift und Beschreibung der Gear-Seite.
+    fields:
+    - name: gear_kicker
+      label: Mini-Titel (Kicker)
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: gear_title
+      label: Titel
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: string }
+      - { name: en, label: Englisch, widget: string }
+    - name: gear_intro
+      label: Beschreibung
+      widget: object
+      fields:
+      - { name: de, label: Deutsch, widget: text }
+      - { name: en, label: Englisch, widget: text }
+
+# Rest-Eintrag: wird in Commit 4 zusammen mit page-titles.json entfernt.
+- name: seitentexte_alt
+  label: 📐 Seiten-Überschriften (alt – wird entfernt)
+  files:
   - name: pagetitles
     label: 📐 Seiten-Überschriften
     file: content/page-titles.json
@@ -893,8 +1007,11 @@ collections:
         label: EN
         widget: text
 
+- name: ueber_uns
+  label: 👥 Über uns
+  files:
   - name: about
-    label: 👥 Über uns
+    label: Über uns
     file: content/about.json
     description: Alle Texte der Über-uns-Seite.
     fields:
@@ -1017,8 +1134,11 @@ collections:
         label: EN
         widget: string
 
+- name: kontakt
+  label: ✉️ Kontakt
+  files:
   - name: contact
-    label: ✉️ Kontakt
+    label: Kontakt
     file: content/contact.json
     description: Texte, Formular und Kontakt-Kanäle der Kontaktseite.
     fields:
@@ -1182,8 +1302,11 @@ collections:
         widget: string
         hint: 'z.B. https://instagram.com/euername oder mailto:hallo@... '
 
+- name: kartenstil
+  label: 🗺️ Karten-Stil
+  files:
   - name: mapstyle
-    label: 🗺️ Karten-Stil (Reisen-Karte)
+    label: Karten-Stil (Reisen-Karte)
     file: content/trips-settings.json
     description: Bestimmt das Aussehen der Karte auf der Reisen-Seite.
     fields:
