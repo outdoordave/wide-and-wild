@@ -701,10 +701,11 @@
 
     <section>
       <div class="wrap">
-        <div class="home-intro">
-          <h2 data-site="hero.subline" data-de="Zwei Blickwinkel, ein endloser Horizont." data-en="Two perspectives, one endless horizon.">Zwei Blickwinkel, ein endloser Horizont.</h2>
+        <div class="home-intro ww-editable" style="position:relative">
+          <div class="ww-edit-toolbar"><button class="ww-edit-btn" title="Intro-Text ändern" onclick="event.stopPropagation(); window.open('/admin/#/collections/sitetexts/entries/home_intro','_blank')"><svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
+          <h2 data-site="home_intro.subline" data-de="Zwei Blickwinkel, ein endloser Horizont." data-en="Two perspectives, one endless horizon.">Zwei Blickwinkel, ein endloser Horizont.</h2>
           <div class="divider-orn">✦</div>
-          <p data-site="hero.subtext" data-de="Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen." data-en="Alexandra captures animals and light with her camera, David sends the drone into the sky. Together we tell the story of the American landscape — one frame at a time.">Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen.</p>
+          <p data-site="home_intro.subtext" data-de="Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen." data-en="Alexandra captures animals and light with her camera, David sends the drone into the sky. Together we tell the story of the American landscape — one frame at a time.">Alexandra fängt mit der Kamera Tiere und Licht ein, David schickt die Drohne in den Himmel. Zusammen erzählen wir die Geschichte der amerikanischen Landschaft — eine Aufnahme nach der anderen.</p>
           <div class="insta-row" id="heroSocialRow"></div>
         </div>
       </div>
@@ -3287,14 +3288,17 @@ function loadSiteTexts() {
     getJson('content/contact.json'),
     getJson('content/stories-settings.json'),
     getJson('content/gallery-settings.json'),
-    getJson('content/appearance-settings.json')
+    getJson('content/appearance-settings.json'),
+    getJson('content/home-intro.json')
   ]).then(function(parts){
     var home = parts[0] || {};
     var storiesSettings = parts[4] || {};
     var gallerySettings = parts[5] || {};
     var appearance = parts[6] || {};
+    var homeIntro = parts[7] || {};
     WW_SITE = {
       hero: home.hero || {},
+      home_intro: homeIntro,
       sections: home.sections || {},
       pagetitles: parts[1] || {},
       about: parts[2] || {},
