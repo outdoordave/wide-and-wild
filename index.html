@@ -98,6 +98,9 @@
   img { display: block; max-width: 100%; }
   a { color: inherit; text-decoration: none; }
   button { font-family: var(--font-body); }
+  /* Sichtbarer Tastatur-Fokus -- nur bei Keyboard-Fokus (nicht Maus), Token-Outline */
+  :focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+  :focus:not(:focus-visible) { outline: none; }
 
   /* ---------- PLATZHALTER-BILDER (eingebettet, kein Internet noetig) ---------- */
   .ph {
@@ -305,7 +308,6 @@
   }
   .album-head-text:hover .gallery-group-title { color: var(--c-accent); }
   .album-head-text:hover .album-go-arrow { transform: translateX(4px); }
-  .album-head-text:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 3px; border-radius: var(--radius-sm); }
   .album-toggle {
     flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
     background: transparent; border: 1.5px solid var(--c-line); color: var(--c-ink-soft);
@@ -480,7 +482,7 @@
     width: 100%; padding: 12px 14px; border: 1px solid var(--c-line); border-radius: var(--radius-sm);
     font-family: var(--font-body); font-size: var(--fs-ui); background: #fff; color: var(--c-ink); transition: border var(--dur-base) var(--ease);
   }
-  .form-field input:focus, .form-field textarea:focus { outline: none; border-color: var(--c-accent); }
+  .form-field input:focus, .form-field textarea:focus { border-color: var(--c-accent); }
   .form-field textarea { resize: none; min-height: 120px; max-height: 300px; overflow-y: auto; }
   .form-note { font-size: var(--fs-label); color: var(--c-ink-soft); margin-top: 14px; }
   .form-success { display: none; background: #e6efd9; border: 1px solid #b8d089; color: #3b5510; padding: 16px 18px; border-radius: var(--radius-sm); margin-bottom: 18px; font-size: var(--fs-ui); }
