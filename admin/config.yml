@@ -11,7 +11,7 @@ public_folder: /uploads
 # Bilder werden beim Hochladen NOCH IM BROWSER verkleinert und nach WebP
 # umgewandelt, BEVOR sie zu GitHub committet werden. Das loest das
 # Speicher-/Groessen-Problem: aus z.B. 80 MB Originalfotos werden wenige MB.
-# Gilt fuer ALLE Bild-Felder (Galerie, Startseite, Ausruestung ...).
+# Gilt fuer ALLE Bild-Felder (Portfolio, Startseite, Ausruestung ...).
 # quality 85 + max 2400px = sehr gute Qualitaet fuer eine Fotoseite.
 # Hinweis: In Safari dauert die Umwandlung etwas laenger (kein natives WebP),
 # der Upload geht aber durch. max_file_size greift NACH der Umwandlung.
@@ -76,9 +76,9 @@ collections:
 
 # === 🖼️ Portfolio ===
 - name: portfolio
-  label: 🖼️ Galerie
+  label: 🖼️ Portfolio
   label_singular: Album
-  description: Alle Galerie-Alben. Ein Album = ein Ordner mit Fotos. Mehrere Fotos auf einmal hochladen mit Strg/Cmd+Klick im Datei-Dialog.
+  description: Alle Portfolio-Alben. Ein Album = ein Ordner mit Fotos. Mehrere Fotos auf einmal hochladen mit Strg/Cmd+Klick im Datei-Dialog.
   folder: content/albums
   create: true
   extension: json
@@ -141,7 +141,7 @@ collections:
       widget: boolean
       default: false
       required: false
-      hint: Angepinnte Alben erscheinen oben in der Galerie.
+      hint: Angepinnte Alben erscheinen oben in der Portfolio.
     - name: highlight_order
       label: Pin-Reihenfolge
       widget: number
@@ -194,22 +194,22 @@ collections:
 
 # === ⚙️ Einstellungen (kleine Schalter, gebündelt) ===
 # Bündelt die selten gebrauchten Schalter in EINEM Menü statt mehrerer:
-# Galerie-Sortier-Knöpfe + Stories-Sichtbarkeit. Die Dateien bleiben dieselben
+# Portfolio-Sortier-Knöpfe + Stories-Sichtbarkeit. Die Dateien bleiben dieselben
 # wie bisher (gallery-settings.json / stories-settings.json).
 - name: settings
   label: ⚙️ Einstellungen
   description: Kleine Schalter für die Website – selten anzufassen.
   files:
   - name: gallery_sort
-    label: 🖼️ Galerie-Sortierung
+    label: 🖼️ Portfolio-Sortierung
     file: content/gallery-settings.json
-    description: Steuert, welche Sortier-Knöpfe über der Galerie erscheinen (Alben / Neueste / A–Z). Mindestens einer sollte an sein.
+    description: Steuert, welche Sortier-Knöpfe über der Portfolio erscheinen (Alben / Neueste / A–Z). Mindestens einer sollte an sein.
     fields:
     - name: show_album
       label: „Alben" anzeigen (nach Alben gruppiert)
       widget: boolean
       default: true
-      hint: Zeigt die Galerie in Album-Sektionen mit Überschrift.
+      hint: Zeigt die Portfolio in Album-Sektionen mit Überschrift.
     - name: show_chronological
       label: „Neueste" anzeigen (nach Datum)
       widget: boolean
@@ -368,7 +368,7 @@ collections:
   identifier_field: title_de
   slug: '{{year}}-{{month}}-{{slug}}'
   summary: '{{title_de}}  -  {{date}}'
-  # Karten-Ansicht mit Vorschaubild (erste Station-Foto bzw. erstes Galerie-Bild):
+  # Karten-Ansicht mit Vorschaubild (erste Station-Foto bzw. erstes Portfolio-Bild):
   view_style: grid
   sortable_fields:
   - date
@@ -438,7 +438,7 @@ collections:
       label: Weitere Bilder dieser Station (optional)
       widget: list
       required: false
-      hint: Beliebig viele Fotos. Werden als Galerie unter der Station gezeigt, NICHT zugeschnitten.
+      hint: Beliebig viele Fotos. Werden als Portfolio unter der Station gezeigt, NICHT zugeschnitten.
       field:
         name: image
         label: Bild
@@ -485,16 +485,16 @@ collections:
     widget: object
     collapsed: false
     required: false
-    hint: 'Wenn ein Album zu dieser Reise gehört (in der Galerie unter "Gehört zu Reise" einstellen), erscheint auf der Reise-Seite automatisch ein Link "Mehr Fotos im Album X". Diese Verknüpfung wird im Album gepflegt, nicht hier.'
+    hint: 'Wenn ein Album zu dieser Reise gehört (in der Portfolio unter "Gehört zu Reise" einstellen), erscheint auf der Reise-Seite automatisch ein Link "Mehr Fotos im Album X". Diese Verknüpfung wird im Album gepflegt, nicht hier.'
     fields:
     - name: _info
       label: Hinweis
       widget: string
       required: false
-      default: 'Album-Verknüpfung wird im Galerie-Album eingestellt'
-      hint: Dieses Feld ist nur ein Hinweis. Die Verknüpfung selbst stellst du in der Galerie beim jeweiligen Album ein (Dropdown "Gehört zu Reise").
+      default: 'Album-Verknüpfung wird im Portfolio-Album eingestellt'
+      hint: Dieses Feld ist nur ein Hinweis. Die Verknüpfung selbst stellst du in der Portfolio beim jeweiligen Album ein (Dropdown "Gehört zu Reise").
   - name: gallery_block
-    label: 🖼️ Reise-Galerie (Reisefazit)
+    label: 🖼️ Reise-Portfolio (Reisefazit)
     widget: object
     collapsed: true
     required: false
@@ -503,7 +503,7 @@ collections:
       label: Bilder
       widget: list
       required: false
-      hint: Deine Lieblingsbilder der ganzen Reise. Werden am Ende der Reise als große Galerie gezeigt, NICHT zugeschnitten.
+      hint: Deine Lieblingsbilder der ganzen Reise. Werden am Ende der Reise als große Portfolio gezeigt, NICHT zugeschnitten.
       fields:
       - name: image
         label: Bild
@@ -635,7 +635,7 @@ collections:
       widget: object
       fields:
       - name: gallery_kicker
-        label: Galerie - Mini-Titel
+        label: Portfolio - Mini-Titel
         widget: object
         fields:
         - name: de
@@ -645,7 +645,7 @@ collections:
           label: Englisch
           widget: string
       - name: gallery_title
-        label: Galerie - Titel
+        label: Portfolio - Titel
         widget: object
         fields:
         - name: de
