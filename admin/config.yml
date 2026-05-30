@@ -610,26 +610,6 @@ collections:
         - name: en
           label: Englisch
           widget: text
-      - name: subline
-        label: Unterzeile
-        widget: object
-        fields:
-        - name: de
-          label: Deutsch
-          widget: string
-        - name: en
-          label: Englisch
-          widget: string
-      - name: subtext
-        label: Zusatztext
-        widget: object
-        fields:
-        - name: de
-          label: Deutsch
-          widget: text
-        - name: en
-          label: Englisch
-          widget: text
       - name: cta_portfolio
         label: 'Button: Portfolio'
         widget: object
@@ -714,6 +694,32 @@ collections:
         - name: en
           label: Englisch
           widget: string
+
+  - name: home_intro
+    label: 🏠 Startseite – Intro-Text
+    file: content/home-intro.json
+    description: Der Textblock unter dem Titelbild („Zwei Blickwinkel …" mit Beschreibung). Getrennt vom großen Kopfbereich.
+    fields:
+    - name: subline
+      label: Überschrift
+      widget: object
+      fields:
+      - name: de
+        label: Deutsch
+        widget: string
+      - name: en
+        label: Englisch
+        widget: string
+    - name: subtext
+      label: Beschreibungstext
+      widget: object
+      fields:
+      - name: de
+        label: Deutsch
+        widget: text
+      - name: en
+        label: Englisch
+        widget: text
 
   - name: pagetitles
     label: 📐 Seiten-Überschriften
