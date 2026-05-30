@@ -4,6 +4,9 @@ backend:
   branch: main
   base_url: https://aanddphotography-oauth.davidbastisch.workers.dev
   auth_endpoint: auth
+# Link zurueck zur Live-Website in der CMS-Topbar (Sveltia-nativ)
+site_url: https://aanddphotography.pages.dev
+display_url: https://aanddphotography.pages.dev
 media_folder: uploads
 public_folder: /uploads
 

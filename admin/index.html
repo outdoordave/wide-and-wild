@@ -8,29 +8,6 @@
   <!-- Das CMS uebernimmt das GitHub-OAuth-Popup selbst.
        Login geht ueber den Cloudflare-Worker (siehe admin/config.yml -> backend.base_url). -->
   <style>
-    /* Zurück-zur-Website-Knopf unten links.
-       WICHTIG: NICHT oben rechts platzieren -- dort sitzt in Sveltia der
-       Speichern-Button. Unten links kollidiert weder mit der oberen
-       Editor-Leiste noch mit der unteren (mittigen) Bestaetigungsmeldung. */
-    .ww-back-btn {
-      position: fixed;
-      bottom: 14px;
-      left: 14px;
-      z-index: 999990;
-      background: #a7672f;
-      color: #fff;
-      text-decoration: none;
-      font-family: -apple-system, system-ui, sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 8px 14px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.15);
-      opacity: .82;
-      transition: background .15s, opacity .15s;
-    }
-    .ww-back-btn:hover { background: #b97a3f; opacity: 1; }
-
     /* Upload-/Speicher-Indikator (Banner unten) */
     #ww-progress {
       display: none;
@@ -76,9 +53,6 @@
   </style>
 </head>
 <body>
-  <!-- Zurück zur Website -->
-  <a href="/" class="ww-back-btn" title="Zurück zur Website">← Zurück zur Website</a>
-
   <!-- Fortschritts-Banner -->
   <div id="ww-progress" role="status" aria-live="polite">
     <div class="ww-progress-label">Speichern …</div>
