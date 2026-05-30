@@ -517,10 +517,17 @@
     document.addEventListener('input',  onEdit, true);
     document.addEventListener('change', onEdit, true);
 
-    // 2) Jeder Routenwechsel setzt das Flag zurueck. Editor verlassen/
-    //    wechseln = nicht mehr relevant; beforeunload feuert nur beim
-    //    echten Schliessen/Reload, nicht bei In-App-Navigation.
-    window.addEventListener('hashchange', function(){ dirty = false; });
+    // 2) Jeder Routenwechsel setzt das Flag zurueck und (neu) lokalisiert den
+    //    Speichern-Button fuer den Editor. Editor verlassen/wechseln = nicht
+    //    mehr relevant.
+    //
+    //    GRENZE (bewusst, kein Bug): Das interne Zurueck-Navigieren im CMS
+    //    (Editor -> Liste) ist ueber beforeunload PRINZIPIELL NICHT abfangbar,
+    //    weil bei SPA-Navigation KEIN Page-Unload stattfindet. beforeunload
+    //    feuert nur beim echten Schliessen/Neuladen des Tabs. Ein Warnen bei
+    //    In-App-Navigation ginge nur ueber Sveltias internen Navigations-Guard,
+    //    den wir bewusst nicht anfassen.
+    window.addEventListener('hashchange', function(){ dirty = false; watchSaveButton(); });
 
     // 3) Erfolgreiches Speichern setzt das Flag zurueck. window.CMS kann
     //    beim Laden noch fehlen -> kurz pollen (wie die Erweiterungen oben).
@@ -545,6 +552,66 @@
         } catch (e) { clearInterval(iv); }
       }, 200);
     })();
+
+    // 3b) ZWEITES Dirty-Signal: der Speichern-Button.
+    //     Manche Felder (select, Liste, Bild, Boolean) werfen KEIN bubbelndes
+    //     input/change -> der schnelle Pfad (1) verpasst sie. Sveltia aktiviert
+    //     aber bei JEDER echten Aenderung seinen Speichern-Button. Wir beobachten
+    //     daher dessen aktiv/inaktiv-Zustand per MutationObserver.
+    //     WICHTIG: Der Button wird NICHT ueber interne CSS-Klassen oder Sveltia-
+    //     Stores gefunden, sondern -- wie der Login-Check oben -- ueber sein
+    //     Text-Label ("Speichern"/"Save"). Das ist versionsstabil.
+    //     Gilt NUR fuer bestehende Eintraege (/entries/): bei /new ist Speichern
+    //     sofort aktiv, sonst wuerde schon das blosse Oeffnen warnen.
+    //     Graceful degrade: wird kein Button gefunden, bleibt exakt das heutige
+    //     Verhalten (kein Regressionsrisiko).
+    var saveObserver = null;
+    function inExistingEntry(){
+      try { return /#\/collections\/[^/]+\/entries\//i.test(location.hash || ''); }
+      catch (e) { return false; }
+    }
+    function btnEnabled(b){
+      try { return !b.disabled && b.getAttribute('aria-disabled') !== 'true'; }
+      catch (e) { return false; }
+    }
+    function findSaveButton(){
+      try {
+        var bs = document.querySelectorAll('button, [role="button"]');
+        for (var i = 0; i < bs.length; i++) {
+          var t = (bs[i].textContent || '').trim().toLowerCase();
+          if (t === 'speichern' || t === 'save') return bs[i];
+        }
+      } catch (e) {}
+      return null;
+    }
+    function watchSaveButton(){
+      try {
+        if (saveObserver) { saveObserver.disconnect(); saveObserver = null; }
+        if (!inExistingEntry()) return;
+        // Der Editor rendert asynchron nach dem Routenwechsel -> kurz pollen.
+        var tries = 0;
+        var iv = setInterval(function(){
+          tries++;
+          var btn = findSaveButton();
+          if (btn) {
+            clearInterval(iv);
+            // Direkt aktiv (z.B. wiederhergestellter Entwurf) -> bereits dirty.
+            if (btnEnabled(btn) && inExistingEntry()) dirty = true;
+            saveObserver = new MutationObserver(function(){
+              if (btnEnabled(btn) && inExistingEntry()) dirty = true;
+            });
+            saveObserver.observe(btn, {
+              attributes: true,
+              attributeFilter: ['disabled', 'aria-disabled', 'class']
+            });
+          } else if (tries > 25) {
+            clearInterval(iv); // nicht gefunden -> heutiges Verhalten
+          }
+        }, 200);
+      } catch (e) {}
+    }
+    // Falls die Seite direkt in einem Editor geladen wird:
+    watchSaveButton();
 
     // 4) Browserwarnung beim Schliessen/Neuladen, solange ungespeichert.
     window.addEventListener('beforeunload', function(e){
